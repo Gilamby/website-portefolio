@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Laadpaal - Charging Station App. A real app built during my internship at Delta-N, currently live and in use.">
+    <meta name="theme-color" content="#FF6B35">
+    
+    <title>Laadpaal App Project - Fabian Corsalini</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--orange);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: gap 0.3s;
+        }
+
+        .back-btn:hover {
+            gap: 0.8rem;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .project-hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+            min-height: 90vh;
+            padding: 8rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .project-hero-left h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            font-family: 'Outfit';
+            color: #FFFFFF;
+            margin: 1rem 0 1.5rem 0;
+            line-height: 1.1;
+        }
+
+        .project-hero-label {
+            font-size: 0.85rem;
+            color: var(--orange);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 1rem;
+        }
+
+        .project-hero-subtitle {
+            font-size: 1.1rem;
+            color: #B0B0B0;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .project-hero-description {
+            font-size: 1rem;
+            color: #FFFFFF;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            max-width: 90%;
+        }
+
+        .project-tags {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .project-tag {
+            background: #141414;
+            border: 1px solid #2A2A2A;
+            color: #FFFFFF;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .project-impact-line {
+            font-size: 0.95rem;
+            color: #22c55e;
+            font-weight: 600;
+            margin-top: 2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .project-hero-right {
+            display: flex;
+            justify-content: center;
+        }
+
+        .project-hero-right img {
+            max-width: 280px;
+            border-radius: 24px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+            border: 1px solid #2A2A2A;
+        }
+
+        .info-bar {
+            background: #141414;
+            border-top: 1px solid #2A2A2A;
+            border-bottom: 1px solid #2A2A2A;
+            padding: 2.5rem 5%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            max-width: 100%;
+        }
+
+        .info-bar-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--orange);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.6rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #FFFFFF;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .problem-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 8rem 5%;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 800;
+            font-family: 'Outfit';
+            color: #FFFFFF;
+            margin-bottom: 3rem;
+        }
+
+        .problem-quote {
+            border-left: 4px solid var(--orange);
+            padding-left: 3rem;
+            max-width: 800px;
+        }
+
+        .problem-quote p {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: #B0B0B0;
+            margin-bottom: 1rem;
+        }
+
+        .steps-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 5%;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: #141414;
+            border: 1px solid #2A2A2A;
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transition: 0.3s;
+        }
+
+        .step-card:hover {
+            border-color: var(--orange);
+            transform: translateY(-5px);
+        }
+
+        .step-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--orange);
+            opacity: 0.3;
+            font-family: 'Outfit';
+            line-height: 1;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        .step-description {
+            font-size: 0.95rem;
+            color: #B0B0B0;
+            line-height: 1.6;
+        }
+
+        .step-card img {
+            width: 100%;
+            max-width: 180px;
+            margin: 0 auto;
+            border-radius: 16px;
+            border: 1px solid #2A2A2A;
+            display: block;
+        }
+
+        .gallery-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 5%;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .gallery-grid img {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid #2A2A2A;
+            transition: 0.3s;
+        }
+
+        .gallery-grid img:hover {
+            border-color: var(--orange);
+            transform: scale(1.02);
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 6rem 5%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .cta-text {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Outfit';
+            color: #FFFFFF;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .cta-button {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cta-button.primary {
+            background: var(--orange);
+            color: #0A0A0A;
+        }
+
+        .cta-button.primary:hover {
+            background: var(--orange-light);
+            gap: 0.8rem;
+        }
+
+        .cta-button.secondary {
+            background: #141414;
+            color: var(--orange);
+            border: 1px solid var(--orange);
+        }
+
+        .cta-button.secondary:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .project-hero {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+                min-height: auto;
+                padding: 4rem 5%;
+            }
+
+            .project-hero-left h1 {
+                font-size: 2.5rem;
+            }
+
+            .project-hero-right {
+                order: -1;
+            }
+
+            .info-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .cta-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-left {
+                gap: 1rem;
+            }
+
+            .problem-quote p {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+    
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+</head>
+<body>
+
+<nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-content">
+        <div class="nav-left">
+            <a href="index.html#projects" class="back-btn">
+                <i data-lucide="arrow-left"></i> Back to Projects
+            </a>
+            <a href="#" class="logo" aria-label="Fabian Corsalini - Home">Fabian<span>.</span></a>
+        </div>
+        <div class="nav-menu">
+            <ul class="nav-links">
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#skills">Skills</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="index.html#experience">Experience</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme" aria-pressed="false">
+                <i data-lucide="sun" aria-hidden="true"></i>
+            </button>
+            <a href="../Fabian-Corsalini-CV.pdf" download class="cv-btn" aria-label="Download CV as PDF">
+                <i data-lucide="download" aria-hidden="true"></i> <span>CV</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<section class="project-hero">
+    <div class="project-hero-left">
+        <p class="project-hero-label">04 — Project</p>
+        <h1>Charging Station App</h1>
+        <p class="project-hero-subtitle">Internship · Delta-N · Low-code</p>
+        
+        <p class="project-hero-description">
+            During my internship at Delta-N I noticed there was no easy way
+            for employees to reserve a charging station. So I built one.
+            A low-code app where you can see which stations are available,
+            pick a time slot, and reserve it in seconds.
+            It's been live and in use ever since.
+        </p>
+        
+        <div class="project-tags">
+            <span class="project-tag">Low-Code</span>
+            <span class="project-tag">App Design</span>
+            <span class="project-tag">UX</span>
+            <span class="project-tag">Problem Solving</span>
+            <span class="project-tag">Internship</span>
+        </div>
+        
+        <p class="project-impact-line">✓ Currently live and in use</p>
+    </div>
+    
+    <div class="project-hero-right">
+        <img src="projects/laadpaal-1.jpg" alt="Laadpaal App Main Screen">
+    </div>
+</section>
+
+<div class="info-bar">
+    <div class="info-bar-item">
+        <div class="info-label">Role</div>
+        <div class="info-value">Solo Developer</div>
+    </div>
+    <div class="info-bar-item">
+        <div class="info-label">Tool</div>
+        <div class="info-value">Low-code Platform</div>
+    </div>
+    <div class="info-bar-item">
+        <div class="info-label">Type</div>
+        <div class="info-value">Internship Project</div>
+    </div>
+    <div class="info-bar-item">
+        <div class="info-label">Status</div>
+        <div class="info-value">Live & In Use</div>
+    </div>
+</div>
+
+<section class="problem-section">
+    <h2 class="section-title">The Problem</h2>
+    
+    <div class="problem-quote">
+        <p>
+            Delta-N had charging stations in their parking lot but no system
+            to manage them. People would walk down and find them all taken.
+            No reservations, no overview, no solution.
+            I saw the problem, proposed a fix, and built it.
+        </p>
+    </div>
+</section>
+
+<section class="steps-section">
+    <h2 class="section-title">How It Works</h2>
+    
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-number">01</div>
+            <h3 class="step-title">Check Availability</h3>
+            <p class="step-description">
+                Open the app and see which charging stations are free (green)
+                or taken (red) in real time.
+            </p>
+            <img src="projects/laadpaal-1.jpg" alt="Check availability screen">
+        </div>
+        
+        <div class="step-card">
+            <div class="step-number">02</div>
+            <h3 class="step-title">Pick Your Time</h3>
+            <p class="step-description">
+                Tap a station, fill in when you need it — date, start time, end time.
+                Simple form, no nonsense.
+            </p>
+            <img src="projects/laadpaal-3.jpg" alt="Time picker screen">
+        </div>
+        
+        <div class="step-card">
+            <div class="step-number">03</div>
+            <h3 class="step-title">Reserved</h3>
+            <p class="step-description">
+                One tap on 'reserveer hier' and you're done.
+                The app confirms with a smiley. Honestly pretty satisfying.
+            </p>
+            <img src="projects/laadpaal-2.jpg" alt="Confirmation screen">
+        </div>
+    </div>
+</section>
+
+<section class="gallery-section">
+    <h2 class="section-title">The App</h2>
+    
+    <div class="gallery-grid">
+        <img src="projects/laadpaal-1.jpg" alt="Main screen">
+        <img src="projects/laadpaal-3.jpg" alt="Booking form">
+        <img src="projects/laadpaal-4.jpg" alt="Calendar picker">
+        <img src="projects/laadpaal-2.jpg" alt="Confirmation screen">
+    </div>
+</section>
+
+<section class="cta-section">
+    <p class="cta-text">Want to see more?</p>
+    
+    <div class="cta-buttons">
+        <a href="gemeente-delft.html" class="cta-button primary">
+            ← Previous Project
+        </a>
+        <a href="funfactory.html" class="cta-button secondary">
+            Next Project →
+        </a>
+    </div>
+</section>
+
+<footer class="footer" role="contentinfo">
+    <div class="footer-content">
+        <p class="footer-text">© 2026 Fabian Corsalini. All rights reserved.</p>
+        <div class="circular-text-container" aria-hidden="true" role="presentation">
+            <div class="circular-text" id="circularText"></div>
+            <div class="circular-center">FC</div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    lucide.createIcons();
+
+    // Circular text
+    function createCircularText() {
+        const circularText = document.getElementById('circularText');
+        if (!circularText) return;
+        const text = "• FABIAN CORSALINI • PORTFOLIO 2026 ";
+        text.split('').forEach((char, i) => {
+            const span = document.createElement('span');
+            span.textContent = char;
+            span.style.transform = `rotate(${(360 / text.length) * i}deg)`;
+            circularText.appendChild(span);
+        });
+    }
+    createCircularText();
+
+    // Theme toggle
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        lucide.createIcons();
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found | Fabian Corsalini</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0A0A0A;
+      color: #FFFFFF;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .error-container {
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .fuzzy-404 {
+      font-size: clamp(5rem, 20vw, 15rem);
+      font-weight: 900;
+      color: #FF6B35;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+      animation: glitch 3s infinite;
+    }
+
+    @keyframes glitch {
+      0%, 90%, 100% {
+        transform: translate(0);
+      }
+      92% {
+        transform: translate(-2px, 2px);
+      }
+      94% {
+        transform: translate(2px, -2px);
+      }
+      96% {
+        transform: translate(-2px, -2px);
+      }
+      98% {
+        transform: translate(2px, 2px);
+      }
+    }
+
+    .error-title {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      margin-bottom: 1rem;
+      color: #FFFFFF;
+    }
+
+    .error-message {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: #B0B0B0;
+      margin-bottom: 3rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Ghost Animation */
+    .ghost-container {
+      position: fixed;
+      left: 10%;
+      top: 20%;
+      width: 120px;
+      height: 160px;
+      animation: floatAround 20s ease-in-out infinite;
+      z-index: 5;
+    }
+
+    @keyframes floatAround {
+      0% {
+        left: 10%;
+        top: 20%;
+      }
+      25% {
+        left: 80%;
+        top: 30%;
+      }
+      50% {
+        left: 75%;
+        top: 70%;
+      }
+      75% {
+        left: 15%;
+        top: 60%;
+      }
+      100% {
+        left: 10%;
+        top: 20%;
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    .ghost {
+      position: relative;
+      width: 120px;
+      height: 160px;
+      background: #FF6B35;
+      border-radius: 60px 60px 0 0;
+      box-shadow: 0 0 40px rgba(255, 107, 53, 0.6);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .ghost-eyes {
+      display: flex;
+      justify-content: space-around;
+      padding: 40px 20px 0;
+    }
+
+    .ghost-eye {
+      width: 20px;
+      height: 20px;
+      background: #0A0A0A;
+      border-radius: 50%;
+      animation: blink 4s infinite;
+    }
+
+    @keyframes blink {
+      0%, 90%, 100% {
+        transform: scaleY(1);
+      }
+      95% {
+        transform: scaleY(0.1);
+      }
+    }
+
+    .ghost-mouth {
+      width: 40px;
+      height: 20px;
+      border: 3px solid #0A0A0A;
+      border-top: none;
+      border-radius: 0 0 40px 40px;
+      margin: 20px auto 0;
+    }
+
+    .ghost-bottom {
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .ghost-wave {
+      width: 30px;
+      height: 20px;
+      background: #FF6B35;
+      border-radius: 0 0 15px 15px;
+    }
+
+    .ghost-arms {
+      position: absolute;
+      width: 100%;
+      top: 60px;
+    }
+
+    .ghost-arm {
+      position: absolute;
+      width: 40px;
+      height: 50px;
+      background: #FF6B35;
+      border-radius: 20px;
+    }
+
+    .ghost-arm-left {
+      left: -20px;
+      animation: wave-left 2s ease-in-out infinite;
+    }
+
+    .ghost-arm-right {
+      right: -20px;
+      animation: wave-right 2s ease-in-out infinite;
+    }
+
+    @keyframes wave-left {
+      0%, 100% {
+        transform: rotate(-10deg);
+      }
+      50% {
+        transform: rotate(-30deg);
+      }
+    }
+
+    @keyframes wave-right {
+      0%, 100% {
+        transform: rotate(10deg);
+      }
+      50% {
+        transform: rotate(30deg);
+      }
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      background: #FF6B35;
+      color: #FFFFFF;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn:hover {
+      background: #E85A2B;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
+    }
+
+    /* Floating particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      background: #FF6B35;
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: rise 10s infinite;
+    }
+
+    @keyframes rise {
+      0% {
+        transform: translateY(100vh) scale(0);
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.3;
+      }
+      100% {
+        transform: translateY(-100vh) scale(1);
+        opacity: 0;
+      }
+    }
+
+    .particle:nth-child(1) { left: 10%; width: 10px; height: 10px; animation-delay: 0s; }
+    .particle:nth-child(2) { left: 30%; width: 15px; height: 15px; animation-delay: 2s; }
+    .particle:nth-child(3) { left: 50%; width: 8px; height: 8px; animation-delay: 4s; }
+    .particle:nth-child(4) { left: 70%; width: 12px; height: 12px; animation-delay: 6s; }
+    .particle:nth-child(5) { left: 90%; width: 10px; height: 10px; animation-delay: 8s; }
+
+    @media (max-width: 768px) {
+      .ghost-container {
+        width: 80px;
+        height: 100px;
+      }
+
+      .ghost {
+        width: 80px;
+        height: 100px;
+        border-radius: 40px 40px 0 0;
+      }
+
+      .ghost-eyes {
+        padding: 25px 15px 0;
+      }
+
+      .ghost-eye {
+        width: 12px;
+        height: 12px;
+      }
+
+      .ghost-mouth {
+        width: 25px;
+        height: 12px;
+      }
+
+      .ghost-arms {
+        top: 40px;
+      }
+
+      .ghost-arm {
+        width: 25px;
+        height: 35px;
+      }
+
+      .ghost-arm-left {
+        left: -12px;
+      }
+
+      .ghost-arm-right {
+        right: -12px;
+      }
+
+      .ghost-wave {
+        width: 20px;
+        height: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="particles">
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+</div>
+
+<div class="error-container">
+  <div class="ghost-container">
+    <div class="ghost">
+      <div class="ghost-arms">
+        <div class="ghost-arm ghost-arm-left"></div>
+        <div class="ghost-arm ghost-arm-right"></div>
+      </div>
+      <div class="ghost-eyes">
+        <div class="ghost-eye"></div>
+        <div class="ghost-eye"></div>
+      </div>
+      <div class="ghost-mouth"></div>
+      <div class="ghost-bottom">
+        <div class="ghost-wave"></div>
+        <div class="ghost-wave"></div>
+        <div class="ghost-wave"></div>
+        <div class="ghost-wave"></div>
+      </div>
+    </div>
+  </div>
+
+  <h1 class="fuzzy-404">404</h1>
+  <h2 class="error-title">Boo! Page Not Found</h2>
+  <p class="error-message">
+    Looks like this page went ghost mode... 👻<br>
+    Even my spooky friend couldn't find it!<br>
+    Maybe it's hiding in the code somewhere?
+  </p>
+  <a href="index.html" class="btn">Back to Safety</a>
+</div>
+</body>
+</html>

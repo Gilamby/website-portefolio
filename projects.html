@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280, shrink-to-fit=no">
+<title>All Projects — Fabian Corsalini</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --orange: #ff5500;
+    --bg: #0a0a0a;
+    --card: #111;
+    --font-primary: 'Poppins', sans-serif;
+    --font-secondary: 'Outfit', sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: #fff;
+    font-family: var(--font-primary);
+    min-height: 100vh;
+}
+
+/* Nav */
+.nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.2rem 5%;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.logo { font-family: var(--font-secondary); font-size: 1.2rem; font-weight: 700; color: #fff; text-decoration: none; }
+.logo span { color: var(--orange); }
+.back-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 20px; border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 100vw; color: rgba(255,255,255,0.6);
+    text-decoration: none; font-size: 13px; font-weight: 600;
+    transition: all 0.2s;
+}
+.back-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+/* Hero */
+.hero {
+    padding: 140px 5% 60px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.hero p {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 12px;
+}
+.hero h1 {
+    font-family: var(--font-secondary);
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 20px;
+}
+.hero h1 span { color: var(--orange); }
+.hero-sub {
+    color: rgba(255,255,255,0.4);
+    font-size: 1rem;
+    max-width: 500px;
+    line-height: 1.7;
+}
+
+/* Filter bar */
+.filters {
+    padding: 28px 5%;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.filter-btn {
+    padding: 7px 18px;
+    border-radius: 100vw;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: none;
+    font-family: var(--font-primary);
+    transition: all 0.2s;
+}
+.filter-btn:hover,
+.filter-btn.active {
+    border-color: var(--orange);
+    color: var(--orange);
+    background: rgba(255,85,0,0.06);
+}
+
+/* Grid */
+.all-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    padding: 2px 0;
+}
+
+.proj {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 28px;
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+    cursor: pointer;
+}
+.proj:hover { background: rgba(255,255,255,0.025); }
+
+.proj-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.proj-cat {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+.proj-year {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.2);
+    font-weight: 600;
+}
+
+.proj-title {
+    font-family: var(--font-secondary);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.proj-preview {
+    display: block;
+    position: relative;
+    aspect-ratio: 16/10;
+    overflow: hidden;
+    background: #1a1a1a;
+    border-radius: 12px;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.07);
+    flex: 1;
+}
+.proj-preview img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top;
+    display: block;
+    transition: transform 0.5s ease;
+}
+.proj-preview iframe {
+    width: 100%; height: 100%;
+    border: none; display: block;
+    pointer-events: none;
+    transition: transform 0.5s ease;
+}
+.proj-preview:hover img,
+.proj-preview:hover iframe { transform: scale(1.04); }
+
+.proj-hover {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s;
+    backdrop-filter: blur(3px);
+    border-radius: 12px;
+    gap: 8px;
+}
+.proj-preview:hover .proj-hover { opacity: 1; }
+
+.proj-tags {
+    display: flex; flex-wrap: wrap; gap: 5px;
+}
+.proj-tags span {
+    padding: 3px 10px;
+    background: rgba(255,85,0,0.07);
+    border: 1px solid rgba(255,85,0,0.16);
+    border-radius: 20px;
+    font-size: 0.68rem;
+    color: var(--orange);
+    font-weight: 500;
+}
+
+.badge-live { color: #22c55e; font-size: 0.68rem; font-weight: 700; }
+.badge-group { color: #ff9944; font-size: 0.68rem; font-weight: 700; }
+
+/* Hidden for filter */
+.proj.hidden { display: none; }
+
+/* Footer count */
+.proj-count {
+    padding: 40px 5%;
+    color: rgba(255,255,255,0.2);
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+    <a href="index.html" class="logo">Fabian<span>.</span></a>
+    <a href="index.html" class="back-btn">← Back to portfolio</a>
+</nav>
+
+<div class="hero">
+    <p>All Projects</p>
+    <h1>Everything I've <span>Built</span></h1>
+    <p class="hero-sub">Solo projects, internship work and group projects from school. Click any project to see it live.</p>
+</div>
+
+<div class="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="solo">Solo</button>
+    <button class="filter-btn" data-filter="group">Group</button>
+    <button class="filter-btn" data-filter="live">Live</button>
+    <button class="filter-btn" data-filter="design">Design</button>
+</div>
+
+<div class="all-grid" id="grid">
+
+    <div class="proj" data-tags="solo live">
+        <div class="proj-meta">
+            <span class="proj-cat">App Development · <span class="badge-live">● Live</span></span>
+            <span class="proj-year">2023</span>
+        </div>
+        <h3 class="proj-title">Charging Station App</h3>
+        <a href="laadpaal.html" target="_blank" class="proj-preview">
+            <img src="projects/laadpaal-1.jpg" alt="Charging Station App">
+            <div class="proj-hover">View Project →</div>
+        </a>
+        <div class="proj-tags"><span>Low-Code</span><span>App Design</span><span>Internship</span></div>
+    </div>
+
+    <div class="proj" data-tags="group live">
+        <div class="proj-meta">
+            <span class="proj-cat">Web Design · <span class="badge-live">● Live</span></span>
+            <span class="proj-year">2025</span>
+        </div>
+        <h3 class="proj-title">Red Frontier</h3>
+        <a href="https://102454.stu.sd-lab.nl/gr7_M2M-main/gr7_M2M-main/index.html" target="_blank" class="proj-preview">
+            <img src="projects/red-frontier.png" alt="Red Frontier">
+            <div class="proj-hover">Live Demo →</div>
+        </a>
+        <div class="proj-tags"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+    </div>
+
+    <div class="proj" data-tags="group live">
+        <div class="proj-meta">
+            <span class="proj-cat">Web Development · <span class="badge-live">● Live</span></span>
+            <span class="proj-year">2025</span>
+        </div>
+        <h3 class="proj-title">Marktplaats</h3>
+        <a href="https://102454.stu.sd-lab.nl/Marktplaats-main/" target="_blank" class="proj-preview">
+            <img src="projects/marktplaats.png" alt="Marktplaats">
+            <div class="proj-hover">Live Demo →</div>
+        </a>
+        <div class="proj-tags"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+    </div>
+
+    <div class="proj" data-tags="group live">
+        <div class="proj-meta">
+            <span class="proj-cat">Web Development · <span class="badge-live">● Live</span></span>
+            <span class="proj-year">2025</span>
+        </div>
+        <h3 class="proj-title">Quizzy</h3>
+        <a href="https://102454.stu.sd-lab.nl/Quizzy-main/" target="_blank" class="proj-preview">
+            <img src="projects/quizzy.png" alt="Quizzy">
+            <div class="proj-hover">Live Demo →</div>
+        </a>
+        <div class="proj-tags"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+    </div>
+
+    <div class="proj" data-tags="solo live">
+        <div class="proj-meta">
+            <span class="proj-cat">Web Development · Real Client</span>
+            <span class="proj-year">2023</span>
+        </div>
+        <h3 class="proj-title">Youth Voting Platform</h3>
+        <a href="gemeente-delft.html" target="_blank" class="proj-preview">
+            <img src="projects/gemeente-2.jpg" alt="Youth Voting Platform">
+            <div class="proj-hover">View Project →</div>
+        </a>
+        <div class="proj-tags"><span>HTML</span><span>CSS</span><span>JavaScript</span><span>Figma</span></div>
+    </div>
+
+    <div class="proj" data-tags="group design">
+        <div class="proj-meta">
+            <span class="proj-cat">UI/UX Design · Web Development</span>
+            <span class="proj-year">2024</span>
+        </div>
+        <h3 class="proj-title">FunFactory</h3>
+        <a href="funfactory.html" target="_blank" class="proj-preview">
+            <img src="projects/funfactory.png" alt="FunFactory">
+            <div class="proj-hover">View Project →</div>
+        </a>
+        <div class="proj-tags"><span>Figma</span><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+    </div>
+
+</div>
+
+<p class="proj-count" id="projCount">Showing 6 projects</p>
+
+<script>
+const btns = document.querySelectorAll('.filter-btn');
+const projs = document.querySelectorAll('.proj');
+const count = document.getElementById('projCount');
+
+btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        let visible = 0;
+        projs.forEach(p => {
+            const tags = p.dataset.tags || '';
+            const show = filter === 'all' || tags.includes(filter);
+            p.classList.toggle('hidden', !show);
+            if (show) visible++;
+        });
+        count.textContent = `Showing ${visible} project${visible !== 1 ? 's' : ''}`;
+    });
+});
+</script>
+</body>
+</html>

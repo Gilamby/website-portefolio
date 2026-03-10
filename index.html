@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Character encoding and viewport for proper rendering on all devices -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280, shrink-to-fit=no">
+    
+    <!-- SEO and metadata for better discoverability -->
+    <meta name="description" content="Fabian Corsalini's portfolio. I build things that work. Creative software developer specializing in web development, UI/UX design, and game development.">
+    <meta name="theme-color" content="#FF6B35">
+    
+    <title>Fabian Corsalini - Creative Software Developer</title>
+    
+    <!-- Preconnect for better performance with external fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Defer non-critical scripts for faster initial page load -->
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-content">
+        <!-- Logo as proper link for accessibility -->
+        <a href="#home" class="logo" aria-label="Fabian Corsalini - Home">Fabian<span>.</span></a>
+        <div class="nav-menu">
+            <div class="gooey-nav-container" id="gooeyNav">
+                <ul class="gooey-nav-links">
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#experience">Experience</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <span class="gooey-filter" id="gooeyFilter"></span>
+            </div>
+            <!-- Improved theme toggle button with proper accessibility -->
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme" aria-pressed="false">
+                <i data-lucide="sun" aria-hidden="true"></i>
+            </button>
+            <a href="cv.html" class="cv-btn" aria-label="View CV">
+                <i data-lucide="eye" aria-hidden="true"></i> <span>View CV</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero" id="home" aria-labelledby="heroName">
+    <canvas id="hero-colorbends"></canvas>
+
+    <div class="hero-split" id="heroContent">
+        <div class="hero-split-left">
+            <p class="hero-greeting">Hey, I'm</p>
+            <h1 class="hero-name" id="heroName">Fabian<br>Corsalini<span class="hero-dot">.</span></h1>
+            <p class="hero-role" aria-live="polite" aria-atomic="true">
+                <span id="typedText"></span><span class="typing-cursor" aria-hidden="true">|</span>
+            </p>
+            <div class="hero-cta">
+                <a href="#projects" class="btn btn-primary">View Projects</a>
+                <a href="#contact" class="btn btn-secondary">Contact Me</a>
+            </div>
+        </div>
+        <div class="hero-split-right">
+            <img src="fabian-photo-new.png"
+                 alt="Fabian Corsalini"
+                 class="hero-profile-photo hero-photo-oval"
+                 id="heroPhoto">
+        </div>
+    </div>
+
+    <a href="#about" class="scroll-indicator" aria-label="Scroll down">
+        <span>Scroll</span>
+        <i data-lucide="chevron-down" aria-hidden="true"></i>
+    </a>
+
+    <div class="hero-blur-bottom" id="hero-blur-bottom" aria-hidden="true"></div>
+    <div class="hero-fade-bottom" aria-hidden="true"></div>
+</section>
+
+<section id="about" class="animate-section about-with-particles" aria-labelledby="about-title">
+    <!-- Decorative particle effects - hidden from screen readers -->
+    <canvas class="side-particles left-particles" id="leftParticles" aria-hidden="true"></canvas>
+    <canvas class="side-particles right-particles" id="rightParticles" aria-hidden="true"></canvas>
+
+    <div class="about-content">
+        <div>
+            <div class="section-header">
+                <!-- Use semantic paragraph instead of div for section numbers -->
+                <p class="section-number" aria-label="Section 1 of 5">01 — About Me</p>
+                <h2 class="section-title" id="about-title">Getting to Know Me</h2>
+            </div>
+            <div class="about-text">
+                <p class="animate-text about-lead">A creative software developer who enjoys building things that people can actually use.</p>
+
+                <p class="animate-text">I mainly work with HTML, CSS and JavaScript. Not every single day, but often enough to understand how things work and how to solve problems when they appear. I've also worked with React and Figma. I still have a lot to learn, but that's exactly what I like about this field.</p>
+
+                <p class="animate-text">Technology changes fast, and every company works with different tools and workflows. Instead of seeing that as a problem, I see it as something interesting. Give me the documentation and some time, and I'll figure it out.</p>
+
+                <h3 class="animate-text about-h3">Real Experience</h3>
+
+                <p class="animate-text">During my internships at the Municipality of Delft and the Municipality of Rijswijk, I didn't just sit and watch. I was given the chance to work on real projects.</p>
+
+                <p class="animate-text">At the Municipality of Delft, I worked on a voting platform for young people. The idea was simple: create a website where young people could vote on local events created for them. I helped think about the project, designed the interface and built the website itself.</p>
+
+                <p class="animate-text">It wasn't always smooth. Sometimes things broke, sometimes I had to redo parts of the design or code. But that is also how I learned the most.</p>
+
+                <p class="animate-text">One moment that stood out for me was getting the opportunity to interview the mayor about the project. That was something I definitely didn't expect when starting the internship.</p>
+
+                <p class="animate-text">During another internship, I worked on a charging station application using low-code tools. The application is still live today and used in practice. Contributing to something that people actually use in the real world was a great experience.</p>
+
+                <h3 class="animate-text about-h3">Who I Am</h3>
+
+                <p class="animate-text">I'm still learning and improving every day. I don't pretend to know everything, but I do take responsibility for the work I do. If something doesn't work, I keep trying until I find a solution. That mindset helped me a lot during my internships and while building my own projects.</p>
+
+                <p class="animate-text">Right now I'm looking for an internship where I can keep growing as a developer, work on real projects and learn from people with more experience.</p>
+
+                <p class="animate-text">If you're looking for someone who is motivated, curious and willing to put in the effort to improve, I would love to connect.</p>
+            </div>
+        </div>
+        <div class="about-stats" aria-label="Key information about Fabian" role="region">
+            <div class="stat-item animate-stat">
+                <div class="stat-label">Status</div>
+                <div class="stat-value">
+                    <span class="status-dot"></span>
+                    Available for Internship
+                </div>
+            </div>
+            <div class="stat-item animate-stat">
+                <div class="stat-label">Mobility</div>
+                <div class="stat-value">
+                    <span>✈️</span>
+                    Open to Relocate
+                </div>
+                <div class="stat-sub">Available for international internships</div>
+            </div>
+            <div class="stat-item animate-stat">
+                <div class="stat-label">Languages</div>
+                <div class="stat-value lang-value">
+                    <span>🇳🇱</span> Dutch
+                    <span class="lang-dot">·</span>
+                    <span>🇬🇧</span> English
+                </div>
+            </div>
+            <div class="stat-item animate-stat">
+                <div class="stat-label">Program</div>
+                <div class="stat-value">Creative Software Developer (N4)</div>
+            </div>
+            <div class="stat-item animate-stat">
+                <div class="stat-label">School</div>
+                <div class="stat-value">Grafisch Lyceum Rotterdam</div>
+            </div>
+            <div class="stat-item animate-stat">
+                <div class="stat-label">Location</div>
+                <div class="stat-value">Delft, Netherlands</div>
+            </div>
+            <div class="stat-item animate-stat">
+                <div class="stat-label">Age</div>
+                <div class="stat-value">18</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="curved-text-divider" aria-hidden="true" role="presentation">
+    <svg class="curved-text-svg" viewBox="0 0 2880 200" preserveAspectRatio="xMidYMid slice">
+        <defs><path id="curve-path" d="M-100,100 Q260,40 620,100 T1340,100 T2060,100 T2780,100" fill="none"/></defs>
+        <text class="curved-marquee-text">
+            <textPath id="curvedTextPath" href="#curve-path" startOffset="0%">
+                ✦ CREATIVE DEVELOPER ✦ UI/UX DESIGN ✦ WEB DEVELOPMENT ✦ GAME DESIGN ✦ CREATIVE DEVELOPER ✦ UI/UX DESIGN ✦ WEB DEVELOPMENT ✦ GAME DESIGN ✦ CREATIVE DEVELOPER ✦ UI/UX DESIGN ✦ WEB DEVELOPMENT ✦ GAME DESIGN ✦ CREATIVE DEVELOPER ✦ UI/UX DESIGN ✦ WEB DEVELOPMENT ✦ GAME DESIGN
+            </textPath>
+        </text>
+    </svg>
+</div>
+<section id="skills" class="animate-section skills-new" aria-labelledby="skills-title">
+    <div class="skills-inner">
+
+        <!-- LEFT: all content -->
+        <div class="skills-left">
+            <p class="section-number">02 — Skills</p>
+            <h2 class="section-title" id="skills-title">What I<br>Work With</h2>
+            <p class="skills-intro">These are the areas I spend most of my time improving in. Not just things I've tried once — real skills I use when building projects from start to finish.</p>
+
+            <div class="skills-entries">
+                <div class="skill-entry">
+                    <div class="skill-num">01</div>
+                    <h3>Web Development</h3>
+                    <p>Web development is where most of my time goes. I like building websites from the ground up using HTML, CSS and JavaScript, making sure everything is structured properly and easy to maintain.</p>
+                    <p>I care a lot about writing clean code and building layouts that actually work across different screen sizes. Performance matters too — I like things to load fast and feel smooth.</p>
+                    <p>I'm always experimenting with new ideas and components, but I never just copy things without understanding how they work. If something is in the code, there's a reason for it.</p>
+                    <div class="skill-tools">
+                        <span>HTML5</span><span>CSS3</span><span>JavaScript</span><span>React</span>
+                    </div>
+                </div>
+
+                <div class="skill-entry">
+                    <div class="skill-num">02</div>
+                    <h3>UI/UX &amp; Creative Design</h3>
+                    <p>Before I start coding, I usually spend time designing and testing ideas. I mainly use Figma to explore layouts, create wireframes and prototype how a page should feel.</p>
+                    <p>For me, design isn't just about making something look cool — it's about making it easy and natural for people to use. I try to keep interfaces clean, simple and intuitive.</p>
+                    <p>Good design shouldn't confuse people. Ideally, everything should just make sense the moment you see it.</p>
+                    <div class="skill-tools">
+                        <span>Figma</span><span>Wireframing</span><span>Prototyping</span><span>UI Design</span>
+                    </div>
+                </div>
+
+                <div class="skill-entry">
+                    <div class="skill-num">03</div>
+                    <h3>Workflow &amp; Tools</h3>
+                    <p>Over time I've built a workflow that helps me stay organised and keep improving. I use Git for version control, VS Code as my main development environment, and Node.js when I'm working with backend tools or scripts.</p>
+                    <p>I also use AI sometimes when I'm stuck on a problem or want to explore different approaches faster. It doesn't do the work for me — it just helps me think through things and keep moving.</p>
+                    <p>I enjoy learning new tools and figuring out how they fit into my workflow. If you give me documentation or a new stack, I'll usually dive in and start experimenting until I understand it.</p>
+                    <div class="skill-tools">
+                        <span>Git</span><span>VS Code</span><span>Node.js</span><span>AI-assisted workflow</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: rotating toolkit circle -->
+        <div class="skills-right">
+            <div class="skills-right-inner">
+            <div class="circle-wrap">
+                <div class="circle-outer-ring"></div>
+                <div class="circle-border"></div>
+                <div class="circle-ring">
+                    <svg class="ring-svg" viewBox="0 0 340 340">
+                        <defs>
+                            <path id="textCircle" d="M 170,170 m -130,0 a 130,130 0 1,1 260,0 a 130,130 0 1,1 -260,0"/>
+                        </defs>
+                        <text font-family="inherit" font-size="11.5" font-weight="500" fill="rgba(255,255,255,0.45)" letter-spacing="3">
+                            <textPath href="#textCircle">
+                                HTML5 · CSS3 · JavaScript · React · Figma · Wireframing · Prototyping · Git · VS Code · Node.js · UI Design · Problem Solving · AI Tools · Clean Code · Performance ·&#160;
+                            </textPath>
+                        </text>
+                    </svg>
+                </div>
+                <div class="circle-center">
+                    <span class="circle-label">My Toolkit</span>
+                    <span class="circle-title">What I use<br>every day</span>
+                </div>
+            </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section id="projects" aria-labelledby="projects-title">
+    <!-- Scroll spacer gives room for the sticky animation -->
+    <div class="hscroll-spacer" id="hscrollSpacer">
+        <div class="hscroll-sticky" id="hscrollSticky">
+
+            <div class="hscroll-header">
+                <div class="hscroll-header-left">
+                    <p class="section-number">03 — Projects</p>
+                    <h2 class="section-title" id="projects-title">My Work</h2>
+                </div>
+                <div class="hscroll-progress-wrap" aria-hidden="true">
+                    <div class="hscroll-progress-bar" id="hscrollProgress"></div>
+                </div>
+            </div>
+
+            <div class="hscroll-viewport" id="hscrollViewport">
+                <div class="hscroll-track" id="hscrollTrack">
+
+                    <div class="hcard">
+                        <p class="hcard-num">01</p>
+                        <div class="hcard-img-wrap">
+                            <a href="laadpaal.html" target="_blank">
+                                <img src="projects/laadpaal-1.jpg" alt="Charging Station App" style="object-position: center 20%;">
+                                <div class="hcard-overlay">View Project →</div>
+                            </a>
+                        </div>
+                        <div class="hcard-info">
+                            <p class="hcard-cat">App Development · <span class="pc-live">● Live</span></p>
+                            <h3 class="hcard-title">Charging Station App</h3>
+                        </div>
+                    </div>
+
+                    <div class="hcard">
+                        <p class="hcard-num">02</p>
+                        <div class="hcard-img-wrap">
+                            <a href="https://102454.stu.sd-lab.nl/gr7_M2M-main/gr7_M2M-main/index.html" target="_blank">
+                                <img src="projects/red-frontier.png" alt="Red Frontier" style="object-position: center 18%;">
+                                <div class="hcard-overlay">Live Demo →</div>
+                            </a>
+                        </div>
+                        <div class="hcard-info">
+                            <p class="hcard-cat">Web Design · <span class="pc-live">● Live</span></p>
+                            <h3 class="hcard-title">Red Frontier</h3>
+                        </div>
+                    </div>
+
+                    <div class="hcard">
+                        <p class="hcard-num">03</p>
+                        <div class="hcard-img-wrap">
+                            <a href="https://102454.stu.sd-lab.nl/Marktplaats-main/" target="_blank">
+                                <img src="projects/marktplaats.png" alt="Marktplaats" style="object-position: center 12%;">
+                                <div class="hcard-overlay">Live Demo →</div>
+                            </a>
+                        </div>
+                        <div class="hcard-info">
+                            <p class="hcard-cat">Web Development · <span class="pc-live">● Live</span></p>
+                            <h3 class="hcard-title">Marktplaats</h3>
+                        </div>
+                    </div>
+
+                    <div class="hcard">
+                        <p class="hcard-num">04</p>
+                        <div class="hcard-img-wrap">
+                            <a href="https://102454.stu.sd-lab.nl/Quizzy-main/" target="_blank">
+                                <img src="projects/quizzy.png" alt="Quizzy" style="object-position: center 15%;">
+                                <div class="hcard-overlay">Live Demo →</div>
+                            </a>
+                        </div>
+                        <div class="hcard-info">
+                            <p class="hcard-cat">Web Development · <span class="pc-live">● Live</span></p>
+                            <h3 class="hcard-title">Quizzy</h3>
+                        </div>
+                    </div>
+
+                    <div class="hcard">
+                        <p class="hcard-num">05</p>
+                        <div class="hcard-img-wrap">
+                            <a href="gemeente-delft.html" target="_blank">
+                                <img src="projects/gemeente-2.jpg" alt="Youth Voting Platform" style="object-position: center 10%;">
+                                <div class="hcard-overlay">View Project →</div>
+                            </a>
+                        </div>
+                        <div class="hcard-info">
+                            <p class="hcard-cat">Web Development · Real Client</p>
+                            <h3 class="hcard-title">Youth Voting Platform</h3>
+                        </div>
+                    </div>
+
+                    <div class="hcard">
+                        <p class="hcard-num">06</p>
+                        <div class="hcard-img-wrap">
+                            <a href="funfactory.html" target="_blank">
+                                <img src="projects/funfactory.png" alt="FunFactory" style="object-position: center 15%;">
+                                <div class="hcard-overlay">View Project →</div>
+                            </a>
+                        </div>
+                        <div class="hcard-info">
+                            <p class="hcard-cat">UI/UX Design · Web Development</p>
+                            <h3 class="hcard-title">FunFactory</h3>
+                        </div>
+                    </div>
+
+                    <!-- End card -->
+                    <div class="hcard hcard-end">
+                        <div class="hcard-end-inner">
+                            <p class="hcard-end-label">That's not all</p>
+                            <h3 class="hcard-end-title">Want to<br>see more?</h3>
+                            <a href="projects.html" class="hcard-end-btn">All Projects →</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section id="experience" class="animate-section" aria-labelledby="experience-title">
+
+  <div class="journey-head">
+    <p class="section-number">04 — Experience</p>
+    <h2 class="section-title journey-title" id="experience-title">My Journey</h2>
+  </div>
+
+  <div class="zz-outer" id="zzOuter">
+    <svg class="zz-svg" id="zzSvg" viewBox="0 0 1000 1600" preserveAspectRatio="none">
+      <path class="path-ghost" id="pathGhost" d=""/>
+      <path class="path-draw"  id="pathDraw"  d=""/>
+    </svg>
+
+    <!-- Rose -->
+    <div class="zz-rose-wrap" id="zzRose">
+      <svg class="zz-rose-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g class="rose-petals-outer">
+          <ellipse cx="60" cy="38" rx="10" ry="18" fill="rgba(255,85,0,0.18)" stroke="#ff5500" stroke-width="0.8" transform="rotate(0 60 60)"/>
+          <ellipse cx="60" cy="38" rx="10" ry="18" fill="rgba(255,85,0,0.18)" stroke="#ff5500" stroke-width="0.8" transform="rotate(45 60 60)"/>
+          <ellipse cx="60" cy="38" rx="10" ry="18" fill="rgba(255,85,0,0.18)" stroke="#ff5500" stroke-width="0.8" transform="rotate(90 60 60)"/>
+          <ellipse cx="60" cy="38" rx="10" ry="18" fill="rgba(255,85,0,0.18)" stroke="#ff5500" stroke-width="0.8" transform="rotate(135 60 60)"/>
+          <ellipse cx="60" cy="38" rx="10" ry="18" fill="rgba(255,85,0,0.18)" stroke="#ff5500" stroke-width="0.8" transform="rotate(180 60 60)"/>
+          <ellipse cx="60" cy="38" rx="10" ry="18" fill="rgba(255,85,0,0.18)" stroke="#ff5500" stroke-width="0.8" transform="rotate(225 60 60)"/>
+          <ellipse cx="60" cy="38" rx="10" ry="18" fill="rgba(255,85,0,0.18)" stroke="#ff5500" stroke-width="0.8" transform="rotate(270 60 60)"/>
+          <ellipse cx="60" cy="38" rx="10" ry="18" fill="rgba(255,85,0,0.18)" stroke="#ff5500" stroke-width="0.8" transform="rotate(315 60 60)"/>
+        </g>
+        <g class="rose-petals-inner">
+          <ellipse cx="60" cy="46" rx="7" ry="13" fill="rgba(255,85,0,0.28)" stroke="#ff5500" stroke-width="0.9" transform="rotate(22.5 60 60)"/>
+          <ellipse cx="60" cy="46" rx="7" ry="13" fill="rgba(255,85,0,0.28)" stroke="#ff5500" stroke-width="0.9" transform="rotate(67.5 60 60)"/>
+          <ellipse cx="60" cy="46" rx="7" ry="13" fill="rgba(255,85,0,0.28)" stroke="#ff5500" stroke-width="0.9" transform="rotate(112.5 60 60)"/>
+          <ellipse cx="60" cy="46" rx="7" ry="13" fill="rgba(255,85,0,0.28)" stroke="#ff5500" stroke-width="0.9" transform="rotate(157.5 60 60)"/>
+          <ellipse cx="60" cy="46" rx="7" ry="13" fill="rgba(255,85,0,0.28)" stroke="#ff5500" stroke-width="0.9" transform="rotate(202.5 60 60)"/>
+          <ellipse cx="60" cy="46" rx="7" ry="13" fill="rgba(255,85,0,0.28)" stroke="#ff5500" stroke-width="0.9" transform="rotate(247.5 60 60)"/>
+          <ellipse cx="60" cy="46" rx="7" ry="13" fill="rgba(255,85,0,0.28)" stroke="#ff5500" stroke-width="0.9" transform="rotate(292.5 60 60)"/>
+          <ellipse cx="60" cy="46" rx="7" ry="13" fill="rgba(255,85,0,0.28)" stroke="#ff5500" stroke-width="0.9" transform="rotate(337.5 60 60)"/>
+        </g>
+        <circle cx="60" cy="60" r="10" fill="rgba(255,85,0,0.5)" stroke="#ff5500" stroke-width="1"/>
+        <circle cx="60" cy="60" r="5" fill="#ff5500"/>
+        <circle cx="60" cy="60" r="3" fill="#fff" opacity="0.4"/>
+      </svg>
+    </div>
+
+    <div class="zz-entries">
+
+      <!-- 1 LEFT — First Internship -->
+      <div class="zz-entry zz-odd">
+        <div class="zz-card-col">
+          <div class="zz-card">
+            <div class="zz-year">2023</div>
+            <span class="zz-tag">Internship</span>
+            <div class="zz-company">First Internship</div>
+            <div class="zz-role">IT & Development · Age 16</div>
+            <div class="zz-reveal-text" data-text="It started when I was around 8 or 9 years old — my dad and my uncle introduced me to computers and programming. I wanted to become a game developer, and that spark never left. That is what pulled me into IT. My first internship was at the IT departments of Gemeente Delft and Gemeente Rijswijk. I did not just watch — I sat in on CEO meetings, joined decision-making sessions and worked alongside the manager. They gave me real responsibility from day one. The development team gave me the assignment to build a youth voting platform. I had to figure it out myself, design it, and code it. They pushed me to work independently — if I asked too many questions, they would not answer. Not to be harsh, but to teach me how to figure things out on my own. And I did."></div>
+            <div class="zz-skills">
+              <span class="zz-skill">HTML</span>
+              <span class="zz-skill">CSS</span>
+              <span class="zz-skill">Low-Code</span>
+              <span class="zz-skill">Self-reliance</span>
+            </div>
+          </div>
+        </div>
+        <div class="zz-dot-col"></div>
+        <div class="zz-empty"></div>
+      </div>
+
+      <!-- 2 RIGHT — Gemeente Delft & Rijswijk -->
+      <div class="zz-entry zz-even">
+        <div class="zz-empty"></div>
+        <div class="zz-dot-col"></div>
+        <div class="zz-card-col">
+          <div class="zz-card">
+            <div class="zz-year">2024</div>
+            <span class="zz-tag">Internship</span>
+            <div class="zz-company">Gemeente Delft & Rijswijk</div>
+            <div class="zz-role">IT & Development · Second Internship</div>
+            <div class="zz-reveal-text" data-text="My second internship was at Delta-N. The assignment: build a charging station app — and they were actually going to use it. You came in, sat down, and got to work. Lunch was the social moment. Meetings were focused. Everything else was heads down. I worked closely with the client but the work itself was fully independent. No hand-holding. I had to figure out problems myself, communicate professionally and deliver something real. The app went live and is still actively used today. Knowing that real people use something I built — that is the kind of motivation that keeps me going."></div>
+            <div class="zz-skills">
+              <span class="zz-skill">Low-Code</span>
+              <span class="zz-skill">App Design</span>
+              <span class="zz-skill">Client Communication</span>
+              <span class="zz-skill">Independent Work</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 LEFT — Grafisch Lyceum Rotterdam -->
+      <div class="zz-entry zz-odd">
+        <div class="zz-card-col">
+          <div class="zz-card">
+            <div class="zz-year">2024</div>
+            <span class="zz-tag">Education</span>
+            <div class="zz-company">Grafisch Lyceum Rotterdam</div>
+            <div class="zz-role">Software Development · Year 2</div>
+            <div class="zz-reveal-text" data-text="After those internships I started Software Development at Grafisch Lyceum Rotterdam. Here I learned something different — how to work as a real team. Building projects from scratch together, doing project plans, wireframes, prototypes, pitches, client meetings and presentations. Everything that comes with being a real developer. It was not just coding. It was learning how a product actually gets made from idea to delivery."></div>
+            <div class="zz-skills">
+              <span class="zz-skill">HTML</span>
+              <span class="zz-skill">CSS</span>
+              <span class="zz-skill">JavaScript</span>
+              <span class="zz-skill">Figma</span>
+              <span class="zz-skill">Teamwork</span>
+            </div>
+          </div>
+        </div>
+        <div class="zz-dot-col"></div>
+        <div class="zz-empty"></div>
+      </div>
+
+      <!-- 4 RIGHT — What's Next -->
+      <div class="zz-entry zz-even">
+        <div class="zz-empty"></div>
+        <div class="zz-dot-col"></div>
+        <div class="zz-card-col">
+          <div class="zz-card">
+            <div class="zz-year">2026</div>
+            <span class="zz-tag">Now</span>
+            <div class="zz-company">What's Next</div>
+            <div class="zz-role">Looking for an internship · NL or Spain</div>
+            <div class="zz-reveal-text" data-text="Now I am in my second year, and in year three I will be doing a full internship at a real company — to see what it is actually like to be a developer in the real world. I am looking for a place where I can keep learning, take ownership and grow fast. Front-end development and design are where I feel strongest right now, but game development and game design are never far from my mind either. It all started with that dream as a kid. I am still chasing it."></div>
+            <div class="zz-skills">
+              <span class="zz-skill">Available 2026</span>
+              <span class="zz-skill">NL or Spain</span>
+              <span class="zz-skill">Ready</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- WHY ME — stacking cards with glitch bg -->
+<section id="why-me" aria-label="Why hire me">
+  <canvas id="glitch-canvas"></canvas>
+
+  <div class="wm-header">
+    <p class="section-number">04.5 — Why Me</p>
+    <h2 class="section-title wm-title">Why you should<br><em>hire me.</em></h2>
+  </div>
+
+  <div class="wm-stack">
+
+    <div class="wm-card">
+      <div class="wm-top"><span class="wm-n">01</span><span class="wm-tag">Self-starter</span></div>
+      <div class="wm-card-title">Self-starter.</div>
+      <p class="wm-text">I learned early on how to figure things out myself.</p>
+      <p class="wm-text">During both of my internships, there were moments where people intentionally stopped answering my questions. Not because they didn't want to help, but because they wanted me to learn how to solve problems on my own.</p>
+      <p class="wm-text">So I did. I research things, experiment, break stuff, fix it, and keep going until it works. That process taught me more than any tutorial ever could.</p>
+      <p class="wm-text">By now I'm comfortable jumping into new problems, learning what I need to learn, and delivering results without needing constant guidance.</p>
+    </div>
+
+    <div class="wm-card">
+      <div class="wm-top"><span class="wm-n">02</span><span class="wm-tag">Real experience</span></div>
+      <div class="wm-card-title">Real Experience.</div>
+      <p class="wm-text">I didn't just observe during my internships — I built things that were actually used.</p>
+      <p class="wm-text">At 15, I was already sitting in meetings with management and even the CEO, discussing projects and ideas. Instead of doing typical intern tasks, I helped build a platform where young people in Delft could vote on real local events.</p>
+      <p class="wm-text">At Delta-N, I also worked on an application that is still live today.</p>
+      <p class="wm-text">That experience showed me how development works outside of school: working with teams, real users, deadlines, and responsibility. It wasn't a demo project — it was something people actually used.</p>
+    </div>
+
+    <div class="wm-card">
+      <div class="wm-top"><span class="wm-n">03</span><span class="wm-tag">Fast learner</span></div>
+      <div class="wm-card-title">Fast Learner.</div>
+      <p class="wm-text">I've been curious about technology for as long as I can remember.</p>
+      <p class="wm-text">I started experimenting with coding when I was around eight years old. At the time I didn't fully understand what I was doing, but I kept trying, learning, and improving.</p>
+      <p class="wm-text">Over the years I've worked with technologies like HTML, CSS, JavaScript, React, TypeScript and Figma, and I'm always exploring new tools.</p>
+      <p class="wm-text">Every company uses a different stack, but learning new technologies quickly is something I'm very comfortable with.</p>
+    </div>
+
+    <div class="wm-card">
+      <div class="wm-top"><span class="wm-n">04</span><span class="wm-tag">Design-minded</span></div>
+      <div class="wm-card-title">Design-Minded.</div>
+      <p class="wm-text">For me, development isn't only about making something work — it should also look and feel right.</p>
+      <p class="wm-text">I pay attention to details in interfaces, layouts and interactions because they directly affect how people experience a product.</p>
+      <p class="wm-text">A good website or application should feel clear, intuitive and visually balanced. When design and development work together, the result is much stronger.</p>
+      <p class="wm-text">That's why I enjoy combining frontend development with UI/UX thinking.</p>
+    </div>
+
+    <div class="wm-card">
+      <div class="wm-top"><span class="wm-n">05</span><span class="wm-tag">Passionate</span></div>
+      <div class="wm-card-title">Passionate.</div>
+      <p class="wm-text">This isn't just something I do for work — it's something I genuinely enjoy.</p>
+      <p class="wm-text">Before even starting my study, I already completed two internships and built my own portfolio. I often spend my free time experimenting with ideas, learning new tools or improving projects.</p>
+      <p class="wm-text">Technology moves fast, and that's part of what makes it exciting.</p>
+      <p class="wm-text">I'm not just looking for a job — I'm looking for opportunities to build things, learn from experienced people, and keep growing as a developer.</p>
+    </div>
+
+  </div>
+</section>
+<section id="contact" class="animate-section contact-section" aria-labelledby="contact-title">
+  <div class="contact-wrap">
+
+    <!-- HEADER ROW: heading left, typewriter right -->
+    <div class="contact-header-row">
+      <div class="contact-header-left">
+        <p class="section-number">05 — Contact</p>
+        <h2 class="section-title contact-title" id="contact-title">Let's Connect</h2>
+        <p class="contact-sub">Looking for a motivated developer who takes ownership from day one? I'd love to hear from you.</p>
+      </div>
+      <div class="typewriter-anim">
+        <div class="tw-slide"><i></i></div>
+        <div class="tw-paper"></div>
+        <div class="tw-keyboard"></div>
+      </div>
+    </div>
+
+    <!-- BODY: contacts left, form right -->
+    <div class="contact-inner">
+    <div class="contact-left">
+      <div class="contact-details">
+        <div class="contact-detail-item">
+          <span class="contact-detail-label">School email</span>
+          <a href="mailto:101721@glr.nl" class="contact-detail-value">101721@glr.nl</a>
+        </div>
+        <div class="contact-detail-item">
+          <span class="contact-detail-label">Personal email</span>
+          <a href="mailto:fabichelsea555@outlook.com" class="contact-detail-value">fabichelsea555@outlook.com</a>
+        </div>
+        <div class="contact-detail-item">
+          <span class="contact-detail-label">Phone</span>
+          <a href="tel:+3147255213" class="contact-detail-value">+31 47255213</a>
+        </div>
+        <div class="contact-detail-item">
+          <span class="contact-detail-label">LinkedIn</span>
+          <a href="https://www.linkedin.com/in/fabian-corsalini-731a583b5" target="_blank" class="contact-detail-value">fabian-corsalini</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT — Form -->
+    <div class="contact-right">
+      <form class="contact-form" id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <input type="hidden" name="_replyto" value="fabichelsea555@outlook.com">
+        <div class="cf-field">
+          <label class="cf-label">Your name</label>
+          <input type="text" name="name" class="cf-input" placeholder="Jan de Vries" required>
+        </div>
+        <div class="cf-field">
+          <label class="cf-label">Email</label>
+          <input type="email" name="email" class="cf-input" placeholder="jan@bedrijf.nl" required>
+        </div>
+        <div class="cf-field">
+          <label class="cf-label">Message</label>
+          <textarea name="message" class="cf-textarea" placeholder="We're looking for an intern who..." required></textarea>
+        </div>
+        <button type="submit" class="cf-submit" id="cfSubmit">
+          <span class="cf-submit-text">Send Message</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <p class="cf-success" id="cfSuccess">Message sent! I'll get back to you soon.</p>
+        <p class="cf-error" id="cfError">Something went wrong. Please email me directly.</p>
+      </form>
+    </div>
+
+    </div><!-- end contact-inner -->
+  </div><!-- end contact-wrap -->
+</section>
+
+<!-- Footer with proper semantic markup -->
+<footer class="footer" role="contentinfo">
+    <div class="footer-content">
+        <p class="footer-text">© 2026 Fabian Corsalini. All rights reserved.</p>
+        <!-- Decorative circular text - hidden from screen readers -->
+        <div class="circular-text-container" aria-hidden="true" role="presentation">
+            <div class="circular-text" id="circularText"></div>
+            <div class="circular-center">FC</div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="script.js" defer></script>
+</body>
+</html>

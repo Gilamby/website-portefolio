@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FunFactory - A sustainable toy webshop design project. Full web design from wireframes to final product.">
+    <meta name="theme-color" content="#FF6B35">
+    
+    <title>FunFactory Project - Fabian Corsalini</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--orange);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: gap 0.3s ease;
+        }
+
+        .back-btn:hover { 
+            gap: 0.8rem; 
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .project-hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+            min-height: 90vh;
+            padding: 8rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .project-hero-left h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            font-family: 'Outfit';
+            color: #FFFFFF;
+            margin: 1rem 0 1.5rem 0;
+            line-height: 1.1;
+        }
+
+        .project-hero-label {
+            font-size: 0.85rem;
+            color: var(--orange);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 1rem;
+        }
+
+        .project-hero-subtitle {
+            font-size: 1.1rem;
+            color: #B0B0B0;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .project-hero-description {
+            font-size: 1rem;
+            color: #FFFFFF;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            max-width: 90%;
+        }
+
+        .project-tags {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .project-tag {
+            background: #141414;
+            border: 1px solid #2A2A2A;
+            color: #FFFFFF;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .project-impact-line {
+            font-size: 0.95rem;
+            color: #22c55e;
+            font-weight: 600;
+            margin-top: 2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .project-hero-img {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid #2A2A2A;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+        }
+
+        .info-bar {
+            background: #141414;
+            border-top: 1px solid #2A2A2A;
+            border-bottom: 1px solid #2A2A2A;
+            padding: 2.5rem 5%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            max-width: 100%;
+        }
+
+        .info-bar-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--orange);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.6rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #FFFFFF;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .process-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 5%;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 800;
+            font-family: 'Outfit';
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .process-step {
+            background: #141414;
+            border: 1px solid #2A2A2A;
+            border-radius: 20px;
+            padding: 2rem;
+            transition: 0.3s;
+        }
+
+        .process-step:hover {
+            border-color: var(--orange);
+            transform: translateY(-5px);
+        }
+
+        .process-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--orange);
+            opacity: 0.3;
+            font-family: 'Outfit';
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .process-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 1rem;
+        }
+
+        .process-description {
+            font-size: 0.95rem;
+            color: #B0B0B0;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .process-step img {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            border: 1px solid #2A2A2A;
+        }
+
+        .screenshots-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 5%;
+        }
+
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .screenshots-grid img {
+            width: 100%;
+            border-radius: 15px;
+            border: 1px solid #2A2A2A;
+            transition: 0.3s;
+        }
+
+        .screenshots-grid img:hover {
+            border-color: var(--orange);
+            transform: scale(1.02);
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 6rem 5%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .cta-text {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Outfit';
+            color: #FFFFFF;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .cta-button {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cta-button.primary {
+            background: var(--orange);
+            color: #0A0A0A;
+        }
+
+        .cta-button.primary:hover {
+            background: var(--orange-light);
+            gap: 0.8rem;
+        }
+
+        .cta-button.secondary {
+            background: #141414;
+            color: var(--orange);
+            border: 1px solid var(--orange);
+        }
+
+        .cta-button.secondary:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .project-hero { 
+                grid-template-columns: 1fr; 
+                gap: 3rem; 
+                min-height: auto; 
+                padding: 4rem 5%;
+            }
+            .project-hero-left h1 {
+                font-size: 2.5rem;
+            }
+            .info-bar { 
+                grid-template-columns: repeat(2, 1fr); 
+            }
+            .process-grid { 
+                grid-template-columns: 1fr; 
+            }
+            .screenshots-grid { 
+                grid-template-columns: 1fr; 
+            }
+            .cta-buttons { 
+                flex-direction: column;
+                width: 100%;
+            }
+            .cta-button {
+                width: 100%;
+                justify-content: center;
+            }
+            .nav-left {
+                gap: 1rem;
+            }
+        }
+    </style>
+    
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+</head>
+<body>
+
+<nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-content">
+        <div class="nav-left">
+            <a href="index.html#projects" class="back-btn">
+                <i data-lucide="arrow-left"></i> Back to Projects
+            </a>
+            <a href="#" class="logo" aria-label="Fabian Corsalini - Home">Fabian<span>.</span></a>
+        </div>
+        <div class="nav-menu">
+            <ul class="nav-links">
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#skills">Skills</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="index.html#experience">Experience</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme" aria-pressed="false">
+                <i data-lucide="sun" aria-hidden="true"></i>
+            </button>
+            <a href="../Fabian-Corsalini-CV.pdf" download class="cv-btn" aria-label="Download CV as PDF">
+                <i data-lucide="download" aria-hidden="true"></i> <span>CV</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<section class="project-hero">
+    <div class="project-hero-left">
+        <p class="project-hero-label">03 — Project</p>
+        <h1>FunFactory</h1>
+        <p class="project-hero-subtitle">E-commerce Web Design · UI/UX · Frontend</p>
+        
+        <p class="project-hero-description">
+            A full web design project for a sustainable toy webshop.
+            From the first wireframe to the final product.
+            Every screen. Every state. Start to finish.
+        </p>
+        
+        <div class="project-tags">
+            <span class="project-tag">Figma</span>
+            <span class="project-tag">HTML/CSS/JS</span>
+        </div>
+        
+        <p class="project-impact-line">✓ Full design process — wireframes to final product</p>
+    </div>
+    
+    <div class="project-hero-right">
+        <img src="projects/Component 4 (1).png" alt="FunFactory Final Product" class="project-hero-img">
+    </div>
+</section>
+
+<div class="info-bar">
+    <div class="info-bar-item">
+        <div class="info-label">Role</div>
+        <div class="info-value">Solo Designer & Developer</div>
+    </div>
+    <div class="info-bar-item">
+        <div class="info-label">Tools</div>
+        <div class="info-value">Figma · HTML · CSS · JS</div>
+    </div>
+    <div class="info-bar-item">
+        <div class="info-label">Type</div>
+        <div class="info-value">School Project</div>
+    </div>
+    <div class="info-bar-item">
+        <div class="info-label">Year</div>
+        <div class="info-value">2024</div>
+    </div>
+</div>
+
+<section class="process-section">
+    <h2 class="section-title">The Process</h2>
+    
+    <div class="process-grid">
+        <div class="process-step">
+            <div class="process-number">01</div>
+            <h3 class="process-title">Research & Wireframes</h3>
+            <p class="process-description">
+                I started by mapping out every page in Figma.
+                Low-fidelity wireframes for the homepage, product page,
+                detail page and cart. No colors yet — just structure and flow.
+            </p>
+            <img src="projects/Component 1 (1).png" alt="FunFactory Wireframes">
+        </div>
+        
+        <div class="process-step">
+            <div class="process-number">02</div>
+            <h3 class="process-title">UI Design in Figma</h3>
+            <p class="process-description">
+                Once the wireframes were done I moved to Figma.
+                Color palette, typography, buttons, cards — all documented
+                in a style guide before writing a single line of code.
+            </p>
+            <img src="projects/funfactory-styleguide.png"
+                 alt="FunFactory Style Guide"
+                 style="width:100%;border-radius:12px;border:1px solid #2A2A2A;">
+        </div>
+        
+        <div class="process-step">
+            <div class="process-number">03</div>
+            <h3 class="process-title">Built it</h3>
+            <p class="process-description">
+                Translated the Figma design into a working website using
+                HTML, CSS and JavaScript. Every page from the wireframe
+                got built — homepage, product page, detail page and cart.
+            </p>
+            <img src="projects/Component 4 (1).png" alt="FunFactory Final Website">
+        </div>
+    </div>
+</section>
+
+<section class="screenshots-section">
+    <h2 class="section-title">The Result</h2>
+    
+    <div class="screenshots-grid">
+        <img src="projects/Component 1 (2).png" alt="Homepage">
+        <img src="projects/Component 2 (1).png" alt="Product Page">
+        <img src="projects/Component 1 (1).png" alt="Cart">
+        <img src="projects/Component 3 (1).png" alt="Mobile">
+    </div>
+</section>
+
+<section class="cta-section">
+    <p class="cta-text">Want to see more?</p>
+    
+    <div class="cta-buttons">
+        <a href="index.html#projects" class="cta-button primary">
+            ← Previous Project
+        </a>
+        <a href="gemeente-delft.html" class="cta-button secondary">
+            Next Project →
+        </a>
+    </div>
+</section>
+
+<footer class="footer" role="contentinfo">
+    <div class="footer-content">
+        <p class="footer-text">© 2026 Fabian Corsalini. All rights reserved.</p>
+        <div class="circular-text-container" aria-hidden="true" role="presentation">
+            <div class="circular-text" id="circularText"></div>
+            <div class="circular-center">FC</div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    lucide.createIcons();
+
+    // Circular text
+    function createCircularText() {
+        const circularText = document.getElementById('circularText');
+        if (!circularText) return;
+        const text = "• FABIAN CORSALINI • PORTFOLIO 2026 ";
+        text.split('').forEach((char, i) => {
+            const span = document.createElement('span');
+            span.textContent = char;
+            span.style.transform = `rotate(${(360 / text.length) * i}deg)`;
+            circularText.appendChild(span);
+        });
+    }
+    createCircularText();
+
+    // Theme toggle
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        lucide.createIcons();
+    });
+</script>
+
+</body>
+</html>

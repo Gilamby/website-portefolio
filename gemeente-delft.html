@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youth Voting Platform — Gemeente Delft</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--orange);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: gap 0.3s;
+            margin: 2rem 5%;
+        }
+
+        .back-btn:hover {
+            gap: 0.8rem;
+        }
+
+        .project-hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+            min-height: 90vh;
+            padding: 0 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .project-hero-content h2 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: white;
+            font-family: 'Outfit';
+            line-height: 1.1;
+            margin: 1rem 0;
+        }
+
+        .project-hero-content .label {
+            font-size: 0.85rem;
+            color: var(--orange);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .project-hero-content .subtitle {
+            font-size: 1.1rem;
+            color: #888;
+            margin-bottom: 2rem;
+        }
+
+        .project-hero-content p {
+            font-size: 1rem;
+            color: #B0B0B0;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .project-hero-content .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tag {
+            font-size: 0.85rem;
+            color: #888;
+            border: 1px solid #2A2A2A;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .badge-green {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-orange {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            color: var(--orange);
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .project-hero-image {
+            text-align: center;
+        }
+
+        .project-hero-image img {
+            max-width: 320px;
+            border-radius: 16px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            border: 1px solid #2A2A2A;
+        }
+
+        .info-bar {
+            background: #141414;
+            border-top: 1px solid #2A2A2A;
+            border-bottom: 1px solid #2A2A2A;
+            padding: 2.5rem 5%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            max-width: 100%;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--orange);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.4rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .what-i-built {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 4rem;
+            align-items: start;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 8rem 5%;
+        }
+
+        .what-i-built h3 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            font-family: 'Outfit';
+            margin-bottom: 2rem;
+            grid-column: 1 / -1;
+        }
+
+        .built-text {
+            font-size: 1.1rem;
+            color: #B0B0B0;
+            line-height: 1.9;
+        }
+
+        .stat-sidebar {
+            background: #141414;
+            border: 1px solid #2A2A2A;
+            border-left: 3px solid var(--orange);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .stat-item-label {
+            font-size: 0.75rem;
+            color: #555;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-item-value {
+            font-family: 'Outfit';
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            margin-top: 2px;
+        }
+
+        .platform-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 4rem 5%;
+        }
+
+        .platform-section h3 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            font-family: 'Outfit';
+            margin-bottom: 3rem;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: #141414;
+            border: 1px solid #2A2A2A;
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: 0.3s;
+        }
+
+        .step-card:hover {
+            border-color: var(--orange);
+            transform: translateY(-5px);
+        }
+
+        .step-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--orange);
+            opacity: 0.3;
+            font-family: 'Outfit';
+            line-height: 1;
+        }
+
+        .step-card h4 {
+            font-size: 1.2rem;
+            color: white;
+            font-family: 'Outfit';
+            font-weight: 700;
+        }
+
+        .step-card p {
+            font-size: 0.95rem;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        .step-card img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #2A2A2A;
+            margin-top: 1rem;
+        }
+
+        .screenshots-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 5%;
+        }
+
+        .screenshots-section h3 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            font-family: 'Outfit';
+            margin-bottom: 3rem;
+        }
+
+        .screenshots-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .screenshots-row img {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid #2A2A2A;
+            transition: 0.3s;
+        }
+
+        .screenshots-row img:hover {
+            border-color: var(--orange);
+            transform: scale(1.02);
+        }
+
+        .screenshot-caption {
+            font-size: 11px;
+            color: #555;
+            margin-top: 8px;
+        }
+
+        .mayor-moment {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 5%;
+        }
+
+        .mayor-card {
+            background: #141414;
+            border: 1px solid #2A2A2A;
+            border-left: 4px solid var(--orange);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .mayor-emoji {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .mayor-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.8rem;
+            font-family: 'Outfit';
+        }
+
+        .mayor-card p {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.7;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 6rem 5%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .cta-section h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            font-family: 'Outfit';
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .cta-button {
+            padding: 0.85rem 2rem;
+            background: var(--orange);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+        }
+
+        .cta-button.secondary {
+            background: transparent;
+            border: 1px solid #2A2A2A;
+            color: white;
+        }
+
+        .cta-button.secondary:hover {
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        @media (max-width: 768px) {
+            .project-hero {
+                grid-template-columns: 1fr;
+                min-height: auto;
+                gap: 3rem;
+                padding: 3rem 5%;
+            }
+
+            .project-hero-content h2 {
+                font-size: 2rem;
+            }
+
+            .info-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .what-i-built {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .screenshots-row {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .mayor-card {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAV -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="logo">FABIO</a>
+            <div class="nav-links">
+                <a href="index.html#about">About</a>
+                <a href="index.html#skills">Skills</a>
+                <a href="index.html#projects">Projects</a>
+                <a href="index.html#contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- BACK BUTTON -->
+    <a href="index.html#projects" class="back-btn">
+        <i data-lucide="arrow-left"></i> Back to Projects
+    </a>
+
+    <!-- HERO -->
+    <section class="project-hero">
+        <div class="project-hero-content">
+            <div class="label">01 — PROJECT</div>
+            <h2>Youth Voting Platform</h2>
+            <div class="subtitle">Gemeente Delft · Oracle APEX · Solo Project</div>
+            
+            <p>I was 15 when I built this. During my internship at the Municipality of Delft I got one assignment: build a platform where young people could vote on and submit ideas for local events made for them. I wrote the project plan, designed the UI, built the whole thing in Oracle APEX, wrote PL/SQL for the email logic, and launched it. Oh — and I got to interview the mayor. Yes, really.</p>
+
+            <div class="tags">
+                <span class="tag">Oracle APEX</span>
+                <span class="tag">PL/SQL</span>
+                <span class="tag">UI Design</span>
+                <span class="tag">Solo Project</span>
+                <span class="tag">Real Client</span>
+            </div>
+
+            <div class="badges">
+                <span class="badge-green">✓ Delivered to real client</span>
+                <span class="badge-orange">👤 Interviewed the mayor</span>
+            </div>
+        </div>
+
+        <div class="project-hero-image">
+            <img src="projects/gemeente-2.jpg" alt="Youth Voting Platform">
+        </div>
+    </section>
+
+    <!-- INFO BAR -->
+    <section class="info-bar">
+        <div class="info-item">
+            <div class="info-label">Role</div>
+            <div class="info-value">Solo Developer & Designer</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Tools</div>
+            <div class="info-value">Oracle APEX · PL/SQL</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Type</div>
+            <div class="info-value">Internship Project</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Age</div>
+            <div class="info-value">15 years old</div>
+        </div>
+    </section>
+
+    <!-- WHAT I BUILT -->
+    <section class="what-i-built">
+        <h3>What I Built</h3>
+        <div class="built-text">
+            <p>The platform is called the Evenementen ideeënbus — an event ideas mailbox for young people in Delft. Users fill in a multi-step form: their idea, their details, and a confirmation screen before submitting. When someone submits, two automatic emails get sent — one to the municipality, one back to the user as confirmation. I wrote that email logic myself in PL/SQL.</p>
+        </div>
+        <div class="stat-sidebar">
+            <div>
+                <div class="stat-item-label">Built in</div>
+                <div class="stat-item-value">Oracle APEX</div>
+            </div>
+            <div>
+                <div class="stat-item-label">Email logic in</div>
+                <div class="stat-item-value">PL/SQL</div>
+            </div>
+            <div>
+                <div class="stat-item-label">Steps in the form</div>
+                <div class="stat-item-value">4</div>
+            </div>
+            <div>
+                <div class="stat-item-label">Emails sent per submission</div>
+                <div class="stat-item-value">2</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="platform-section">
+        <h3>The Platform</h3>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h4>Submit your idea</h4>
+                <p>Young people fill in a multi-step form. Name, age, email, target group, and their event idea.</p>
+                <img src="projects/gemeente-1.jpg" alt="Step 1: Submit your idea">
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h4>Review your details</h4>
+                <p>Before submitting, users see a summary of everything they filled in. Name, age, contact info, and their idea — all in one overview.</p>
+                <img src="projects/gemeente-2.jpg" alt="Step 2: Review your details">
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h4>Backend & email logic</h4>
+                <p>On submit, two emails fire automatically. One goes to the municipality. One goes back to the user. I wrote the entire email flow in PL/SQL inside Oracle APEX.</p>
+                <img src="projects/gemeente-4.jpg" alt="Step 3: Backend & email logic">
+                <p class="screenshot-caption">The backend — PL/SQL email logic I wrote myself.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCREENSHOT SECTION -->
+    <section class="screenshots-section">
+        <h3>The App</h3>
+        <div class="screenshots-row">
+            <div>
+                <img src="projects/gemeente-1.jpg" alt="Step 2: Your idea">
+                <p class="screenshot-caption">Step 2: Your idea</p>
+            </div>
+            <div>
+                <img src="projects/gemeente-2.jpg" alt="Step 4: Review details">
+                <p class="screenshot-caption">Step 4: Review details</p>
+            </div>
+            <div>
+                <img src="projects/gemeente-3.jpg" alt="Oracle APEX builder - blurred for privacy">
+                <p class="screenshot-caption">Blurred for privacy — this is the Oracle APEX builder.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- THE MAYOR MOMENT -->
+    <section class="mayor-moment">
+        <div class="mayor-card">
+            <div class="mayor-emoji">🎙️</div>
+            <h3>"And then I interviewed the mayor."</h3>
+            <p>Part of the project was interviewing the mayor of Delft to understand what kinds of youth events the city actually wanted. Not many 15-year-olds get that meeting.</p>
+        </div>
+    </section>
+
+    <!-- BOTTOM CTA -->
+    <section class="cta-section">
+        <h3>Want to see more?</h3>
+        <div class="cta-buttons">
+            <a href="laadpaal.html" class="cta-button">Next Project →</a>
+            <a href="index.html#projects" class="cta-button secondary">← Back to Projects</a>
+        </div>
+    </section>
+
+    <!-- SCRIPTS -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script>
+        lucide.createIcons();
+
+        // Scroll animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    anime({
+                        targets: entry.target,
+                        opacity: [0, 1],
+                        translateY: [20, 0],
+                        duration: 800,
+                        easing: 'easeOutExpo'
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.step-card, .screenshots-row img, .mayor-card').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
