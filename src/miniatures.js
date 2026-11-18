@@ -23,7 +23,7 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
   const TOP = .15;
   const grassTex = canvasTex(256, 256, (g, w, h) => { g.fillStyle = "#7f9a4e"; g.fillRect(0, 0, w, h); noise(g, w, h, 900, ["#6c8a40", "#93ad5c", "#a8b866", "#5f7d3a"], 2, 9); }, 2.2);
   const rockTex = canvasTex(256, 256, (g, w, h) => { g.fillStyle = "#8a7258"; g.fillRect(0, 0, w, h); for (let y = 0; y < h; y += 6) { g.fillStyle = `rgba(${60 + Math.random() * 60},${45 + Math.random() * 40},${30 + Math.random() * 30},.35)`; g.fillRect(0, y, w, 2 + Math.random() * 4); } noise(g, w, h, 300, ["#6e5a44", "#a08a6c", "#5a4836"], 2, 7); }, 1.5);
-  const sandTex = canvasTex(128, 128, (g, w, h) => { g.fillStyle = "#e3cf9e"; g.fillRect(0, 0, w, h); noise(g, w, h, 300, ["#d6bf8a", "#efe0b8"], 1, 3); }, 3);
+  const sandTex = canvasTex(128, 128, (g, w, h) => { g.fillStyle = "#efdcae"; g.fillRect(0, 0, w, h); noise(g, w, h, 300, ["#e4cd98", "#f7ead0"], 1, 3); }, 3);
   const GRASS = new T.MeshStandardMaterial({ map: grassTex, roughness: .95 }), ROCK = new T.MeshStandardMaterial({ map: rockTex, roughness: 1 }), SAND = new T.MeshStandardMaterial({ map: sandTex, roughness: 1 });
   const islands = new T.Group(); scene.add(islands);
   const isleGroups = {};
@@ -38,38 +38,72 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
     geo.computeVertexNormals();
     const top = new T.Mesh(geo, [GRASS, ROCK]); top.castShadow = true; top.receiveShadow = true; g.add(top);
     // a sandy beach around the foot of the cliffs
-    const bg = new T.ExtrudeGeometry(shapeOf(poly, 1.07, [cx, cy]), { depth: .03, bevelEnabled: true, bevelThickness: .01, bevelSize: .02, bevelSegments: 2 });
+    const bg = new T.ExtrudeGeometry(shapeOf(poly, 1.13, [cx, cy]), { depth: .03, bevelEnabled: true, bevelThickness: .01, bevelSize: .02, bevelSegments: 2 });
     bg.rotateX(-Math.PI / 2); bg.translate(0, .02, 0); const beach = new T.Mesh(bg, SAND); beach.receiveShadow = true; g.add(beach);
   });
 
   // ---------------------------------------------------------------- living water over the painted sea
+  // rocks standing in the sea (paper x, y, size): they get surf rings in the water too
+  const SEA_ROCKS = [[240, 760, 1.25], [660, 175, .9], [1820, 680, 1.05], [1085, 985, .85], [300, 1150, .95], [820, 425, .7], [1960, 230, .8]];
   const water = (() => {
-    const MW = 512, MH = 350, id = map.heightMask(MW, MH); const mask = new T.DataTexture(new Uint8Array(id.data), MW, MH, T.RGBAFormat); mask.flipY = false; mask.needsUpdate = true; mask.minFilter = mask.magFilter = T.LinearFilter;
+    // island mask, plus two blurred copies of it: the turquoise shallows (wide) and the surf line (narrow)
+    const MW = 512, MH = 350, id = map.heightMask(MW, MH), src = id.data, land = new Float32Array(MW * MH);
+    for (let i = 0; i < MW * MH; i++) land[i] = src[i * 4] / 255;
+    SEA_ROCKS.forEach(([px, py, sz]) => { const cx = px / 4, cy = py / 4, r = 7 * sz; for (let y = Math.floor(cy - r); y <= cy + r; y++) for (let x = Math.floor(cx - r); x <= cx + r; x++) if (x >= 0 && y >= 0 && x < MW && y < MH && Math.hypot(x - cx, (y - cy) * 1.1) < r * .62) land[y * MW + x] = 1; });
+    const blur = (inp, r) => { const tmp = new Float32Array(MW * MH), out = new Float32Array(MW * MH);
+      for (let y = 0; y < MH; y++) { let acc = 0; for (let x = -r; x <= r; x++) acc += inp[y * MW + Math.min(MW - 1, Math.max(0, x))]; for (let x = 0; x < MW; x++) { tmp[y * MW + x] = acc / (2 * r + 1); acc += inp[y * MW + Math.min(MW - 1, x + r + 1)] - inp[y * MW + Math.max(0, x - r)]; } }
+      for (let x = 0; x < MW; x++) { let acc = 0; for (let y = -r; y <= r; y++) acc += tmp[Math.min(MH - 1, Math.max(0, y)) * MW + x]; for (let y = 0; y < MH; y++) { out[y * MW + x] = acc / (2 * r + 1); acc += tmp[Math.min(MH - 1, y + r + 1) * MW + x] - tmp[Math.max(0, y - r) * MW + x]; } }
+      return out; };
+    let wide = blur(blur(land, 10), 10), near = blur(land, 3);
+    const data = new Uint8Array(MW * MH * 4);
+    for (let i = 0; i < MW * MH; i++) { data[i * 4] = src[i * 4]; data[i * 4 + 1] = Math.min(255, wide[i] * 255 * 2.2); data[i * 4 + 2] = near[i] * 255; data[i * 4 + 3] = 255; }
+    const mask = new T.DataTexture(data, MW, MH, T.RGBAFormat); mask.flipY = false; mask.needsUpdate = true; mask.minFilter = mask.magFilter = T.LinearFilter;
     const a = W(110, 100), b = W(1938, 1300), w = b.x - a.x, d = b.z - a.z;
     const g = new T.PlaneGeometry(w, d, 1, 1); g.rotateX(-Math.PI / 2); g.translate((a.x + b.x) / 2, 0, (a.z + b.z) / 2);
     const m = new T.ShaderMaterial({ transparent: true, depthWrite: false,
       uniforms: { t: { value: 0 }, k: { value: 0 }, mask: { value: mask }, light: { value: new T.Vector3(3.5, 5, -3).normalize() }, box: { value: new T.Vector4(a.x, a.z, w, d) }, paper: { value: new T.Vector2(W(2048, 0).x * 2, W(0, 1400).z * 2) } },
       vertexShader: `varying vec3 vW; void main(){ vec4 p = modelMatrix * vec4(position, 1.); vW = p.xyz; gl_Position = projectionMatrix * viewMatrix * p; }`,
       fragmentShader: `uniform float t, k; uniform sampler2D mask; uniform vec3 light; uniform vec4 box; uniform vec2 paper; varying vec3 vW;
-        float h(vec2 p){ float a = sin(p.x * 7.3 + t * .9 + sin(p.y * 2.1) * 1.5) * .5 + sin(p.y * 8.7 - t * .7 + sin(p.x * 1.7) * 1.8) * .5; a += sin((p.x * .8 + p.y) * 17.3 + t * 1.3 + sin(p.x * 4.1)) * .2 + sin((p.x - p.y * 1.3) * 23.9 - t * 1.6 + cos(p.y * 3.7)) * .12; return a; }
+        float hs(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f); return mix(mix(hs(i), hs(i + vec2(1., 0.)), f.x), mix(hs(i + vec2(0., 1.)), hs(i + vec2(1., 1.)), f.x), f.y); }
+        float fbm(vec2 p){ return vn(p) * .55 + vn(p * 2.1 + 3.7) * .3 + vn(p * 4.3 + 9.1) * .15; }
         void main(){
           vec2 uv = vec2((vW.x - box.x) / box.z, (vW.z - box.y) / box.w);
-          float land = texture2D(mask, vec2(vW.x / paper.x + .5, vW.z / paper.y + .5)).r;
-          float e = 0.004; vec2 p = vW.xz;
-          vec3 n = normalize(vec3(-(h(p + vec2(e, 0.)) - h(p)) / e * .012, 1., -(h(p + vec2(0., e)) - h(p)) / e * .012));
+          vec3 M = texture2D(mask, vec2(vW.x / paper.x + .5, vW.z / paper.y + .5)).rgb;
+          float land = M.r, shal = M.g, near = M.b;
+          vec2 p = vW.xz;
+          // faceted low-poly swell: every triangle of a slowly drifting grid tilts on its own
+          vec2 q = p * 9. + vec2(t * .05, t * .03); vec2 c = floor(q), f = fract(q); float tri = step(f.y, f.x);
+          float id = hs(c + tri * 17.31);
+          vec3 n = normalize(vec3(sin(t * .55 + id * 6.28) * .16, 1., cos(t * .47 + id * 5.1) * .16));
           vec3 v = normalize(cameraPosition - vW);
-          float fres = pow(1. - max(dot(n, v), 0.), 3.);
-          float spec = pow(max(dot(reflect(-light, n), v), 0.), 160.) * .55;
-          vec3 deep = vec3(.03, .30, .38), shallow = vec3(.18, .58, .58);
-          vec3 col = mix(deep, shallow, smoothstep(0., .5, land) * .9 + fres * .25);
-          float foamBand = smoothstep(.06, .22, land) * (1. - smoothstep(.3, .5, land));
-          float foam = foamBand * smoothstep(.2, .9, sin(t * 1.4 + land * 40. + h(p * 1.7) * 2.) * .5 + .5);
-          col += vec3(1., .9, .72) * spec + vec3(.95) * foam * .7;
-          float edge = smoothstep(0., .03, uv.x) * smoothstep(0., .03, uv.y) * smoothstep(0., .03, 1. - uv.x) * smoothstep(0., .03, 1. - uv.y);
-          float a = (.5 + fres * .3 + spec * .35 + foam * .4) * (1. - smoothstep(.45, .6, land)) * edge * k;
-          gl_FragColor = vec4(col, a);
+          float facet = dot(n, light) * .5 + .5;
+          float fres = pow(1. - max(dot(n, v), 0.), 4.);
+          vec3 deep = vec3(.07, .27, .46), mid = vec3(.10, .45, .62), shallow = vec3(.25, .80, .78), lagoon = vec3(.48, .90, .82);
+          float dpt = smoothstep(.0, .9, shal);
+          vec3 col = mix(deep, mid, smoothstep(.0, .25, dpt + fbm(p * 1.3) * .25));
+          col = mix(col, shallow, smoothstep(.25, .75, dpt));
+          col = mix(col, lagoon, smoothstep(.55, .95, near));
+          // coral and weed patches seen through the water
+          float cor = smoothstep(.62, .7, fbm(p * 2.6 + 11.)) * (1. - smoothstep(.2, .7, dpt)) * smoothstep(.05, .15, uv.x) * smoothstep(.05, .15, uv.y) * smoothstep(.05, .15, 1. - uv.x) * smoothstep(.05, .15, 1. - uv.y);
+          vec3 cc = mix(vec3(.18, .42, .52), vec3(.36, .32, .58), step(.5, vn(p * 1.1 + 4.)));
+          col = mix(col, cc, cor * .55);
+          col *= .9 + facet * .2;
+          col += vec3(.55, .75, .85) * fres * .25;
+          // the surf: a crisp white line that breathes in and out along every shore, with a second softer ring
+          float edgeV = near + sin(t * 1.1 + fbm(p * 3.) * 6.) * .05;
+          float surf = smoothstep(.3, .36, edgeV) * (1. - smoothstep(.5, .56, edgeV));
+          float ring = smoothstep(.12, .16, edgeV) * (1. - smoothstep(.18, .23, edgeV)) * step(.45, vn(p * 14. + t * .3));
+          col = mix(col, vec3(.97, .99, 1.), max(surf * .95, ring * .5));
+          // sparkles on the open sea
+          vec2 sg = p * 22.; vec2 sc = floor(sg); float sh = hs(sc);
+          float tw = pow(max(0., sin(t * (1.2 + sh * 2.) + sh * 40.)), 24.) * step(.93, sh) * (1. - dpt) * smoothstep(.12, 0., length(fract(sg) - .5));
+          col += vec3(1.) * tw * 1.4;
+          float edge = smoothstep(0., .02, uv.x) * smoothstep(0., .02, uv.y) * smoothstep(0., .02, 1. - uv.x) * smoothstep(0., .02, 1. - uv.y);
+          float a = .93 * (1. - smoothstep(.5, .62, land)) * edge * k;
+          gl_FragColor = vec4(pow(clamp(col, 0., 1.5), vec3(2.2)), a);
         }` });
-    const mesh = new T.Mesh(g, m); mesh.position.y = .048; mesh.renderOrder = 2; scene.add(mesh); return mesh;
+    const mesh = new T.Mesh(g, m); mesh.position.y = .048; mesh.renderOrder = 2; mesh.userData.sea = true; mesh.userData.mat = m; scene.add(mesh); return mesh;
   })();
 
   // ---------------------------------------------------------------- landmarks
@@ -181,15 +215,29 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
   const trees = new T.Group(); scene.add(trees);
   const tg = (geo, y) => { geo.translate(0, y, 0); return geo; };
   const kinds = [
-    [[tg(new T.CylinderGeometry(.007, .01, .05, 5), .025), WOOD], [tg(new T.ConeGeometry(.05, .1, 7), .085), PINE], [tg(new T.ConeGeometry(.036, .08, 7), .135), PINE]],
-    [[tg(new T.CylinderGeometry(.008, .011, .06, 5), .03), WOOD], [tg(new T.IcosahedronGeometry(.058, 1), .1), LEAF]]];
+    [[tg(new T.CylinderGeometry(.007, .01, .05, 5), .025), WOOD], [tg(new T.ConeGeometry(.054, .085, 7), .075), PINE], [tg(new T.ConeGeometry(.043, .075, 7), .115), PINE], [tg(new T.ConeGeometry(.03, .065, 7), .152), PINE]],
+    [[tg(new T.CylinderGeometry(.008, .011, .06, 5), .03), WOOD], [tg(new T.IcosahedronGeometry(.05, 1), .1), LEAF], [tg(new T.IcosahedronGeometry(.036, 1).translate(.034, 0, .012), .085), LEAF], [tg(new T.IcosahedronGeometry(.032, 1).translate(-.028, 0, -.02), .128), LEAF]]];
   kinds.forEach((parts, kind) => {
     const list = spots.filter(s => s[3] === kind); if (!list.length) return;
     parts.forEach(([geo, m]) => { const im = new T.InstancedMesh(geo, m, list.length); im.castShadow = true; im.receiveShadow = true;
       const d = new T.Object3D(), col = new T.Color();
       list.forEach(([px, py, sc], i) => { d.position.copy(W(px, py, TOP - .004)); d.scale.setScalar(sc * 1.5); d.rotation.y = i * 1.3; d.updateMatrix(); im.setMatrixAt(i, d.matrix);
-        col.set(m === WOOD ? 0xffffff : kind ? [0x6f8f3e, 0x5f8236, 0x86a24a, 0x7a9440][i % 4] : [0x3f6a40, 0x4c7448, 0x355c38][i % 3]); im.setColorAt(i, col); });
+        col.set(m === WOOD ? 0xffffff : kind ? [0x6f9a3e, 0x5f8a36, 0x8fb04a, 0x7a9c40, 0xd9973c, 0x7fa648, 0xe0b84a][i % 7] : [0x3f7a48, 0x4c844f, 0x356a40][i % 3]); im.setColorAt(i, col); });
       trees.add(im); }); });
+
+  // ---------------------------------------------------------------- faceted boulders: along the shores and as stacks in the sea
+  const boulders = new T.Group(); scene.add(boulders);
+  {
+    const BG = new T.DodecahedronGeometry(.075, 0), BM = new T.MeshStandardMaterial({ color: 0xffffff, roughness: .82, flatShading: true });
+    const list = [];
+    Object.entries(map.lands).forEach(([id, poly]) => { const [cx, cy] = map.ISLES[id];
+      poly.forEach(([px, py], i) => { if ((i * 7 + id.length) % 3) return; const g = 1.1 + ((i * 13) % 5) * .012; const qx = cx + (px - cx) * g, qy = cy + (py - cy) * g; if (qy > cy + map.ISLES[id][3] * .45) return; list.push([qx, qy, .55 + ((i * 31) % 7) * .09, .02]); }); });
+    SEA_ROCKS.forEach(([px, py, sz], j) => { for (let i = 0; i < 4; i++) { const a = i * 2.1 + j, r = i ? 9 + i * 5 : 0; list.push([px + Math.cos(a) * r * sz * 1.3, py + Math.sin(a) * r * sz, (i ? .9 : 1.7) * sz * (1 - i * .12), i ? .045 : .06]); } });
+    const im = new T.InstancedMesh(BG, BM, list.length); im.castShadow = true; im.receiveShadow = true;
+    const d = new T.Object3D(), col = new T.Color();
+    list.forEach(([px, py, sc, y], i) => { d.position.copy(W(px, py, y)); d.rotation.set(i * 1.7, i * 2.3, i * .9); d.scale.set(sc * 1.25, sc * (sc > 1.4 ? 2.1 : 1), sc * 1.1); d.updateMatrix(); im.setMatrixAt(i, d.matrix); col.set([0x9aa3a8, 0x8a9499, 0xa9b0b1, 0x7f8a90][i % 4]); im.setColorAt(i, col); });
+    boulders.add(im);
+  }
 
   // ---------------------------------------------------------------- wooden piers
   const piers = new T.Group(); scene.add(piers);
@@ -217,6 +265,8 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
     document.fonts && document.fonts.load("700 104px 'Cinzel Decorative'").then(() => { const c = tex.image, g = c.getContext("2d"); g.clearRect(0, 0, c.width, c.height); drawBanner(g, c.width); tex.needsUpdate = true; });
     const m = new T.Mesh(new T.PlaneGeometry(1.3, .325), new T.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: .3, roughness: .9, emissiveMap: tex, emissive: 0xffffff, emissiveIntensity: .12, side: T.DoubleSide }));
     m.castShadow = true;
+    // the names always stay readable: drawn over the windmill sails, ships and clouds that pass in front
+    m.material.depthTest = false; m.renderOrder = 20;
     const holder = new T.Group(); holder.position.copy(W(px, py - 70, TOP + .16)); holder.rotation.x = -.9; holder.add(m); scene.add(holder); banners[id] = holder; holder.userData.id = id;
     // a glowing pin under the banner, sitting on the map
     const dot = new T.Mesh(new T.SphereGeometry(.028, 16, 12), new T.MeshBasicMaterial({ color: 0xffd27a })); dot.position.copy(W(px, py, .06)); scene.add(dot);
@@ -252,7 +302,7 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
   // ---------------------------------------------------------------- soft clouds resting on the edges of the map
   const cloudTex = canvasTex(256, 256, (g) => { const gr = g.createRadialGradient(128, 118, 10, 128, 128, 124); gr.addColorStop(0, "rgba(255,252,246,1)"); gr.addColorStop(.45, "rgba(246,238,226,.92)"); gr.addColorStop(.75, "rgba(226,214,200,.45)"); gr.addColorStop(1, "rgba(220,206,190,0)"); g.fillStyle = gr; g.fillRect(0, 0, 256, 256); });
   const clouds = [];
-  [[150, 300], [1960, 780], [300, 1000], [900, 1350], [1980, 1250], [1020, 90]].forEach(([px, py], ci) => {
+  [[120, 260], [1990, 820], [1000, 1380]].forEach(([px, py], ci) => {
     const grp = new T.Group(); grp.position.copy(W(px, py, .28)); scene.add(grp); grp.userData = { base: grp.position.clone(), ph: ci * 1.7 };
     for (let i = 0; i < 7; i++) { const s = new T.Sprite(new T.SpriteMaterial({ map: cloudTex, transparent: true, depthWrite: false, opacity: 0 })); const sc = .32 + Math.random() * .3; s.scale.set(sc, sc * .8, 1); s.position.set((i - 3) * .12 + Math.random() * .05, Math.random() * .12, Math.random() * .12 - .06); grp.add(s); }
     clouds.push(grp); });
@@ -264,10 +314,10 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
   // ---------------------------------------------------------------- update
   function update(t, { k, relief, hover, show }) {
     const vis = show && relief > .01;
-    water.material.uniforms.t.value = t; water.material.uniforms.k.value = vis ? prog(k, .3, .6) : 0; water.visible = vis;
+    const wu = water.userData.mat.uniforms; wu.t.value = t; wu.k.value = vis ? prog(k, .3, .6) : 0; water.visible = vis;
     // islands rise out of the paper as the map finishes, then the landmarks pop up
     const ir = vis ? easeBack(prog(k, .55, .8)) * Math.min(1, relief * 1.2) : 0;
-    islands.visible = trees.visible = piers.visible = ir > .002; [islands, trees, piers].forEach(o => o.scale.set(1, Math.max(.001, ir), 1));
+    islands.visible = trees.visible = piers.visible = boulders.visible = ir > .002; [islands, trees, piers, boulders].forEach(o => o.scale.set(1, Math.max(.001, ir), 1));
     items.forEach((it, i) => {
       const rise = vis ? easeBack(prog(k, .78 + i * .03, .93 + i * .03)) * Math.min(1, relief * 1.2) : 0; it.visible = rise > .002;
       const h = it.userData.h += ((hover === it.userData.id ? 1 : 0) - it.userData.h) * .12;
@@ -290,7 +340,7 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
       c.position.set(Math.cos(a) * o.rx, o.y + Math.sin(t * .5 + i) * .08, Math.sin(a) * o.rz + .2);
       c.rotation.set(0, -a - Math.PI / 2 * Math.sign(o.sp), Math.sin(t * .6 + i) * .15);
       const fl = Math.sin(t * 3.2 + i * 2) * .55; c.userData.l.rotation.x = fl; c.userData.r.rotation.x = -fl; });
-    clouds.forEach(c => { c.position.x = c.userData.base.x + Math.sin(t * .05 + c.userData.ph) * .12; const a = vis ? .9 * prog(k, .7, 1) : 0; c.children.forEach(s => s.material.opacity = a); c.visible = a > 0; });
+    clouds.forEach(c => { c.position.x = c.userData.base.x + Math.sin(t * .05 + c.userData.ph) * .12; const a = vis ? .5 * prog(k, .7, 1) : 0; c.children.forEach(s => s.material.opacity = a); c.visible = a > 0; });
   }
   return { update, pick, items };
 }

@@ -205,8 +205,9 @@ body.pp-panel #pp-info{opacity:1;transform:translate(0,-50%);pointer-events:auto
 #modeSwitch button{position:relative;z-index:1;border:0;background:none;color:#d8bd85;font:700 15px 'Cinzel Decorative',serif;letter-spacing:1px;padding:7px 18px;border-radius:20px;cursor:pointer;transition:color .3s}
 #modeSwitch button[aria-pressed="true"]{color:#2a1a08}
 #modeSwitch button:focus-visible{outline:2px solid #f3d58c;outline-offset:2px}
-#modeSwitch .knob{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:20px;background:linear-gradient(180deg,#f0d08a,#c79a46);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
-#modeSwitch:has(button[data-mode="3d"][aria-pressed="true"]) .knob{transform:translateX(100%)}
+#modeSwitch .knob{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px) / 2);border-radius:20px;background:linear-gradient(180deg,#f0d08a,#c79a46);transition:transform .45s cubic-bezier(.2,.8,.2,1),background .6s}
+#modeSwitch button{flex:0 0 auto;width:62px;font-size:15px;padding:7px 0}
+#modeSwitch[data-on="1"] .knob{transform:translateX(100%)}
 body.plain #modeSwitch{background:#2a1c12}
 /* classic view: a calm page with a sticky menu */
 .classic-nav{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:22px;margin:-56px -64px 30px;padding:14px 64px;background:rgba(239,226,196,.94);border-bottom:1px solid rgba(58,36,20,.2);backdrop-filter:blur(4px)}
@@ -225,7 +226,7 @@ body.side-off #side{transform:translateX(-100%)}
 body.side-off #sidefold{left:0}
 body.side-off #sidefold svg{transform:rotate(180deg)}
 body.side-off #pp-prev{left:34px}
-body.opening #sidefold,body.opening #modeSwitch{opacity:0;pointer-events:none}
+body.opening #sidefold,body.opening #modeSwitch,body.prehub #modeSwitch{opacity:0;pointer-events:none}
 #skip{display:none!important}
 body.plain #sidefold{display:none}
 

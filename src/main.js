@@ -9,7 +9,9 @@ import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeom
 import { buildMap, MAP_SPOTS as SPOTS_3D } from "./map.js";
 import { buildMap as buildMapClassic, MAP_SPOTS as SPOTS_CLASSIC } from "./mapClassic.js";
 // two map styles share one desk: "classic" (the hand-drawn ink map) and "3d" (the island diorama)
+// two versions of the same portfolio: the hand-drawn 2D map and the 3D island world
 let MODE = (() => { try { return localStorage.getItem("fc-map") === "classic" ? "classic" : "3d"; } catch (e) { return "3d"; } })();
+const is3D = () => MODE !== "classic";
 const SPOTS = () => MODE === "classic" ? SPOTS_CLASSIC : SPOTS_3D;
 const MAP_SPOTS = SPOTS_3D;
 import { Story } from "./story.js";
@@ -613,10 +615,12 @@ composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new V2(innerWidth / 2, innerHeight / 2), .45, .6, .9); composer.addPass(bloom);
 composer.addPass(new OutputPass());
 const finalPass = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, time: { value: 0 }, res: { value: new V2(innerWidth, innerHeight) }, vig: { value: 1 }, focusY: { value: .5 }, blurAmt: { value: 1 }, fade: { value: 0 }, bars: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, time: { value: 0 }, res: { value: new V2(innerWidth, innerHeight) }, vig: { value: 1 }, focusY: { value: .5 }, blurAmt: { value: 1 }, fade: { value: 0 }, bars: { value: 0 },
+    swap: { value: 0 }, tPrev: { value: null } },
   vertexShader: `varying vec2 vUv; void main(){vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse; uniform float time,vig,focusY,blurAmt,fade,bars; uniform vec2 res; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse,tPrev; uniform float time,vig,focusY,blurAmt,fade,bars,swap; uniform vec2 res; varying vec2 vUv;
     float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
+    float nz(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y); }
     void main(){
       vec2 uv=vUv; vec2 c=uv-.5;
       float dof=smoothstep(.3,.75,length(vec2(c.x*.8,(uv.y-focusY)*1.15)))*blurAmt;
@@ -629,13 +633,18 @@ const finalPass = new ShaderPass({
       float lu=dot(col,vec3(.299,.587,.114)); col=mix(vec3(lu),col,1.18); col=pow(col,vec3(.96,1.,1.06)); col+=vec3(.018,.008,.0)*(1.-col);
       float v=1.-dot(c*vec2(1.05,1.25),c*vec2(1.05,1.25))*1.25*vig; col*=clamp(v,0.,1.);
       col+=(h(uv*res+fract(time)*100.)-.5)*.025;
+      // switching versions: the old picture dissolves into the new one in soft patches
+      if(swap>.001){ float n=nz(uv*res/120.)*.65+nz(uv*res/30.)*.35; float w=swap*1.2-.1; vec3 pv=texture2D(tPrev,uv).rgb; float m=smoothstep(n-.07,n+.07,w); col=mix(col,pv,m); col+=vec3(.55,.8,1.)*smoothstep(.04,0.,abs(w-n))*.35*step(swap,.999); }
       col*=1.-fade;
       if(abs(uv.y-.5)>.5-bars) col=vec3(0.);
       gl_FragColor=vec4(col,1.);
     }`
 });
 composer.addPass(finalPass);
-
+// snapshot of the last frame, so a version switch can dissolve from the old look into the new one
+const snapTex = new THREE.FramebufferTexture(1, 1); finalPass.uniforms.tPrev.value = snapTex;
+let snapWanted = false;
+function takeSnap() { const sz = renderer.getDrawingBufferSize(new V2()); if (snapTex.image.width !== sz.x || snapTex.image.height !== sz.y) { snapTex.image.width = sz.x; snapTex.image.height = sz.y; snapTex.dispose(); } renderer.copyFramebufferToTexture(snapTex, new V2(0, 0)); }
 // =====================================================================
 // DUST MOTES
 // =====================================================================
@@ -668,8 +677,9 @@ function pointerOnTable() { ray.setFromCamera(new V2(pointer.nx * 2 - 1, -(point
 let camAnim = null;
 const camLook = CAM_HOME.look.clone();
 export function moveCamera(pos, look, dur, e = "io") {
-  const p0 = camera.position.clone(), l0 = camLook.clone();
-  return tween(dur, k => { camera.position.lerpVectors(p0, pos, k); camLook.lerpVectors(l0, look, k); camera.lookAt(camLook); }, e);
+  const p0 = camera.position.clone(), l0 = camLook.clone(), id = (S.camId = (S.camId || 0) + 1); S.camBusy = true;
+  // a newer camera move takes over from an older one instead of both pulling at the camera
+  return tween(dur, (k, c) => { if (id !== S.camId) return; camera.position.lerpVectors(p0, pos, k); camLook.lerpVectors(l0, look, k); camera.lookAt(camLook); if (c >= 1) S.camBusy = false; }, e);
 }
 
 // tweens --------------------------------------------------------------------------------------
@@ -797,6 +807,7 @@ document.getElementById("pp-prev").addEventListener("click", e => { e.stopPropag
 document.getElementById("pp-next").addEventListener("click", e => { e.stopPropagation(); if (active && active.nav) active.nav(1); });
 document.getElementById("casestudy").addEventListener("click", e => { if (e.target.id === "casestudy" || e.target.classList.contains("cs-close")) e.currentTarget.hidden = true; });
 const sections = { about: new About(ctx), story: new Story(ctx), built: new Popup(ctx), why: new Why(ctx), letter: new Letter(ctx) };
+
 let active = null;
 
 // =====================================================================
@@ -940,7 +951,7 @@ async function clickObject(it) { if (it.busy) return; it.busy = true; try { awai
 const quillTip = new V3();
 function setQuill(p, rot = 0, show = true) { quill.visible = show; quill.position.copy(p); quill.rotation.y = rot; }
 async function intro() {
-  S.phase = "intro"; document.body.classList.add("opening");
+  S.phase = "intro"; document.body.classList.add("opening", "prehub");
   const CAM_OPEN = new V3(-.4, 2.05, 6.3), LOOK_OPEN = new V3(.25, 2.0, -3.9);
   camera.position.copy(CAM_OPEN).add(new V3(0, .2, .8)); camLook.copy(LOOK_OPEN); camera.lookAt(camLook);
   OPEN.char = 1; fabian.visible = true; charMat.opacity = 1; goldName.visible = false; quill.visible = false; startSeal.visible = false;
@@ -956,7 +967,7 @@ async function intro() {
   const ch = op.querySelector(".choose"); ch.hidden = false; requestAnimationFrame(() => ch.classList.add("on")); document.body.classList.add("choosing");
   const picked = await new Promise(res => ch.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); res(b.dataset.pick); }, { once: true })));
   if (S.phase !== "intro") return;
-  setMode(picked); ch.classList.remove("on"); document.body.classList.remove("choosing");
+  setMode(picked, true); ch.classList.remove("on"); document.body.classList.remove("choosing");
   op.classList.remove("on"); setTimeout(() => { op.hidden = true; ch.hidden = true; }, 1000);
   if (/hold/.test(location.search)) { tweens = []; FLAMES.forEach(f => f.k = 1); S.L = .75; camera.position.copy(CAM_OPEN); camera.lookAt(camLook); return; }
   // crane up and over the desk, straight to the map
@@ -973,7 +984,7 @@ async function intro() {
   await tween(2.2, k => setRoll(k), "io", 1.9); if (S.phase !== "intro") return;
   fabian.visible = false; prepareSections();
   // then the map draws itself and its islands rise
-  if (MODE === "3d") {
+  if (is3D()) {
     await tween(3.0, k => { INK.map = k; }, "lin"); if (S.phase !== "intro") return;
     S.flying = true;
     // fly low over the sea, past the islands, then rise to take in the whole world
@@ -982,7 +993,7 @@ async function intro() {
     const cp = new THREE.CatmullRomCurve3(P), cl = new THREE.CatmullRomCurve3(L);
     await tween(8.5, k => { camera.position.copy(cp.getPoint(k)); camLook.copy(cl.getPoint(k)); camera.lookAt(camLook); }, "io"); S.flying = false; if (S.phase !== "intro") return;
   } else { await tween(4.6, k => { INK.map = k; }, "lin"); if (S.phase !== "intro") return; }
-  S.phase = "hub"; document.getElementById("skip").hidden = true; hubHint.hidden = false; store.set("fc-seen", String(Date.now())); markSide(null);
+  S.phase = "hub"; document.body.classList.remove("prehub"); document.getElementById("skip").hidden = true; hubHint.hidden = false; store.set("fc-seen", String(Date.now())); markSide(null);
 }
 function completeIntro() { skipIntro(); }
 // build the sections quietly in the background, one at a time, so opening one later is instant
@@ -1016,7 +1027,7 @@ async function startTour() {
   moveCamera(HUB_CAM.pos, HUB_CAM.look, 2.8, "io");
   await tween(5.8, k => { INK.map = k; }, "lin", .6);
   startSeal.visible = false;
-  S.phase = "hub"; document.getElementById("skip").hidden = true; hubHint.hidden = false; store.set("fc-seen", String(Date.now())); markSide(null);
+  S.phase = "hub"; document.body.classList.remove("prehub"); document.getElementById("skip").hidden = true; hubHint.hidden = false; store.set("fc-seen", String(Date.now())); markSide(null);
 }
 async function openSection(id) {
   const fullId = id; let chapter = 0; if (id.includes("@")) { const c = id.split("@")[1]; chapter = isNaN(+c) ? c : +c; id = id.split("@")[0]; }
@@ -1025,7 +1036,12 @@ async function openSection(id) {
   document.body.classList.add("insec"); S.phase = "section"; active = sections[id]; S.hover = null; hubHint.hidden = true;
   const L = active.light; readLamp.color.set(L.color); readLamp.position.set(...L.pos); readLamp.target.position.set(...L.target); readLamp.angle = L.angle;
   const spot = SPOTS().find(s => s.id === fullId) || SPOTS().find(s => s.id === id); const sp = p2w(spot.x, spot.y);
-  if (MODE === "3d") { const isl = p2w(spot.x, spot.y, .15); await moveCamera(isl.clone().add(new V3(0, 2.3, 2.7)), isl, 1.15, "io"); }
+  // 3D: lean in towards the island while the world sinks back into the sea, then the page arrives in its place
+  if (is3D()) {
+    const isl = p2w(spot.x, spot.y, .15), view = isl.clone().add(new V3(0, 2.3, 2.7)); const id = (S.miniId = (S.miniId || 0) + 1), m0 = S.mini ?? 1;
+    tween(1.2, k => { if (id === S.miniId) S.mini = m0 * (1 - k); }, "io");
+    await moveCamera(camera.position.clone().lerp(view, .4), camLook.clone().lerp(isl, .4), .85, "io");
+  } else S.mini = 0;
   // push in towards the place on the map, then the object arrives
   tween(.6, k => { S.focus = k; }, "io");
   await active.open(sp);
@@ -1038,7 +1054,10 @@ export async function closeSection() {
   tween(.6, k => { S.focus = 1 - k; }, "io");
   const leaving = active.close();
   setTimeout(() => moveCamera(HUB_CAM.pos, HUB_CAM.look, 1.6, "io"), 250);
-  await leaving; await wait(.35);
+  await leaving;
+  // the islands, landmarks and names rise again, in the same order as when the map was first drawn
+  { const id = (S.miniId = (S.miniId || 0) + 1), m0 = S.mini ?? 0; tween(2.2, k => { if (id === S.miniId) S.mini = m0 + (1 - m0) * k; }, "lin"); }
+  await wait(.35);
   active = null; S.phase = "hub"; hubHint.hidden = false; document.body.classList.remove("insec"); store.set("fc-last", null); markSide(null);
 }
 ctx.closeSection = closeSection;
@@ -1056,11 +1075,12 @@ document.getElementById("skip").addEventListener("click", e => { e.stopPropagati
 function skipIntro() {
   endOpening(); setTimeout(prepareSections, 300); setRoll(1); fabian.visible = false; OPEN.char = 0;
   if (S.phase === "hub" || S.phase === "section" || S.phase === "inSection") return;
-  tweens = []; FLAMES.forEach(f => f.k = 1); S.L = 1; S.lampK = 1; S.handOn = 1; S.leftOut = 1; INK.title = 1; INK.titleFade = 0; INK.start = 0; INK.map = 1; goldMat.userData.u.uFade.value = 0; goldName.visible = false; quill.visible = false; startSeal.visible = false;
-  finalPass.uniforms.bars.value = 0; camera.position.copy(HUB_CAM.pos); camLook.copy(HUB_CAM.look); camera.lookAt(camLook); S.phase = "hub"; store.set("fc-seen", String(Date.now())); markSide(null); document.getElementById("skip").hidden = true; cta.hidden = true; hubHint.hidden = false;
+  tweens = []; S.flying = false; S.camBusy = false; FLAMES.forEach(f => f.k = 1); S.L = 1; S.lampK = 1; S.handOn = 1; S.leftOut = 1; INK.title = 1; INK.titleFade = 0; INK.start = 0; INK.map = 1; goldMat.userData.u.uFade.value = 0; goldName.visible = false; quill.visible = false; startSeal.visible = false;
+  finalPass.uniforms.bars.value = 0; camera.position.copy(HUB_CAM.pos); camLook.copy(HUB_CAM.look); camera.lookAt(camLook); S.phase = "hub"; document.body.classList.remove("prehub"); store.set("fc-seen", String(Date.now())); markSide(null); document.getElementById("skip").hidden = true; cta.hidden = true; hubHint.hidden = false;
 }
 async function go(id) {
   if (["intro", "await", "tour", "load"].includes(S.phase)) skipIntro();
+  for (let i = 0; i < 40 && (S.phase === "section" || S.phase === "closing"); i++) await new Promise(r => setTimeout(r, 100));
   if (S.phase === "inSection") { if (active === sections[id]) return; await closeSection(); }
   if (S.phase === "hub") openSection(id);
 }
@@ -1070,18 +1090,32 @@ const sideBtn = document.getElementById("sidefold");
 function foldSide(off) { document.body.classList.toggle("side-off", off); sideBtn.setAttribute("aria-expanded", String(!off)); sideBtn.setAttribute("aria-label", off ? "Show the menu" : "Hide the menu"); try { localStorage.setItem("fc-side-off", off ? "1" : "0"); } catch (e) {} }
 sideBtn.addEventListener("click", e => { e.stopPropagation(); foldSide(!document.body.classList.contains("side-off")); });
 try { if (localStorage.getItem("fc-side-off") === "1") foldSide(true); } catch (e) {}
-function setMode(m) { MODE = m; try { localStorage.setItem("fc-map", MODE); } catch (err) {} document.querySelectorAll("#modeSwitch button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === MODE))); }
-// Classic | 3D switch: flips the map style; the map redraws itself in the new style
+const MODES = [["classic", "2D"], ["3d", "3D"]];
+function setMode(m, animate) {
+  const was = MODE;
+  const apply = () => {
+    MODE = m; try { localStorage.setItem("fc-map", MODE); } catch (err) {}
+    document.querySelectorAll("#modeSwitch button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === MODE)));
+    const sw = document.getElementById("modeSwitch"); if (sw) sw.dataset.on = String(MODES.findIndex(x => x[0] === MODE));
+    if (!animate) return;
+    const u = finalPass.uniforms.swap, id = (S.swapId = (S.swapId || 0) + 1); u.value = 1;
+    if (!REDUCED) tween(1.5, k => { if (id === S.swapId) u.value = 1 - k; }, "io"); else u.value = 0;
+    // between the 2D prototype and a 3D world the map itself redraws
+    if (S.phase === "hub" && (was === "classic") !== (MODE === "classic")) { const rid = (S.redrawId = (S.redrawId || 0) + 1); INK.map = .45; tween(2.6, k => { if (rid === S.redrawId) INK.map = .45 + .55 * k; }, "o"); }
+  };
+  if (animate && !REDUCED) { S.doSwap = () => { S.doSwap = null; apply(); }; snapWanted = true; } else apply();
+}
+// 2D | 3D: one switch, the same content in two worlds
 {
-  const sw = document.createElement("div"); sw.id = "modeSwitch"; sw.setAttribute("role", "group"); sw.setAttribute("aria-label", "Map style");
-  sw.innerHTML = `<button data-mode="classic">2D</button><button data-mode="3d">3D</button><span class="knob" aria-hidden="true"></span>`;
+  const sw = document.createElement("div"); sw.id = "modeSwitch"; sw.setAttribute("role", "group"); sw.setAttribute("aria-label", "Version");
+  sw.innerHTML = MODES.map(([m, l]) => `<button data-mode="${m}">${l}</button>`).join("") + `<span class="knob" aria-hidden="true"></span>`;
   document.body.appendChild(sw);
-  const mark = () => sw.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === MODE)));
-  mark();
   sw.addEventListener("click", e => {
-    e.stopPropagation(); setMode(MODE === "3d" ? "classic" : "3d");
-    if (S.phase === "hub") { INK.map = .45; tween(2.6, k => { INK.map = .45 + .55 * k; }, "o"); }
+    e.stopPropagation(); const b = e.target.closest("button"); if (!b || b.dataset.mode === MODE) return;
+    if (S.phase !== "hub" && S.phase !== "inSection") return;
+    setMode(b.dataset.mode, true);
   });
+  setMode(MODE, false);
 }
 // light up the side bar item of the place you are in
 function markSide(id) { document.querySelectorAll("#side .si").forEach(a => a.classList.toggle("on", id ? a.dataset.go === id : a.hasAttribute("data-map"))); }
@@ -1152,13 +1186,13 @@ function frame() {
   pointerLight.position.set(pw.x - .4, 1.6, pw.z + .2); pointerLight.intensity = 1.8 * S.handOn * S.L * (1 - S.focus * .7);
   // hover over hotspots
   if (S.phase === "hub") {
-    const [px, py] = w2p(pw); let h = null; SPOTS().forEach(s => { if (Math.hypot(px - s.x, py - s.y) < s.r) h = s.id; }); if (MODE === "3d") { const mh = MINI.pick(ctx.ray()); if (mh) h = mh; } S.hover = S.overUI ? null : h; { const sp = SPOTS().find(x => x.id === S.hover); const txt = sp ? `${sp.label}: ${sp.sub}` : "Select a place on the map"; if (hubHint.textContent !== txt) hubHint.textContent = txt; }
+    const [px, py] = w2p(pw); let h = null; SPOTS().forEach(s => { if (Math.hypot(px - s.x, py - s.y) < s.r) h = s.id; }); if (is3D()) { const mh = MINI.pick(ctx.ray()); if (mh) h = mh; } S.hover = S.overUI ? null : h; { const sp = SPOTS().find(x => x.id === S.hover); const txt = sp ? `${sp.label}: ${sp.sub}` : "Select a place on the map"; if (hubHint.textContent !== txt) hubHint.textContent = txt; }
   }
-  if (MODE === "3d" && S.phase === "hub" && !document.body.classList.contains("qv")) {
+  if (is3D() && S.phase === "hub" && !S.camBusy && !document.body.classList.contains("qv")) {
     const tx = HUB_CAM.pos.x + (pointer.nx - .5) * .9, ty = HUB_CAM.pos.y - (pointer.ny - .5) * .5, tz = HUB_CAM.pos.z + (pointer.ny - .5) * .3;
     camera.position.x += (tx - camera.position.x) * .02; camera.position.y += (ty - camera.position.y) * .02; camera.position.z += (tz - camera.position.z) * .02; camera.lookAt(camLook);
   }
-  MINI.update(t, { k: INK.map, relief: RELIEF.cur, hover: S.hover, show: MODE === "3d" && (S.phase === "hub" || S.phase === "intro" || S.phase === "await" || S.phase === "tour") });
+  MINI.update(t, { k: INK.map * (S.mini ?? 1), relief: RELIEF.cur, hover: S.phase === "hub" ? S.hover : null, show: is3D() && S.phase !== "load" });
   spotGlows.forEach((g, i) => { const on = 0; g.material.opacity += ((on * (.65 + Math.sin(t * 3 + i) * .15)) * INK.map - g.material.opacity) * .12; });
   if (S.phase === "await") { const dd = pw.distanceTo(startSeal.position), near = Math.max(0, 1 - dd / 1.2); sealRing.material.opacity += ((.32 + Math.sin(t * 2.4) * .14) * (1 - near) + near * (.75 + Math.sin(t * 5) * .2) - sealRing.material.opacity) * .12; sealRing.scale.setScalar(1.25 + Math.sin(t * 2.4) * .12 + near * .3); document.body.classList.toggle("pp-hover", dd < .45); if (S.press === 0 || S.press === undefined) startSeal.scale.setScalar(1 + Math.sin(t * 2.4) * .025 + (dd < .45 ? .06 : 0)); }
   else { sealRing.material.opacity *= .9; if (S.phase === "tour") document.body.classList.remove("pp-hover"); }
@@ -1188,6 +1222,7 @@ function frame() {
   finalPass.uniforms.time.value = t; goldMat.userData.u.uTime.value = t; stepSparks(1 / 60); goldName.visible = goldMat.userData.u.uFade.value > .01;
   finalPass.uniforms.focusY.value = .52;
   composer.render(); adapt();
+  if (snapWanted) { snapWanted = false; takeSnap(); S.doSwap && S.doSwap(); }
   requestAnimationFrame(frame);
 }
 addEventListener("resize", () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); finalPass.uniforms.res.value.set(innerWidth, innerHeight); });
