@@ -1113,19 +1113,9 @@ function setMode(m, animate) {
   };
   if (animate && !REDUCED) { S.doSwap = () => { S.doSwap = null; apply(); }; snapWanted = true; } else apply();
 }
-// the map comes to life: clicking the compass rose raises the islands out of the drawing, a second click folds them back
+// a secret: clicking the compass rose raises the islands out of the drawing, a second click folds them back (no label on purpose)
 const ROSE = { classic: [380, 1130, 95], "3d": [300, 1150, 115] };
-const aliveHint = document.createElement("div"); aliveHint.id = "alivehint"; aliveHint.setAttribute("aria-hidden", "true"); document.body.appendChild(aliveHint);
 function toggleAlive() { if (S.phase !== "hub") return; setMode(is3D() ? "classic" : "3d", true); store.set("fc-alive", "1"); S.hover = null; }
-function updateAliveHint() {
-  const on = S.phase === "hub" && !document.body.classList.contains("qv") && finalPass.uniforms.swap.value < .02;
-  aliveHint.classList.toggle("on", on); if (!on) return;
-  const [rx, ry] = ROSE[MODE], a = p2w(rx, ry, .05).project(camera);
-  aliveHint.style.transform = `translate(${((a.x + 1) / 2 * innerWidth) | 0}px,${((1 - a.y) / 2 * innerHeight) | 0}px)`;
-  const txt = is3D() ? "Click the compass to fold the map back" : "Click the compass to bring the map to life";
-  if (aliveHint.textContent !== txt) aliveHint.textContent = txt;
-  aliveHint.classList.toggle("quiet", !!store.get("fc-alive") && S.hover !== "alive");
-}
 // light up the side bar item of the place you are in
 function markSide(id) { document.querySelectorAll("#side .si").forEach(a => a.classList.toggle("on", id ? a.dataset.go === id : a.hasAttribute("data-map"))); }
 // UNDER THE HOOD: the back-end of my projects, opened from the side bar or from a case study
@@ -1207,7 +1197,6 @@ function frame() {
     const tx = HUB_CAM.pos.x + (pointer.nx - .5) * .9, ty = HUB_CAM.pos.y - (pointer.ny - .5) * .5, tz = HUB_CAM.pos.z + (pointer.ny - .5) * .3;
     camera.position.x += (tx - camera.position.x) * .02; camera.position.y += (ty - camera.position.y) * .02; camera.position.z += (tz - camera.position.z) * .02; camera.lookAt(camLook);
   }
-  updateAliveHint();
   MINI.update(t, { k: INK.map * (S.mini ?? 1), relief: RELIEF.cur, hover: S.phase === "hub" ? S.hover : null, show: is3D() && S.phase !== "load" });
   spotGlows.forEach((g, i) => { const on = 0; g.material.opacity += ((on * (.65 + Math.sin(t * 3 + i) * .15)) * INK.map - g.material.opacity) * .12; });
   if (S.phase === "await") { const dd = pw.distanceTo(startSeal.position), near = Math.max(0, 1 - dd / 1.2); sealRing.material.opacity += ((.32 + Math.sin(t * 2.4) * .14) * (1 - near) + near * (.75 + Math.sin(t * 5) * .2) - sealRing.material.opacity) * .12; sealRing.scale.setScalar(1.25 + Math.sin(t * 2.4) * .12 + near * .3); document.body.classList.toggle("pp-hover", dd < .45); if (S.press === 0 || S.press === undefined) startSeal.scale.setScalar(1 + Math.sin(t * 2.4) * .025 + (dd < .45 ? .06 : 0)); }

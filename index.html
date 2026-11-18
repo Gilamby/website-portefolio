@@ -251,13 +251,6 @@ body.pp-panel #pp-info{opacity:1;transform:translate(0,-50%);pointer-events:auto
 #casestudy .btns .en-link:hover,#casestudy .btns .en-link:focus-visible{background:#1d2f44;outline:none}
 @media (max-width:900px){#engine{padding:12px}#engine .en-stage,#engine .en-foot{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){#engine,#engine .en-in{transition:none}}
-#alivehint{position:fixed;left:0;top:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .6s;margin:-16px 0 0 74px;padding:7px 14px 8px;border-radius:18px;background:rgba(24,15,7,.82);border:1px solid rgba(214,170,90,.45);color:#f3d58c;font:italic 15px Spectral,serif;white-space:nowrap}
-#alivehint:before{content:"";position:absolute;left:-9px;top:50%;width:9px;height:1px;background:rgba(214,170,90,.6)}
-#alivehint.on{opacity:1;animation:alivePulse 2.6s ease-in-out infinite}
-#alivehint.on.quiet{opacity:0;animation:none}
-body.pp-hover #alivehint.on.quiet{opacity:1}
-@keyframes alivePulse{50%{box-shadow:0 0 18px rgba(240,190,90,.35)}}
-@media (prefers-reduced-motion:reduce){#alivehint.on{animation:none}}
 #modeSwitch .knob{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px) / 2);border-radius:20px;background:linear-gradient(180deg,#f0d08a,#c79a46);transition:transform .45s cubic-bezier(.2,.8,.2,1),background .6s}
 #modeSwitch button{flex:0 0 auto;width:62px;font-size:15px;padding:7px 0}
 #modeSwitch[data-on="1"] .knob{transform:translateX(100%)}
