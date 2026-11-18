@@ -51,7 +51,7 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
       uniforms: { t: { value: 0 }, k: { value: 0 }, mask: { value: mask }, light: { value: new T.Vector3(3.5, 5, -3).normalize() }, box: { value: new T.Vector4(a.x, a.z, w, d) }, paper: { value: new T.Vector2(W(2048, 0).x * 2, W(0, 1400).z * 2) } },
       vertexShader: `varying vec3 vW; void main(){ vec4 p = modelMatrix * vec4(position, 1.); vW = p.xyz; gl_Position = projectionMatrix * viewMatrix * p; }`,
       fragmentShader: `uniform float t, k; uniform sampler2D mask; uniform vec3 light; uniform vec4 box; uniform vec2 paper; varying vec3 vW;
-        float h(vec2 p){ return sin(p.x * 9. + t * 1.1) * .5 + sin(p.y * 11. - t * .9 + p.x * 3.) * .5 + sin((p.x + p.y) * 23. + t * 1.7) * .25 + sin((p.x - p.y * 1.3) * 31. - t * 2.1) * .15; }
+        float h(vec2 p){ float a = sin(p.x * 7.3 + t * .9 + sin(p.y * 2.1) * 1.5) * .5 + sin(p.y * 8.7 - t * .7 + sin(p.x * 1.7) * 1.8) * .5; a += sin((p.x * .8 + p.y) * 17.3 + t * 1.3 + sin(p.x * 4.1)) * .2 + sin((p.x - p.y * 1.3) * 23.9 - t * 1.6 + cos(p.y * 3.7)) * .12; return a; }
         void main(){
           vec2 uv = vec2((vW.x - box.x) / box.z, (vW.z - box.y) / box.w);
           float land = texture2D(mask, vec2(vW.x / paper.x + .5, vW.z / paper.y + .5)).r;
@@ -59,14 +59,14 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
           vec3 n = normalize(vec3(-(h(p + vec2(e, 0.)) - h(p)) / e * .012, 1., -(h(p + vec2(0., e)) - h(p)) / e * .012));
           vec3 v = normalize(cameraPosition - vW);
           float fres = pow(1. - max(dot(n, v), 0.), 3.);
-          float spec = pow(max(dot(reflect(-light, n), v), 0.), 90.);
+          float spec = pow(max(dot(reflect(-light, n), v), 0.), 160.) * .55;
           vec3 deep = vec3(.03, .30, .38), shallow = vec3(.18, .58, .58);
           vec3 col = mix(deep, shallow, smoothstep(0., .5, land) * .9 + fres * .25);
           float foamBand = smoothstep(.06, .22, land) * (1. - smoothstep(.3, .5, land));
           float foam = foamBand * smoothstep(.2, .9, sin(t * 1.4 + land * 40. + h(p * 1.7) * 2.) * .5 + .5);
-          col += vec3(1., .9, .72) * spec * 1.4 + vec3(.95) * foam * .75;
+          col += vec3(1., .9, .72) * spec + vec3(.95) * foam * .7;
           float edge = smoothstep(0., .03, uv.x) * smoothstep(0., .03, uv.y) * smoothstep(0., .03, 1. - uv.x) * smoothstep(0., .03, 1. - uv.y);
-          float a = (.5 + fres * .3 + spec * .5 + foam * .4) * (1. - smoothstep(.45, .6, land)) * edge * k;
+          float a = (.5 + fres * .3 + spec * .35 + foam * .4) * (1. - smoothstep(.45, .6, land)) * edge * k;
           gl_FragColor = vec4(col, a);
         }` });
     const mesh = new T.Mesh(g, m); mesh.position.y = .048; mesh.renderOrder = 2; scene.add(mesh); return mesh;
@@ -94,29 +94,39 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
     g.add(at(cyl(.005, .005, .2, DARK, 6), 0, .44, -.02)); const f = flagMesh(.6); f.position.z = -.02; g.add(f); flags.push(f);
   }, 1.9);
 
-  // About Me: a two-storey house with a smoking chimney
-  const smoke = [];
+  // About Me: a Dutch windmill with a little cottage and tulip fields (home is Delft)
+  const smoke = []; let mill;
   place("about", 1150, 205, g => {
-    g.add(box(.32, .24, .22, WALL)); g.add(at(roof(.36, .15, .26, ROOF), 0, .24, 0));
-    g.add(at(box(.05, .13, .05, STONE), .1, .28, -.04));
-    g.add(at(box(.055, .09, .01, WOOD), 0, 0, .111));
-    [[-.1, .05], [.1, .05], [-.1, .15], [0, .15], [.1, .15]].forEach(([x, y]) => g.add(at(box(.04, .045, .01, WIN), x, y, .111)));
-    for (let i = 0; i < 4; i++) { const s = new T.Mesh(new T.SphereGeometry(.03, 12, 10), new T.MeshStandardMaterial({ color: 0xece6dc, transparent: true, opacity: .5, roughness: 1, depthWrite: false })); s.castShadow = false; s.userData.ph = i / 4; g.add(s); smoke.push(s); }
-  }, 1.75);
+    g.add(cyl(.085, .13, .34, mat(0xe9e0cc), 8)); g.add(at(cyl(.135, .135, .02, WOOD, 8), 0, .16, 0));
+    g.add(at(cone(.1, .14, mat(0x3e5a46), 8), 0, .34, 0));
+    g.add(at(box(.05, .08, .01, WOOD), 0, 0, .12)); g.add(at(box(.03, .04, .01, WIN), 0, .23, .085));
+    mill = new T.Group(); mill.position.set(0, .34, .11); g.add(mill);
+    for (let i = 0; i < 4; i++) { const b = new T.Group(); b.rotation.z = i * Math.PI / 2; b.add(at(box(.012, .3, .01, WOOD), 0, 0, 0)); const sail = box(.06, .22, .004, mat(0xf2ead8)); sail.position.set(.036, .07, 0); b.add(sail); mill.add(b); }
+    mill.add(new T.Mesh(new T.SphereGeometry(.02, 10, 8), DARK));
+    const cot = new T.Group(); cot.position.set(-.24, 0, .06); cot.add(box(.14, .09, .11, WALL)); cot.add(at(roof(.16, .07, .13, ROOF), 0, .09, 0)); cot.add(at(box(.03, .03, .01, WIN), 0, .04, .056)); g.add(cot);
+    const tulips = [0xd8463c, 0xf2c14a, 0xe86fa0, 0xf4f0e6]; for (let r = 0; r < 4; r++) g.add(at(box(.24, .02, .03, mat(tulips[r])), .26, 0, -.06 + r * .045));
+  }, 1.8);
 
-  // Projects: a workshop and a turning construction crane
+  // Projects: a construction site: a half-built frame with scaffolding, crates and a turning crane
   let crane;
   place("built", 930, 600, g => {
-    g.add(at(box(.3, .17, .2, WALL), -.08, 0, .02)); g.add(at(roof(.33, .12, .24, ROOF), -.08, .17, .02));
-    g.add(at(box(.07, .1, .01, WOOD), -.08, 0, .121)); [-.19, .03].forEach(x => g.add(at(box(.04, .04, .01, WIN), x, .08, .121)));
+    const BEAM = mat(0xb8875a), BRICK = mat(0xb9654a);
+    g.add(at(box(.3, .07, .2, BRICK), -.06, 0, 0));                                   // first floor already bricked
+    [[-.2, -.09], [.08, -.09], [-.2, .09], [.08, .09]].forEach(([x, z]) => g.add(at(box(.016, .26, .016, BEAM), x, .07, z))); // posts
+    [[-.06, -.09, .3, .016], [-.06, .09, .3, .016]].forEach(([x, z, w, d]) => g.add(at(box(w, .016, d, BEAM), x, .33, z)));
+    [[-.2], [.08]].forEach(([x]) => g.add(at(box(.016, .016, .2, BEAM), x, .33, 0)));
+    g.add(at(box(.3, .012, .2, BEAM), -.06, .2, 0));                                   // second floor boards
+    const SCAF = mat(0x8a8a8a, { metalness: .4, roughness: .5 });
+    for (let i = 0; i < 4; i++) g.add(at(box(.006, .32, .006, SCAF), -.22 + i * .1, .0, .13)); for (let y = 0; y < 3; y++) g.add(at(box(.32, .008, .04, BEAM), -.07, .1 + y * .1, .13));
+    [[.14, .1], [.2, .14], [.17, .17]].forEach(([x, z], i) => g.add(at(box(.05, .045, .05, WOOD), x, i === 2 ? .045 : 0, z)));
     const Y = mat(0xd9a03a, { metalness: .3, roughness: .6 });
-    const mast = new T.Group(); mast.position.set(.24, 0, .07); mast.scale.setScalar(.78); g.add(mast);
-    [[-.018, -.018], [.018, -.018], [-.018, .018], [.018, .018]].forEach(([x, z]) => mast.add(at(box(.008, .44, .008, Y), x, 0, z)));
-    for (let i = 0; i < 8; i++) { const b = box(.05, .006, .006, Y); b.position.y = .03 + i * .05; b.rotation.z = (i % 2 ? .6 : -.6); mast.add(b); }
-    crane = new T.Group(); crane.position.y = .44; mast.add(crane);
-    crane.add(at(box(.36, .02, .02, Y), .12, 0, 0)); crane.add(at(box(.14, .02, .02, Y), -.1, 0, 0)); crane.add(at(box(.06, .06, .05, STONE), -.15, -.04, 0));
-    crane.add(at(box(.04, .04, .04, Y), 0, .02, 0)); const cable = box(.003, .22, .003, DARK); cable.position.set(.26, -.18, 0); crane.add(cable); crane.add(at(box(.05, .04, .05, WOOD), .26, -.22, 0));
-  }, 1.75);
+    const mast = new T.Group(); mast.position.set(.24, 0, -.08); g.add(mast);
+    [[-.018, -.018], [.018, -.018], [-.018, .018], [.018, .018]].forEach(([x, z]) => mast.add(at(box(.008, .5, .008, Y), x, 0, z)));
+    for (let i = 0; i < 9; i++) { const b = box(.05, .006, .006, Y); b.position.y = .03 + i * .05; b.rotation.z = (i % 2 ? .6 : -.6); mast.add(b); }
+    crane = new T.Group(); crane.position.y = .5; mast.add(crane);
+    crane.add(at(box(.4, .02, .02, Y), .14, 0, 0)); crane.add(at(box(.14, .02, .02, Y), -.1, 0, 0)); crane.add(at(box(.06, .06, .05, STONE), -.15, -.04, 0));
+    crane.add(at(box(.04, .04, .04, Y), 0, .02, 0)); const cable = box(.003, .18, .003, DARK); cable.position.set(.28, -.18, 0); crane.add(cable); crane.add(at(box(.07, .015, .04, BEAM), .28, -.2, 0));
+  }, 1.7);
 
   // Contact: a red and white lighthouse with a turning beam, and a keeper's cottage
   let beam, lamp, lampLight;
@@ -135,24 +145,29 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
     const cot = new T.Group(); cot.position.set(.2, 0, .06); cot.add(box(.16, .1, .12, WALL)); cot.add(at(roof(.18, .08, .14, ROOF), 0, .1, 0)); cot.add(at(box(.03, .03, .01, WIN), .03, .045, .061)); g.add(cot);
   }, 1.7);
 
-  // Why Hire Me: a manor house with the treasure chest in front, and fields beside it
+  // Why Hire Me: a rocky hill crowned with a big open treasure chest, palms and a flag
   let goldGlow;
+  const palm = (x, z, s, lean) => { const p = new T.Group(); const trunk = new T.Group(); for (let i = 0; i < 6; i++) { const seg = cyl(.014 - i * .0012, .016 - i * .0012, .05, mat(0x8a6a44), 6); seg.position.set(Math.sin(i * .25) * lean * i * .01, i * .045, 0); trunk.add(seg); } p.add(trunk);
+    const top = new T.Group(); top.position.set(lean * .06, .27, 0); for (let i = 0; i < 7; i++) { const lg = new T.ConeGeometry(.03, .2, 4); lg.rotateZ(Math.PI / 2); lg.translate(.1, 0, 0); const l = new T.Mesh(lg, mat(0x5e8a3a, { flatShading: true })); l.scale.set(1, .25, 1); l.rotation.set(0, i / 7 * Math.PI * 2, -.45); top.add(l); } p.add(top);
+    p.position.set(x, 0, z); p.scale.setScalar(s); return p; };
   place("why", 1470, 920, g => {
-    g.add(box(.5, .2, .22, WALL)); g.add(at(roof(.54, .13, .26, ROOF), 0, .2, 0));
-    g.add(at(box(.16, .26, .24, WALL), 0, 0, .01)); g.add(at(roof(.18, .1, .26, ROOF), 0, .26, .01));
-    g.add(at(box(.06, .1, .01, WOOD), 0, 0, .131)); [[-.18, .06], [-.09, .06], [.09, .06], [.18, .06], [-.18, .14], [.18, .14], [0, .17]].forEach(([x, y]) => g.add(at(box(.035, .045, .01, WIN), x, y, x === 0 ? .131 : .111)));
-    const chest = new T.Group(); chest.position.set(0, 0, .25); g.add(chest);
+    const ROCKY = mat(0x9a8468, { flatShading: true });
+    const hill = new T.Mesh(new T.DodecahedronGeometry(.26, 1), ROCKY); hill.scale.set(1.25, .45, 1); g.add(hill);
+    [[-.2, .08, .09], [.22, .06, .08], [.05, -.18, .1]].forEach(([x, z, r]) => { const b = new T.Mesh(new T.DodecahedronGeometry(r, 0), ROCKY); b.position.set(x, r * .4, z); g.add(b); });
+    const chest = new T.Group(); chest.position.set(0, .1, .04); chest.scale.setScalar(1.6); g.add(chest);
     chest.add(box(.13, .065, .085, WOOD)); [-.045, .045].forEach(x => chest.add(at(box(.012, .067, .087, MAT.brass), x, 0, 0)));
-    const GOLD = new T.MeshStandardMaterial({ color: 0xf2c95a, metalness: 1, roughness: .3, emissive: 0xffa830, emissiveIntensity: .1 });
-    for (let i = 0; i < 6; i++) { const c = new T.Mesh(new T.SphereGeometry(.02, 10, 8), GOLD); c.scale.set(1, .45, 1); c.position.set(-.04 + (i % 3) * .04, .066, -.02 + Math.floor(i / 3) * .04); chest.add(c); }
+    const GOLD = new T.MeshStandardMaterial({ color: 0xf2c95a, metalness: 1, roughness: .3, emissive: 0xffa830, emissiveIntensity: .12 });
+    for (let i = 0; i < 9; i++) { const c = new T.Mesh(new T.SphereGeometry(.018, 10, 8), GOLD); c.scale.set(1, .5, 1); c.position.set(-.04 + (i % 3) * .04, .066 + (i === 4 ? .01 : 0), -.025 + Math.floor(i / 3) * .025); chest.add(c); }
     const lid = new T.Group(); lid.position.set(0, .065, -.043); lid.rotation.x = -1.95; const lb = box(.13, .03, .085, WOOD); lb.position.z = .043; lid.add(lb); chest.add(lid);
-    goldGlow = glowSprite(0xffc060, .35, 0); goldGlow.position.set(0, .12, .25); g.add(goldGlow);
-    const field = mat(0x7a8f3e); for (let r = 0; r < 6; r++) g.add(at(box(.3, .025, .022, field), .48, 0, -.1 + r * .05));
-  }, 1.6);
+    for (let i = 0; i < 8; i++) { const c = new T.Mesh(new T.CylinderGeometry(.014, .014, .004, 12), GOLD); c.position.set(-.12 + Math.random() * .24, .1 + Math.random() * .02, .14 + Math.random() * .06); c.rotation.set(Math.random(), 0, Math.random()); g.add(c); }
+    goldGlow = glowSprite(0xffc060, .5, 0); goldGlow.position.set(0, .26, .04); g.add(goldGlow);
+    g.add(palm(-.3, -.05, 1.1, 1)); g.add(palm(.32, -.02, .95, -1)); g.add(palm(.18, -.22, .8, -.6));
+    g.add(at(cyl(.005, .005, .3, DARK, 6), -.08, .1, -.12)); const f = flagMesh(.38); f.position.set(-.08, .02, -.12); g.add(f); flags.push(f);
+  }, 1.55);
 
   // ---------------------------------------------------------------- trees on every island
   const spots = [];
-  const footprints = { story: [430, 345, 150], about: [1150, 205, 110], built: [930, 600, 140], letter: [1640, 300, 120], why: [1470, 920, 220] };
+  const footprints = { story: [430, 345, 150], about: [1150, 205, 150], built: [930, 600, 140], letter: [1640, 300, 120], why: [1470, 920, 200] };
   Object.entries(map.ISLES).forEach(([id, [cx, cy, rx, ry]]) => {
     const poly = map.lands[id], want = Math.round(rx * ry / 1500); let tries = 0, got = 0;
     while (got < want && tries++ < want * 20) {
@@ -264,7 +279,7 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
     { const a = vis ? prog(k, .6, .85) : 0; dotMesh.visible = a > 0; const c = new T.Color(); dots.forEach((o, i) => { const w = Math.max(0, Math.sin(o.u * 18 - t * 2.2)), b = (.55 + w * .45) * a; c.setRGB(b, .72 * b, .3 * b); dotMesh.setColorAt(i, c); }); dotMesh.instanceColor.needsUpdate = true; }
     WIN.emissiveIntensity = 1.3 + Math.sin(t * 1.7) * .15;
     flags.forEach((f, j) => { const P = f.geometry.attributes.position, x0 = f.userData.x0; for (let i = 0; i < P.count; i++) { const x = x0[i * 3]; P.setZ(i, Math.sin(x * 40 - t * 3.2 + j) * .012 * (x / .13)); } P.needsUpdate = true; });
-    smoke.forEach(s => { const f = (t * .16 + s.userData.ph) % 1; s.position.set(.1 + f * .05, .4 + f * .3, -.04 - f * .05); s.scale.setScalar(.5 + f * 1.4); s.material.opacity = .45 * Math.sin(f * Math.PI); });
+    if (mill) mill.rotation.z = -t * .6;
     if (crane) crane.rotation.y = Math.sin(t * .18) * 1.1;
     beam.rotation.y = t * .45; beam.userData.mat.uniforms.k.value = vis ? 1 : 0; lamp.material.emissiveIntensity = 2.2 + Math.sin(t * 2) * .2; lampLight.intensity = vis ? 1.2 + Math.sin(t * 2) * .1 : 0;
     goldGlow.material.opacity = vis ? .3 + Math.sin(t * 1.6) * .08 + (hover === "why" ? .25 : 0) : 0;

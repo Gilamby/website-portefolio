@@ -781,6 +781,7 @@ const sealRing = glowSprite(0xffb060, 1.6, 0); sealRing.position.copy(startSeal.
 
 // map hotspots glow
 const MINI = buildMiniatures({ THREE, scene, p2w, shadowy, MAT, map, glowSprite });
+try { renderer.compile(scene, camera); } catch (e) {}
 const spotGlows = MAP_SPOTS.map(s => { const g = glowSprite(0xffc070, 1.4, 0); g.position.copy(p2w(s.x, s.y, .15)); scene.add(g); return g; });
 
 // sections
@@ -973,13 +974,13 @@ async function intro() {
   fabian.visible = false; prepareSections();
   // then the map draws itself and its islands rise
   if (MODE === "3d") {
-    tween(4.2, k => { INK.map = k; }, "lin");
-    await wait(1.6); if (S.phase !== "intro") return;
+    await tween(3.0, k => { INK.map = k; }, "lin"); if (S.phase !== "intro") return;
+    S.flying = true;
     // fly low over the sea, past the islands, then rise to take in the whole world
     const P = [HUB_CAM.pos.clone(), p2w(300, 1250, 1.9), p2w(700, 980, 1.25), p2w(1200, 900, 1.15), p2w(1750, 820, 1.6), HUB_CAM.pos.clone()];
     const L = [HUB_CAM.look.clone(), p2w(430, 560, .3), p2w(930, 650, .3), p2w(1400, 760, .3), p2w(1640, 360, .4), HUB_CAM.look.clone()];
     const cp = new THREE.CatmullRomCurve3(P), cl = new THREE.CatmullRomCurve3(L);
-    await tween(8.5, k => { camera.position.copy(cp.getPoint(k)); camLook.copy(cl.getPoint(k)); camera.lookAt(camLook); }, "io"); if (S.phase !== "intro") return;
+    await tween(8.5, k => { camera.position.copy(cp.getPoint(k)); camLook.copy(cl.getPoint(k)); camera.lookAt(camLook); }, "io"); S.flying = false; if (S.phase !== "intro") return;
   } else { await tween(4.6, k => { INK.map = k; }, "lin"); if (S.phase !== "intro") return; }
   S.phase = "hub"; document.getElementById("skip").hidden = true; hubHint.hidden = false; store.set("fc-seen", String(Date.now())); markSide(null);
 }
@@ -1175,7 +1176,14 @@ function frame() {
   leftHand.rotation.order = "YXZ"; leftHand.rotation.y = -.7; leftHand.rotation.x = -.06; leftHand.rotation.z = -.05;
   leftHand.visible = !CALM.has(leftHand) && S.leftOut < .99 && S.handOn > .01;
 
-  if (S.phase === "intro" || S.phase === "await" || S.phase === "tour" || S.phase === "hub" || S.phase === "section" || S.phase === "inSection" || S.phase === "closing") drawInk();
+  // the drawn map is a big canvas: only repaint it when something on it changed, and keep its small animations at a calm frame rate
+  if (S.phase === "intro" || S.phase === "await" || S.phase === "tour" || S.phase === "hub" || S.phase === "section" || S.phase === "inSection" || S.phase === "closing") {
+    const key = `${INK.map.toFixed(3)}|${S.hover}|${MODE}|${INK.title}|${INK.titleFade}|${INK.sub}|${S.phase === "hub" ? 1 : 0}`;
+    const fps = MODE === "classic" ? 20 : 8, due = now - (S.inkAt || 0) > 1000 / fps;
+    const busy = S.flying || S.phase === "section" || S.phase === "closing";
+    if (key !== S.inkKey || (due && !busy) || Math.abs(RELIEF.cur - (S.reliefAt ?? -1)) > .002) { S.inkKey = key; S.inkAt = now; S.reliefAt = RELIEF.cur; drawInk(); }
+    else { const tgt = (S.phase === "hub" || S.phase === "await" || S.phase === "intro" || S.phase === "tour") ? Math.min(1, Math.max(0, (INK.map - .25) / .6)) : 0; RELIEF.cur += (tgt - RELIEF.cur) * (tgt < RELIEF.cur ? .25 : .06); }
+  }
   if (active) active.update(t, pw);
   finalPass.uniforms.time.value = t; goldMat.userData.u.uTime.value = t; stepSparks(1 / 60); goldName.visible = goldMat.userData.u.uFade.value > .01;
   finalPass.uniforms.focusY.value = .52;
