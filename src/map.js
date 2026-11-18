@@ -2,11 +2,11 @@
 // Everything is drawn into the paper's ink canvas (2048 x 1400 px).
 
 export const MAP_SPOTS = [
-  { id: "story", x: 440, y: 460, r: 170, label: "My Story", sub: "internships, school and work, chapter by chapter" },
-  { id: "about", x: 1235, y: 340, r: 150, label: "About Me", sub: "profile, skills and why hire me" },
-  { id: "built", x: 1050, y: 670, r: 165, label: "Projects", sub: "my work, with case studies and live links" },
-  { id: "letter", x: 1700, y: 390, r: 150, label: "Contact", sub: "email, LinkedIn and GitHub" },
-  { id: "why", x: 1440, y: 1110, r: 150, label: "Why Hire Me", sub: "four reasons, each with the story behind it" },
+  { id: "story", x: 430, y: 430, r: 230, label: "My Story", sub: "internships, school and work, chapter by chapter" },
+  { id: "about", x: 1150, y: 280, r: 190, label: "About Me", sub: "profile, skills and why hire me" },
+  { id: "built", x: 930, y: 670, r: 200, label: "Projects", sub: "my work, with case studies and live links" },
+  { id: "letter", x: 1650, y: 400, r: 200, label: "Contact", sub: "email, LinkedIn and GitHub" },
+  { id: "why", x: 1500, y: 1020, r: 260, label: "Why Hire Me", sub: "four reasons, each with the story behind it" },
 ];
 
 let seed = 99;
@@ -42,13 +42,11 @@ function bez(a, c1, c2, b, n = 40) { const o = []; for (let i = 0; i <= n; i++) 
 let TNOW = 0;
 export function buildMap() {
   // ---------- geography (fixed, seeded) ----------
-  const lands = {
-    low: coast([[150, 300], [330, 210], [560, 230], [760, 300], [820, 430], [760, 560], [690, 690], [540, 740], [380, 700], [230, 640], [140, 520]], 5, .22),
-    iberia: coast([[1110, 860], [1290, 780], [1520, 790], [1760, 840], [1900, 960], [1880, 1130], [1720, 1240], [1480, 1250], [1270, 1210], [1140, 1100]], 5, .2),
-    isle: coast([[900, 600], [990, 545], [1110, 560], [1180, 630], [1130, 720], [1010, 750], [910, 705]], 4, .18),
-    cape: coast([[1480, 230], [1640, 190], [1880, 220], [1930, 380], [1850, 520], [1700, 560], [1560, 500], [1500, 380]], 5, .2),
-    unknown: coast([[1150, 300], [1240, 270], [1320, 310], [1300, 380], [1210, 400], [1150, 360]], 3, .2)
-  };
+  // five islands in an open sea, one for each place (centre x, y, radius x, radius y)
+  const ISLES = { story: [430, 400, 250, 170], about: [1150, 245, 215, 125], built: [930, 640, 225, 145], letter: [1650, 370, 225, 155], why: [1500, 990, 330, 205] };
+  const isle = ([cx, cy, rx, ry], seed) => { const pts = []; for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, w = 1 + Math.sin(i * 2.3 + seed) * .12 + Math.cos(i * 1.7 + seed * 2) * .08; pts.push([cx + Math.cos(a) * rx * w, cy + Math.sin(a) * ry * w]); } return coast(pts, 4, .16); };
+  const lands = Object.fromEntries(Object.entries(ISLES).map(([k, v], i) => [k, isle(v, i * 1.9)]));
+
   const mountains = [];
   for (let i = 0; i < 9; i++) mountains.push([R(1560, 1820), R(900, 1070), R(42, 66)]);
   for (let i = 0; i < 5; i++) mountains.push([R(1620, 1840), R(260, 420), R(34, 56)]);
@@ -56,7 +54,10 @@ export function buildMap() {
   for (let i = 0; i < 26; i++) forests.push([R(220, 360), R(520, 640), R(10, 16)]);
   for (let i = 0; i < 14; i++) forests.push([R(600, 720), R(330, 450), R(10, 15)]);
   for (let i = 0; i < 12; i++) forests.push([R(1200, 1320), R(1050, 1180), R(10, 15)]);
-  const route = [].concat(bez([250, 660], [360, 700], [480, 720], [600, 690]), bez([600, 690], [760, 760], [800, 900], [1000, 930]), bez([1000, 930], [1180, 950], [1300, 990], [1390, 1070]));
+  const PINS = { story: [430, 590], built: [930, 805], about: [1150, 392], letter: [1650, 548], why: [1500, 1212] };
+  const P = PINS;
+  const routes = [bez(P.story, [560, 760], [760, 860], P.built), bez(P.built, [1000, 600], [1080, 470], P.about), bez(P.about, [1300, 470], [1480, 560], P.letter), bez(P.built, [1080, 980], [1300, 1180], P.why)];
+  const route = routes[0] || [].concat(bez([250, 660], [360, 700], [480, 720], [600, 690]), bez([600, 690], [760, 760], [800, 900], [1000, 930]), bez([1000, 930], [1180, 950], [1300, 990], [1390, 1070]));
   const waves = []; for (let i = 0; i < 70; i++) { const x = R(150, 1900), y = R(150, 1280); waves.push([x, y, R(14, 26)]); }
 
   // ---------- drawing helpers ----------
@@ -201,6 +202,11 @@ export function buildMap() {
       g.beginPath(); g.moveTo(p[0] - s, p[1] + 10 + Math.sin(now / 500 + k) * 1.5); g.quadraticCurveTo(p[0], p[1] + 4, p[0] + s, p[1] + 10 + Math.cos(now / 500 + k) * 1.5); g.stroke(); }
     g.restore();
   }
+  function border(g, a) {
+    if (a <= 0) return; g.save(); g.globalAlpha = a * .8; g.strokeStyle = INK2; g.lineWidth = 4; g.strokeRect(110, 100, 1828, 1200); g.lineWidth = 1.6; g.strokeRect(126, 116, 1796, 1168);
+    [[110, 100], [1938, 100], [110, 1300], [1938, 1300]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 18, 0, 7); g.stroke(); g.beginPath(); g.arc(x, y, 8, 0, 7); g.fillStyle = INK2; g.fill(); });
+    g.restore();
+  }
   function ship(g, x, y, a, now, dir = 1) {
     if (a <= 0) return; g.save(); g.globalAlpha = a; g.translate(x, y + Math.sin(now / 2200) * 1.6); g.rotate(Math.sin(now / 2900) * .025); g.scale(dir, 1); g.strokeStyle = INK; g.lineWidth = 2.6; g.fillStyle = "#e9d3a4";
     g.beginPath(); g.moveTo(-50, 0); g.lineTo(50, 0); g.lineTo(36, 22); g.lineTo(-38, 22); g.closePath(); g.fill(); g.stroke();
@@ -238,14 +244,15 @@ export function buildMap() {
   // a watercolour sea around the islands, painted once
   const seaCanvas = (() => {
     const c = document.createElement("canvas"); c.width = 2048; c.height = 1400; const g = c.getContext("2d");
-    const gr = g.createRadialGradient(1000, 760, 120, 1000, 760, 1250); gr.addColorStop(0, "rgba(34,128,150,.78)"); gr.addColorStop(.7, "rgba(24,104,130,.84)"); gr.addColorStop(1, "rgba(18,80,104,.88)");
+    const gr = g.createRadialGradient(1000, 760, 120, 1000, 760, 1250); gr.addColorStop(0, "rgba(14,132,150,.92)"); gr.addColorStop(.7, "rgba(10,108,132,.95)"); gr.addColorStop(1, "rgba(8,84,108,.97)");
     g.fillStyle = gr; g.fillRect(70, 70, 1908, 1260);
     // soft blooms of darker and lighter pigment, like watercolour drying unevenly
     for (let i = 0; i < 60; i++) { const x = R(100, 1950), y = R(100, 1300), r = R(60, 220); const b = g.createRadialGradient(x, y, 0, x, y, r); const dark = i % 3 === 0; b.addColorStop(0, dark ? "rgba(40,90,104,.12)" : "rgba(180,214,210,.10)"); b.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = b; g.fillRect(x - r, y - r, r * 2, r * 2); }
     // the islands are cut out, with a soft shallow-water rim around them
     g.fillStyle = "#000"; g.save(); g.globalCompositeOperation = "destination-out"; g.filter = "blur(10px)"; Object.values(lands).forEach(p => { fillPoly(g, p); g.fill(); }); g.restore();
     g.save(); g.globalCompositeOperation = "destination-out"; Object.values(lands).forEach(p => { fillPoly(g, p); g.fill(); }); g.restore();
-    g.save(); g.globalCompositeOperation = "source-atop"; g.filter = "blur(14px)"; g.strokeStyle = "rgba(200,232,226,.55)"; g.lineWidth = 34; Object.values(lands).forEach(p => { fillPoly(g, p); g.stroke(); }); g.restore();
+    g.save(); g.globalCompositeOperation = "source-atop"; g.filter = "blur(16px)"; g.strokeStyle = "rgba(170,226,222,.7)"; g.lineWidth = 60; Object.values(lands).forEach(p => { fillPoly(g, p); g.stroke(); }); g.restore();
+    g.save(); g.globalCompositeOperation = "source-atop"; g.filter = "blur(3px)"; g.strokeStyle = "rgba(255,255,250,.85)"; g.lineWidth = 9; Object.values(lands).forEach(p => { fillPoly(g, p); g.stroke(); }); g.restore();
     // fade at the torn paper edge
     g.save(); g.globalCompositeOperation = "destination-in"; const e = g.createRadialGradient(1024, 700, 500, 1024, 700, 1150); e.addColorStop(0, "rgba(0,0,0,1)"); e.addColorStop(1, "rgba(0,0,0,.25)"); g.fillStyle = e; g.fillRect(0, 0, 2048, 1400); g.restore();
     return c;
@@ -258,7 +265,7 @@ export function buildMap() {
   }
 
   return {
-    seaCanvas, route, mountains: mountains.slice(0, 6), lands, // the journey line in map pixels, drawn in 3D as a glowing path
+    seaCanvas, route, routes, PINS, ISLES, mountains: [], lands, // the journey line in map pixels, drawn in 3D as a glowing path
     // a soft height map of the land, used to lift the islands out of the paper
     heightMask(w, h) {
       const full = document.createElement("canvas"); full.width = 2048; full.height = 1400; const f = full.getContext("2d");
@@ -281,19 +288,9 @@ export function buildMap() {
       const sea = prog(k, 0, .22);
       if (sea > 0) { g.save(); g.globalAlpha = sea; g.drawImage(seaCanvas, 0, 0, g.canvas.width, g.canvas.height); g.restore(); }
       rippleRings(g, now, prog(k, .4, .6));
-      coastline(g, lands.low, prog(k, .05, .3), "rgba(170,182,112,1)");
-      coastline(g, lands.iberia, prog(k, .12, .38), "rgba(182,178,110,1)");
-      coastline(g, lands.isle, prog(k, .2, .4), "rgba(170,182,112,1)");
-      coastline(g, lands.cape, prog(k, .24, .44), "rgba(170,182,112,1)");
-      coastline(g, lands.unknown, prog(k, .3, .46), "rgba(170,182,112,1)");
       waves.forEach((w, i) => wave(g, w[0] + Math.sin(now / 2400 + i) * 7, w[1], w[2], prog(k, .3 + i * .002, .5 + i * .002) * (insideAny(w[0], w[1]) || nearSpot(w[0], w[1]) ? 0 : .7)));
-      rose(g, 380, 1130, 70, prog(k, .8, .92), now);
-      ribbon(g, 1440, 1176, 340, "Why Hire Me", "", prog(k, .9, 1), hover === "why");
-      // the four destinations
-      ribbon(g, 440, 520, 290, "My Story", "", prog(k, .86, 1), hover === "story");
-      ribbon(g, 1235, 412, 290, "About Me", "", prog(k, .87, 1), hover === "about");
-      ribbon(g, 1050, 742, 290, "Projects", "", prog(k, .88, 1), hover === "built");
-      ribbon(g, 1700, 436, 260, "Contact", "", prog(k, .9, 1), hover === "letter");
+      rose(g, 300, 1150, 92, prog(k, .8, .92), now);
+      border(g, prog(k, .02, .25));
     }
   };
   function nearSpot(x, y) { return MAP_SPOTS.some(s => Math.hypot(x - s.x, y - s.y) < 230) || Math.hypot(x - 980, y - 1160) < 120 || (x < 660 && y > 1020); }

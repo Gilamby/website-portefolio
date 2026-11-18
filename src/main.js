@@ -707,6 +707,7 @@ function setRoll(k) {
   P.needsUpdate = true; pg.computeVertexNormals();
 }
 function setRelief(k) {
+  return; // the islands are real 3D objects now; the paper itself stays flat
   if (Math.abs(k - RELIEF.k) < .004 || ROLL.k < 1) return; RELIEF.k = k;
   const P = pg.attributes.position; for (let i = 0; i < P.count; i++) P.setZ(i, RELIEF.base[i] + RELIEF.hgt[i] * .12 * k);
   P.needsUpdate = true; pg.computeVertexNormals();
@@ -774,7 +775,7 @@ const SEAL_AT = [1024, 1215]; const startSeal = waxSeal(.3, "F"); startSeal.posi
 const sealRing = glowSprite(0xffb060, 1.6, 0); sealRing.position.copy(startSeal.position).add(new V3(0, .1, 0)); scene.add(sealRing);
 
 // map hotspots glow
-const MINI = buildMiniatures({ THREE, scene, p2w, shadowy, MAT, map, heightAt, glowSprite, PAPER });
+const MINI = buildMiniatures({ THREE, scene, p2w, shadowy, MAT, map, glowSprite });
 const spotGlows = MAP_SPOTS.map(s => { const g = glowSprite(0xffc070, 1.4, 0); g.position.copy(p2w(s.x, s.y, .15)); scene.add(g); return g; });
 
 // sections
@@ -1078,6 +1079,7 @@ function adapt() {
   renderer.setPixelRatio(pr); composer.setPixelRatio ? composer.setPixelRatio(pr) : 0; composer.setSize(innerWidth, innerHeight);
 }
 function frame() {
+  if (window.__paused) { requestAnimationFrame(frame); return; } // the classic view is showing
   const now = performance.now(), t = clock.getElapsedTime();
   stepTweens(now);
   // candle flicker (smoothed noise, shared so all lights breathe together a bit)
@@ -1120,7 +1122,7 @@ function frame() {
     const [px, py] = w2p(pw); let h = null; MAP_SPOTS.forEach(s => { if (Math.hypot(px - s.x, py - s.y) < s.r) h = s.id; }); { const mh = MINI.pick(ctx.ray()); if (mh) h = mh; } S.hover = S.overUI ? null : h; { const sp = MAP_SPOTS.find(x => x.id === S.hover); const txt = sp ? `${sp.label}: ${sp.sub}` : "Select a place on the map"; if (hubHint.textContent !== txt) hubHint.textContent = txt; }
   }
   MINI.update(t, { k: INK.map, relief: RELIEF.cur, hover: S.hover, show: S.phase === "hub" || S.phase === "intro" || S.phase === "await" || S.phase === "tour" });
-  spotGlows.forEach((g, i) => { const on = S.phase === "hub" ? (S.hover === MAP_SPOTS[i].id ? 1 : .25) : 0; g.material.opacity += ((on * (.65 + Math.sin(t * 3 + i) * .15)) * INK.map - g.material.opacity) * .12; });
+  spotGlows.forEach((g, i) => { const on = 0; g.material.opacity += ((on * (.65 + Math.sin(t * 3 + i) * .15)) * INK.map - g.material.opacity) * .12; });
   if (S.phase === "await") { const dd = pw.distanceTo(startSeal.position), near = Math.max(0, 1 - dd / 1.2); sealRing.material.opacity += ((.32 + Math.sin(t * 2.4) * .14) * (1 - near) + near * (.75 + Math.sin(t * 5) * .2) - sealRing.material.opacity) * .12; sealRing.scale.setScalar(1.25 + Math.sin(t * 2.4) * .12 + near * .3); document.body.classList.toggle("pp-hover", dd < .45); if (S.press === 0 || S.press === undefined) startSeal.scale.setScalar(1 + Math.sin(t * 2.4) * .025 + (dd < .45 ? .06 : 0)); }
   else { sealRing.material.opacity *= .9; if (S.phase === "tour") document.body.classList.remove("pp-hover"); }
   // right hand: fingertip on the pointer, arm reaching in from the bottom right
