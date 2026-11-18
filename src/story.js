@@ -15,8 +15,8 @@ export class Story {
     this.built = false;
   }
   canvasTex(draw, mirror) {
-    const T = this.T; const c = document.createElement("canvas"); c.width = PX; c.height = PY; const g = c.getContext("2d"); draw(g, PX, PY);
-    const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 8;
+    const T = this.T, R = 1.6; const c = document.createElement("canvas"); c.width = Math.round(PX * R); c.height = Math.round(PY * R); const g = c.getContext("2d"); g.scale(R, R); draw(g, PX, PY);
+    const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 16;
     if (mirror) { t.wrapS = T.RepeatWrapping; t.repeat.x = -1; t.offset.x = 1; }
     return t;
   }
@@ -117,7 +117,7 @@ export class Story {
   }
   pageTextures() {
     const F = (s, f = "Spectral") => `${s}px ${f}`;
-    const ink = "#1c120a", soft = "#3a2a1c", meta = "#8a3a1e", gold = "#8a5a14";
+    const ink = "#140c05", soft = "#24180d", meta = "#7a2c12", gold = "#7a4e0e";
     const head = (g, t, x, y) => { g.fillStyle = ink; g.font = "700 56px 'Cinzel Decorative'"; g.fillText(t, x, y); g.strokeStyle = "rgba(138,90,20,.55)"; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y + 22); g.quadraticCurveTo(x + 300, y + 34, x + 620, y + 18); g.stroke(); return y + 90; };
     const entry = (g, x, y, w, role, org, when, body) => {
       g.fillStyle = ink; g.font = "700 38px 'Cinzel Decorative'"; g.fillText(role, x, y);
@@ -132,13 +132,13 @@ export class Story {
       g.fillStyle = meta; g.font = F(44, "Caveat"); g.fillText(`Chapter ${n} · ${c.when}`, x, y);
       g.fillStyle = ink; g.font = "700 44px 'Cinzel Decorative'"; y = wrap(g, c.title, x, y + 62, w, 52);
       g.strokeStyle = "rgba(138,90,20,.55)"; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y - 30); g.quadraticCurveTo(x + 200, y - 22, x + 420, y - 34); g.stroke();
-      g.fillStyle = soft; g.font = "italic 31px Spectral"; y = wrap(g, c.context, x, y + 14, w, 45) + 8;
-      y = label(g, "What I did", x, y + 22); g.fillStyle = ink; g.font = F(31); y = wrap(g, c.did, x, y, w, 45) + 8;
+      g.fillStyle = soft; g.font = "italic 32px Spectral"; y = wrap(g, c.context, x, y + 14, w, 46) + 8;
+      y = label(g, "What I did", x, y + 22); g.fillStyle = ink; g.font = F(32); y = wrap(g, c.did, x, y, w, 46) + 8;
       if (c.result) { y += 14; g.fillStyle = "rgba(138,90,20,.1)"; const top = y - 32; g.font = "700 29px Spectral"; const lines = Math.ceil(g.measureText("Result: " + c.result).width / (w - 40)); g.fillRect(x - 14, top, w + 14, lines * 41 + 22); g.fillStyle = gold; g.fillRect(x - 14, top, 5, lines * 41 + 22); g.fillStyle = ink; y = wrap(g, "Result: " + c.result, x + 8, y, w - 30, 41) + 18; }
       // the lessons only when they fit on the page, so nothing is ever cut off at the bottom
       if (c.learned && y + 90 + c.learned.length * 46 < PY - 70) { y = label(g, "What I took from it", x, y + 26);
-        c.learned.forEach(t => { g.fillStyle = gold; g.font = "700 22px 'Cinzel Decorative'"; g.fillText("✦", x + 2, y); g.fillStyle = soft; g.font = F(30); y = wrap(g, t, x + 40, y, w - 46, 42) + 4; }); }
-      if (c.skills && y + 60 < PY - 70) { y += 22; g.fillStyle = meta; g.font = "italic 26px Spectral"; y = wrap(g, "Tools: " + c.skills, x, y, w, 36); }
+        c.learned.forEach(t => { g.fillStyle = gold; g.font = "700 22px 'Cinzel Decorative'"; g.fillText("✦", x + 2, y); g.fillStyle = soft; g.font = F(31); y = wrap(g, t, x + 40, y, w - 46, 43) + 4; }); }
+      if (c.skills && y + 60 < PY - 70) { y += 22; g.fillStyle = meta; g.font = "italic 28px Spectral"; y = wrap(g, "Tools: " + c.skills, x, y, w, 38); }
       return y + 40;
     };
     const chs = STORY.chapters, rest = chs.slice(1), per = Math.max(1, Math.ceil(rest.length / 4));
@@ -148,7 +148,7 @@ export class Story {
       g.save(); g.translate(30, 30); paperBG(g, w - 60, h - 60, { gutter: "right", sx: .15, sy: .3 }); g.restore();
       g.fillStyle = gold; g.font = "900 82px 'Cinzel Decorative'"; g.fillText("My Story", 100, 190);
       g.fillStyle = soft; g.font = "italic 32px Spectral"; let y = wrap(g, STORY.intro, 100, 250, 820, 44);
-      y = label(g, "Who I am", 100, y + 34); g.fillStyle = ink; g.font = F(30); y = wrap(g, STORY.who, 100, y, 820, 43);
+      y = label(g, "Who I am", 100, y + 34); g.fillStyle = ink; g.font = F(31); y = wrap(g, STORY.who, 100, y, 820, 45);
       g.strokeStyle = "rgba(138,90,20,.4)"; g.lineWidth = 2; g.beginPath(); g.moveTo(100, y + 24); g.lineTo(920, y + 24); g.stroke();
       chapter(g, 100, y + 100, 820, chs[0], 1);
     }, true));
@@ -257,5 +257,5 @@ export class Story {
     this.turn(local.x > 0 ? 1 : -1);
   }
   key(k) { if (k === "ArrowRight") this.turn(1); if (k === "ArrowLeft") this.turn(-1); }
-  update(t) { if (this.gemMat) this.gemMat.emissiveIntensity = .6 + Math.sin(t * 2.2) * .35; (this.glowMats || []).forEach(m => m.emissiveIntensity = .07 * this.ctx.S.focus); }
+  update(t) { if (this.gemMat) this.gemMat.emissiveIntensity = .6 + Math.sin(t * 2.2) * .35; (this.glowMats || []).forEach(m => m.emissiveIntensity = .16 * this.ctx.S.focus); }
 }

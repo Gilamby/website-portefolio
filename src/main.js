@@ -8,6 +8,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { buildMap, MAP_SPOTS as SPOTS_3D } from "./map.js";
 import { buildMap as buildMapClassic, MAP_SPOTS as SPOTS_CLASSIC } from "./mapClassic.js";
+import { buildEngine } from "./engine.js";
 // two map styles share one desk: "classic" (the hand-drawn ink map) and "3d" (the island diorama)
 // two versions of the same portfolio: the hand-drawn 2D map and the 3D island world
 let MODE = (() => { try { return localStorage.getItem("fc-map") === "classic" ? "classic" : "3d"; } catch (e) { return "3d"; } })();
@@ -615,10 +616,10 @@ composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new V2(innerWidth / 2, innerHeight / 2), .45, .6, .9); composer.addPass(bloom);
 composer.addPass(new OutputPass());
 const finalPass = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, time: { value: 0 }, res: { value: new V2(innerWidth, innerHeight) }, vig: { value: 1 }, focusY: { value: .5 }, blurAmt: { value: 1 }, fade: { value: 0 }, bars: { value: 0 },
+  uniforms: { tDiffuse: { value: null }, time: { value: 0 }, res: { value: new V2(innerWidth, innerHeight) }, vig: { value: 1 }, focusY: { value: .5 }, blurAmt: { value: 1 }, read: { value: 0 }, fade: { value: 0 }, bars: { value: 0 },
     swap: { value: 0 }, tPrev: { value: null } },
   vertexShader: `varying vec2 vUv; void main(){vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse,tPrev; uniform float time,vig,focusY,blurAmt,fade,bars,swap; uniform vec2 res; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse,tPrev; uniform float time,vig,focusY,blurAmt,fade,bars,swap,read; uniform vec2 res; varying vec2 vUv;
     float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
     float nz(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y); }
     void main(){
@@ -628,11 +629,12 @@ const finalPass = new ShaderPass({
       for(int i=0;i<12;i++){ float a=float(i)*2.39996; float r=sqrt(float(i)/12.)*dof*3.2; vec2 o=vec2(cos(a),sin(a))*r/res; col+=texture2D(tDiffuse,uv+o).rgb; tot+=1.; }
       col/=tot;
       // subtle chromatic aberration at the edges
-      float ca=length(c)*.0025; col.r=mix(col.r,texture2D(tDiffuse,uv+c*ca).r,.6); col.b=mix(col.b,texture2D(tDiffuse,uv-c*ca).b,.6);
+      float ca=length(c)*.0025*(1.-read);  // while reading a page: no colour fringes, no blur, almost no grain
+      col.r=mix(col.r,texture2D(tDiffuse,uv+c*ca).r,.6); col.b=mix(col.b,texture2D(tDiffuse,uv-c*ca).b,.6);
       // warm grade: lift shadows to brown, keep highlights creamy
       float lu=dot(col,vec3(.299,.587,.114)); col=mix(vec3(lu),col,1.18); col=pow(col,vec3(.96,1.,1.06)); col+=vec3(.018,.008,.0)*(1.-col);
       float v=1.-dot(c*vec2(1.05,1.25),c*vec2(1.05,1.25))*1.25*vig; col*=clamp(v,0.,1.);
-      col+=(h(uv*res+fract(time)*100.)-.5)*.025;
+      col+=(h(uv*res+fract(time)*100.)-.5)*.025*(1.-read*.8);
       // switching versions: the old picture dissolves into the new one in soft patches
       if(swap>.001){ float n=nz(uv*res/260.)*.7+nz(uv*res/70.)*.3; float w=swap*1.5-.25; vec3 pv=texture2D(tPrev,uv).rgb; col=mix(col,pv,smoothstep(n-.25,n+.25,w)); }
       col*=1.-fade;
@@ -668,7 +670,7 @@ const pointer = { nx: .25, ny: .55, has: false, down: false, world: new V3(1.6, 
 const ray = new THREE.Raycaster(); const plane = new THREE.Plane(new V3(0, 1, 0), 0);
 addEventListener("pointermove", e => { pointer.nx = e.clientX / innerWidth; pointer.ny = e.clientY / innerHeight; pointer.has = true;
   // over the side bar or any button the visitor gets their normal mouse; the glove only lives above the desk
-  S.overUI = !!(e.target.closest && e.target.closest("#side, #sidefold, #modeSwitch, header, .ui, #links, .pp-side, #quickview, #casestudy, #lightbox, #skillcard, #pp-info")); });
+  S.overUI = !!(e.target.closest && e.target.closest("#side, #sidefold, #modeSwitch, header, .ui, #links, .pp-side, #quickview, #casestudy, #lightbox, #skillcard, #pp-info, #engine")); });
 document.documentElement.addEventListener("pointerleave", () => { S.overUI = true; });
 addEventListener("pointerdown", e => { pointer.down = true; if (e.target.closest && e.target.closest(".ui, header, #side, #sidefold, #modeSwitch, #quickview, #casestudy, #lightbox, .pp-side, #pp-info")) return; onClick(); });
 addEventListener("pointerup", () => { pointer.down = false; });
@@ -964,13 +966,10 @@ async function intro() {
   tween(5.0, k => { camera.position.copy(CAM_OPEN).add(new V3(0, .2 * (1 - k), .8 * (1 - k))); camera.lookAt(camLook); }, "o");
   // the title card: name, role, "portfolio website", next to the character
   const op = document.getElementById("opening"); setTimeout(() => { if (S.phase !== "intro") return; op.hidden = false; requestAnimationFrame(() => op.classList.add("on")); }, 500);
-  await wait(2.4); if (S.phase !== "intro") return;
-  // the visitor chooses: the 3D world of islands, or the classic hand-drawn map
-  const ch = op.querySelector(".choose"); ch.hidden = false; requestAnimationFrame(() => ch.classList.add("on")); document.body.classList.add("choosing");
-  const picked = await new Promise(res => ch.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); res(b.dataset.pick); }, { once: true })));
-  if (S.phase !== "intro") return;
-  setMode(picked, true); ch.classList.remove("on"); document.body.classList.remove("choosing");
-  op.classList.remove("on"); setTimeout(() => { op.hidden = true; ch.hidden = true; }, 1000);
+  await wait(3.6); if (S.phase !== "intro") return;
+  // every visit starts on the hand-drawn map; the compass on it brings the world to life
+  setMode("classic", false);
+  op.classList.remove("on"); setTimeout(() => { op.hidden = true; }, 1000);
   if (/hold/.test(location.search)) { tweens = []; FLAMES.forEach(f => f.k = 1); S.L = .75; camera.position.copy(CAM_OPEN); camera.lookAt(camLook); return; }
   // crane up and over the desk, straight to the map
   document.body.classList.remove("opening");
@@ -1071,6 +1070,7 @@ ctx.dissolve = fn => new Promise(res => {
 });
 function onClick() {
   if (S.phase === "await") { const p = pointerOnTable(); if (p && p.distanceTo(startSeal.position) < .7) startTour(); else if (hovered) clickObject(hovered); }
+  else if (S.phase === "hub" && S.hover === "alive") toggleAlive();
   else if (S.phase === "hub" && S.hover) openSection(S.hover);
   else if (S.phase === "hub" && hovered) clickObject(hovered);
   else if (S.phase === "inSection" && active) active.click(ray);
@@ -1113,20 +1113,25 @@ function setMode(m, animate) {
   };
   if (animate && !REDUCED) { S.doSwap = () => { S.doSwap = null; apply(); }; snapWanted = true; } else apply();
 }
-// 2D | 3D: one switch, the same content in two worlds
-{
-  const sw = document.createElement("div"); sw.id = "modeSwitch"; sw.setAttribute("role", "group"); sw.setAttribute("aria-label", "Version");
-  sw.innerHTML = MODES.map(([m, l]) => `<button data-mode="${m}">${l}</button>`).join("") + `<span class="knob" aria-hidden="true"></span>`;
-  document.body.appendChild(sw);
-  sw.addEventListener("click", e => {
-    e.stopPropagation(); const b = e.target.closest("button"); if (!b || b.dataset.mode === MODE) return;
-    if (S.phase !== "hub" && S.phase !== "inSection") return;
-    setMode(b.dataset.mode, true);
-  });
-  setMode(MODE, false);
+// the map comes to life: clicking the compass rose raises the islands out of the drawing, a second click folds them back
+const ROSE = { classic: [380, 1130, 95], "3d": [300, 1150, 115] };
+const aliveHint = document.createElement("div"); aliveHint.id = "alivehint"; aliveHint.setAttribute("aria-hidden", "true"); document.body.appendChild(aliveHint);
+function toggleAlive() { if (S.phase !== "hub") return; setMode(is3D() ? "classic" : "3d", true); store.set("fc-alive", "1"); S.hover = null; }
+function updateAliveHint() {
+  const on = S.phase === "hub" && !document.body.classList.contains("qv") && finalPass.uniforms.swap.value < .02;
+  aliveHint.classList.toggle("on", on); if (!on) return;
+  const [rx, ry] = ROSE[MODE], a = p2w(rx, ry, .05).project(camera);
+  aliveHint.style.transform = `translate(${((a.x + 1) / 2 * innerWidth) | 0}px,${((1 - a.y) / 2 * innerHeight) | 0}px)`;
+  const txt = is3D() ? "Click the compass to fold the map back" : "Click the compass to bring the map to life";
+  if (aliveHint.textContent !== txt) aliveHint.textContent = txt;
+  aliveHint.classList.toggle("quiet", !!store.get("fc-alive") && S.hover !== "alive");
 }
 // light up the side bar item of the place you are in
 function markSide(id) { document.querySelectorAll("#side .si").forEach(a => a.classList.toggle("on", id ? a.dataset.go === id : a.hasAttribute("data-map"))); }
+// UNDER THE HOOD: the back-end of my projects, opened from the side bar or from a case study
+const ENGINE = buildEngine({ reduced: REDUCED });
+document.addEventListener("click", e => { const b = e.target.closest("[data-engine]"); if (!b) return; e.preventDefault(); e.stopPropagation();
+  const side = document.querySelector('#side [data-engine]'); side.classList.add("on"); ENGINE.open(b.dataset.engine || "scan", () => side.classList.remove("on")); });
 document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); go(b.dataset.go); }));
 const qv = document.getElementById("quickview");
 function openQuick(e) { if (e) { e.preventDefault(); e.stopPropagation(); } qv.hidden = false; document.body.classList.add("qv"); qv.querySelector(".qv-close").focus(); }
@@ -1135,21 +1140,21 @@ document.querySelectorAll("[data-quick]").forEach(b => b.addEventListener("click
 qv.addEventListener("click", e => { if (e.target.closest(".qv-close")) closeQuick(); });
 qv.addEventListener("pointerdown", e => e.stopPropagation());
 document.getElementById("lightbox").addEventListener("click", e => { e.currentTarget.hidden = true; });
-addEventListener("keydown", e => { if (e.key !== "Escape") return; const cs = document.getElementById("casestudy"), lb = document.getElementById("lightbox"); if (!lb.hidden) lb.hidden = true; else if (!qv.hidden) closeQuick(); else if (cs && !cs.hidden) cs.hidden = true; else if (S.phase === "inSection") closeSection(); });
+addEventListener("keydown", e => { if (e.key !== "Escape") return; if (ENGINE.isOpen) { ENGINE.close(); return; } const cs = document.getElementById("casestudy"), lb = document.getElementById("lightbox"); if (!lb.hidden) lb.hidden = true; else if (!qv.hidden) closeQuick(); else if (cs && !cs.hidden) cs.hidden = true; else if (S.phase === "inSection") closeSection(); });
 if (location.hash === "#quick-view") openQuick();
-window.__app = { scene, inkMesh, map, setRoll, rightHand, completeIntro, INTER, clickObject, go, ray, pointerOnTable, S, skipIntro, openSection, closeSection, startTour, camera, pointer, sections, INK };
+window.__app = { scene, inkMesh, toggleAlive: () => toggleAlive(), map, setRoll, rightHand, completeIntro, INTER, clickObject, go, ray, pointerOnTable, S, skipIntro, openSection, closeSection, startTour, camera, pointer, sections, INK };
 
 // =====================================================================
 // FRAME LOOP
 // =====================================================================
 const clock = new THREE.Clock(); let flick = 0;
 // adaptive quality: if the machine struggles, render fewer pixels (never during the intro's first seconds)
-const AQ = { t0: performance.now(), n: 0, steps: [Math.min(devicePixelRatio, 1.75), 1.4, 1.15, 1, .85], i: 0, cool: 0 };
+const AQ = { t0: performance.now(), n: 0, steps: [Math.min(devicePixelRatio, 2), Math.min(devicePixelRatio, 1.75), 1.4, 1.15, 1, .85], i: 1, cool: 0 };
 function adapt() {
   if (LQ) return; AQ.n++; const now = performance.now(), dt = now - AQ.t0; if (dt < 2000) return;
   const fps = AQ.n * 1000 / dt; AQ.t0 = now; AQ.n = 0; if (document.hidden || --AQ.cool > 0) return;
   const cur = renderer.getPixelRatio();
-  if (fps < 42 && AQ.i < AQ.steps.length - 1) { AQ.i++; } else if (fps > 58 && AQ.i > 0 && AQ.steps[AQ.i - 1] <= Math.min(devicePixelRatio, 1.75)) { AQ.i--; AQ.cool = 4; } else return;
+  if (fps < 42 && AQ.i < AQ.steps.length - 1) { AQ.i++; } else if (fps > 58 && AQ.i > 0 && AQ.steps[AQ.i - 1] <= Math.min(devicePixelRatio, S.focus > .5 ? 2 : 1.75)) { AQ.i--; AQ.cool = 4; } else return;
   const pr = Math.min(AQ.steps[AQ.i], Math.max(devicePixelRatio, .85)); if (Math.abs(pr - cur) < .01) return;
   renderer.setPixelRatio(pr); composer.setPixelRatio ? composer.setPixelRatio(pr) : 0; composer.setSize(innerWidth, innerHeight);
 }
@@ -1169,7 +1174,7 @@ function frame() {
   charMat.opacity = OPEN.char; charLight.intensity = 60 * OPEN.char * S.L; moonLight.intensity = 30 * OPEN.char * S.L + 6 * S.focus;
   if (fabian.visible) fabian.scale.y = 1 + Math.sin(t * 1.4) * .006;
   lamp.intensity = 78 * S.lampK * (1 - S.focus * .82); const AL = active ? active.light : null; readLamp.intensity = (AL ? AL.power : 26) * S.focus; bloom.threshold = .9 + S.focus * .08; bloom.strength = .3 - S.focus * .12;
-  const dk = 1 - S.focus * .75; hemi.intensity = .45 * S.L * dk; rim.intensity = 1.1 * S.L * (1 - S.focus) + (active ? active.light.rim : 0) * S.focus; fill.intensity = .35 * S.L * dk; finalPass.uniforms.vig.value = 1 + S.focus * .35; finalPass.uniforms.blurAmt.value = 1 - S.focus * .9;
+  const dk = 1 - S.focus * .75; hemi.intensity = .45 * S.L * dk; rim.intensity = 1.1 * S.L * (1 - S.focus) + (active ? active.light.rim : 0) * S.focus; fill.intensity = .35 * S.L * dk; finalPass.uniforms.vig.value = 1 + S.focus * .2; finalPass.uniforms.blurAmt.value = 1 - S.focus; finalPass.uniforms.read.value = S.focus;
   scene.environmentIntensity = .32 * (.25 + S.L * .75) * (1 - S.focus * .6);
   const pulse = .5 + Math.sin(t * 1.7) * .5;
   POTION[0].intensity = 1.8 * S.L * (.75 + pulse * .25); POTION[1].emissiveIntensity = .7 + pulse * .4; POTION[2].emissiveIntensity = .5 + pulse * .3;
@@ -1194,12 +1199,15 @@ function frame() {
   pointerLight.position.set(pw.x - .4, 1.6, pw.z + .2); pointerLight.intensity = 1.8 * S.handOn * S.L * (1 - S.focus * .7);
   // hover over hotspots
   if (S.phase === "hub") {
-    const [px, py] = w2p(pw); let h = null; SPOTS().forEach(s => { if (Math.hypot(px - s.x, py - s.y) < s.r) h = s.id; }); if (is3D()) { const mh = MINI.pick(ctx.ray()); if (mh) h = mh; } S.hover = S.overUI ? null : h; { const sp = SPOTS().find(x => x.id === S.hover); const txt = sp ? `${sp.label}: ${sp.sub}` : "Select a place on the map"; if (hubHint.textContent !== txt) hubHint.textContent = txt; }
+    const [px, py] = w2p(pw); let h = null; SPOTS().forEach(s => { if (Math.hypot(px - s.x, py - s.y) < s.r) h = s.id; }); if (is3D()) { const mh = MINI.pick(ctx.ray()); if (mh) h = mh; }
+    { const [rx, ry, rr] = ROSE[MODE]; if (!h && Math.hypot(px - rx, py - ry) < rr) h = "alive"; }
+    S.hover = S.overUI ? null : h; document.body.classList.toggle("pp-hover", S.hover === "alive"); { const sp = SPOTS().find(x => x.id === S.hover); const txt = sp ? `${sp.label}: ${sp.sub}` : "Select a place on the map"; if (hubHint.textContent !== txt) hubHint.textContent = txt; }
   }
   if (is3D() && S.phase === "hub" && !S.camBusy && !document.body.classList.contains("qv")) {
     const tx = HUB_CAM.pos.x + (pointer.nx - .5) * .9, ty = HUB_CAM.pos.y - (pointer.ny - .5) * .5, tz = HUB_CAM.pos.z + (pointer.ny - .5) * .3;
     camera.position.x += (tx - camera.position.x) * .02; camera.position.y += (ty - camera.position.y) * .02; camera.position.z += (tz - camera.position.z) * .02; camera.lookAt(camLook);
   }
+  updateAliveHint();
   MINI.update(t, { k: INK.map * (S.mini ?? 1), relief: RELIEF.cur, hover: S.phase === "hub" ? S.hover : null, show: is3D() && S.phase !== "load" });
   spotGlows.forEach((g, i) => { const on = 0; g.material.opacity += ((on * (.65 + Math.sin(t * 3 + i) * .15)) * INK.map - g.material.opacity) * .12; });
   if (S.phase === "await") { const dd = pw.distanceTo(startSeal.position), near = Math.max(0, 1 - dd / 1.2); sealRing.material.opacity += ((.32 + Math.sin(t * 2.4) * .14) * (1 - near) + near * (.75 + Math.sin(t * 5) * .2) - sealRing.material.opacity) * .12; sealRing.scale.setScalar(1.25 + Math.sin(t * 2.4) * .12 + near * .3); document.body.classList.toggle("pp-hover", dd < .45); if (S.press === 0 || S.press === undefined) startSeal.scale.setScalar(1 + Math.sin(t * 2.4) * .025 + (dd < .45 ? .06 : 0)); }

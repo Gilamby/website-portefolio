@@ -44,7 +44,7 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
 
   // ---------------------------------------------------------------- living water over the painted sea
   // rocks standing in the sea (paper x, y, size): they get surf rings in the water too
-  const SEA_ROCKS = [[240, 760, 1.25], [660, 175, .9], [1820, 680, 1.05], [1085, 985, .85], [300, 1150, .95], [820, 425, .7], [1960, 230, .8]];
+  const SEA_ROCKS = [[240, 760, 1.25], [660, 175, .9], [1820, 680, 1.05], [1085, 985, .85], [540, 1285, .9], [820, 425, .7], [1960, 230, .8]];
   const water = (() => {
     // island mask, plus two blurred copies of it: the turquoise shallows (wide) and the surf line (narrow)
     const MW = 512, MH = 350, id = map.heightMask(MW, MH), src = id.data, land = new Float32Array(MW * MH);

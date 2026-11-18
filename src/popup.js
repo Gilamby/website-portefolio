@@ -226,7 +226,7 @@ export class Popup {
       ${c.facts ? "" : `<p class="kicker">${esc(p.year)} · ${esc(p.tag)}</p>`}<h1>${esc(p.title)}</h1>
       ${c.status ? `<p class="status">✓ ${esc(c.status)}</p>` : ""}
       <p class="intro">${esc(c.lead || p.text)}</p>
-      ${links.length ? `<div class="btns">${links.map(([n, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)} ↗</a>`).join("")}</div>` : ""}
+      ${(() => { const en = { qrcodex: "scan", flexichat: "connect", gemeente: "delft" }[p.id]; const b = en ? `<button class="en-link" data-engine="${en}">See how it works behind the screen</button>` : ""; return links.length || b ? `<div class="btns">${links.map(([n, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)} ↗</a>`).join("")}${b}</div>` : ""; })()}
       ${c.facts ? `<dl class="facts">${c.facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>${c.facts.some(([k]) => /tool/i.test(k)) ? "" : `<div class="tags">${p.tools.map(t => `<span>${esc(t)}</span>`).join("")}</div>`}` : `<dl class="facts"><div><dt>Role</dt><dd>${esc(p.role)}</dd></div><div><dt>Built with</dt><dd>${esc(p.tools.join(" · "))}</dd></div></dl>`}
       ${fig(PROJECT_IMAGES[p.id], "", "hero").replace(' loading="lazy"', "")}
       ${(c.sections || []).map(([t, x]) => `<section><h2>${esc(t)}</h2><p>${esc(x)}</p></section>`).join("")}
