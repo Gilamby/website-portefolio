@@ -1,0 +1,12 @@
+{
+  "name": "fabian-corsalini-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive 3D portfolio of Fabian Corsalini, Creative Software Developer",
+  "scripts": {
+    "build": "esbuild src/entry.js --bundle --format=iife --outfile=app.js --minify --target=es2020 && esbuild src/quick.js --bundle --format=cjs --platform=node --outfile=.build/quick.cjs --log-level=warning && esbuild src/content.js --bundle --format=cjs --platform=node --outfile=.build/content.cjs --log-level=warning && node tools/prerender.js",
+    "start": "python3 -m http.server 8300"
+  },
+  "dependencies": { "three": "^0.170.0" },
+  "devDependencies": { "esbuild": "^0.28.2" }
+}

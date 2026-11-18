@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<noscript><meta http-equiv="refresh" content="6;url=/#hub"></noscript>
+<title>Page not found · Fabian Corsalini</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+<style>
+@font-face{font-family:"Caveat";src:url("/fonts/caveat.woff2") format("woff2")}
+@font-face{font-family:"Spectral";src:url("/fonts/spectral.woff2") format("woff2")}
+@font-face{font-family:"Cinzel Decorative";src:url("/fonts/cinzel-900.woff2") format("woff2");font-weight:900}
+@font-face{font-family:"Cinzel Decorative";src:url("/fonts/cinzel-700.woff2") format("woff2");font-weight:700}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{min-height:100vh;display:grid;place-items:center;padding:28px 18px;color:#2a1c12;font:18px/1.6 Spectral,Georgia,serif;
+  background:radial-gradient(ellipse at 50% 35%,rgba(255,190,110,.22),rgba(0,0,0,0) 55%),radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 40%,rgba(0,0,0,.75) 100%),url("/tex/table_paint.webp") center/cover #1a0f08}
+.sheet{position:relative;width:min(680px,100%);padding:30px 46px 32px;background:radial-gradient(ellipse at 50% 0%,#f8efdb,#ecdcb6 70%,#dcc595);box-shadow:0 30px 80px rgba(0,0,0,.7);text-align:center;
+  clip-path:polygon(0 2%,6% 0,14% 1.5%,23% .3%,35% 1.8%,47% 0,58% 1.4%,70% .2%,81% 1.6%,92% .4%,100% 1.8%,99.2% 18%,100% 37%,99.3% 55%,100% 74%,99.4% 90%,100% 99%,88% 98.2%,76% 100%,63% 98.6%,50% 100%,38% 98.4%,25% 100%,12% 98.5%,0 99.4%,.7% 80%,0 61%,.8% 42%,0 23%);
+  transform:rotate(-1deg);animation:drop .9s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes drop{from{transform:translateY(-40px) rotate(-4deg);opacity:0}}
+.code{font:900 clamp(54px,10vh,96px)/1 'Cinzel Decorative',serif;margin:0;background:linear-gradient(180deg,#d9a748,#8a5a14 55%,#c79a46);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1{font:700 28px/1.2 'Cinzel Decorative',serif;margin:4px 0 6px}
+p{margin:0 auto;max-width:44ch}
+.sea{display:block;width:100%;height:auto;margin:6px 0 2px}
+.note{font:27px/1.2 Caveat,cursive;color:#8e2a1a;margin-top:2px}
+
+/* the voyage */
+.ink{fill:none;stroke:#3a2a1c;stroke-linecap:round;stroke-linejoin:round}
+.waves-a{animation:drift 7s linear infinite}
+.waves-b{animation:drift 11s linear infinite;opacity:.55}
+.waves-c{animation:drift 16s linear infinite;opacity:.3}
+@keyframes drift{to{transform:translateX(-200px)}}
+.ship{transform-box:fill-box;transform-origin:50% 85%;animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(5px) rotate(3.5deg)}}
+.voyage{animation:sail 26s ease-in-out infinite}
+@keyframes sail{0%,100%{transform:translateX(-70px)}50%{transform:translateX(70px)}}
+.sail{transform-box:fill-box;transform-origin:50% 50%;animation:billow 2.6s ease-in-out infinite}
+.sail.s2{animation-delay:-.8s}
+@keyframes billow{0%,100%{transform:scaleX(1)}50%{transform:scaleX(1.06)}}
+.flag{transform-box:fill-box;transform-origin:0 50%;animation:flutter .7s ease-in-out infinite alternate}
+@keyframes flutter{to{transform:skewY(-12deg) scaleX(.86)}}
+.wake{stroke-dasharray:6 7;animation:wake 1.2s linear infinite}
+@keyframes wake{to{stroke-dashoffset:26}}
+.needle{transform-box:view-box;transform-origin:600px 40px;animation:lost 5s cubic-bezier(.5,0,.3,1) infinite}
+@keyframes lost{0%{transform:rotate(0)}20%{transform:rotate(140deg)}35%{transform:rotate(95deg)}55%{transform:rotate(-160deg)}70%{transform:rotate(-120deg)}100%{transform:rotate(360deg)}}
+.gull{animation:gull 9s linear infinite}
+.gull path{transform-box:fill-box;transform-origin:50% 100%;animation:flap .5s ease-in-out infinite alternate}
+@keyframes gull{from{transform:translate(-40px,0)}to{transform:translate(700px,-30px)}}
+@keyframes flap{to{transform:scaleY(.4)}}
+
+/* after a few seconds the ship sails off the page and the visitor lands on the map */
+body.leave .voyage{animation:none;transform:translateX(-70px);transition:transform 1.8s cubic-bezier(.5,0,.8,.6)}
+body.leave .voyage.go{transform:translateX(520px)}
+body.leave .sheet{animation:none;transition:opacity .6s 1.4s,transform .6s 1.4s;opacity:0;transform:translateY(20px) rotate(-1deg)}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important}}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <img src="/img/logo.webp" alt="" width="64" height="64" style="display:block;margin:0 auto -6px;filter:drop-shadow(0 2px 3px rgba(60,30,5,.35))">
+  <p class="code" aria-hidden="true">404</p>
+  <h1>Uncharted territory</h1>
+  <p>This page is not on the map. The ship is still looking for it.</p>
+
+  <svg class="sea" viewBox="0 0 660 220" role="img" aria-label="A small sailing ship bobbing on the waves, still on its way">
+    <defs>
+      <path id="wave" d="M0 0 q25 -10 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0"/>
+      <clipPath id="frame"><rect x="0" y="0" width="660" height="220"/></clipPath>
+    </defs>
+    <g clip-path="url(#frame)">
+      <g class="ink" stroke-width="2" opacity=".55">
+        <path d="M70 52 q8 -16 24 -10 q8 -14 24 -4 q14 -2 14 10 q0 10 -14 10 h-42 q-14 0 -6 -6z" fill="#f3e7cc"/>
+        <path d="M430 34 q8 -14 22 -8 q9 -12 22 -2 q12 0 12 9 q0 9 -12 9 h-38 q-12 0 -6 -8z" fill="#f3e7cc"/>
+      </g>
+      <g class="gull"><path class="ink" stroke-width="2" d="M0 70 q7 -7 14 0 q7 -7 14 0"/></g>
+
+      <circle cx="600" cy="40" r="24" fill="#f3e7cc" stroke="#3a2a1c" stroke-width="2"/>
+      <circle cx="600" cy="40" r="19" fill="none" stroke="#8a5a14" stroke-width="1" stroke-dasharray="2 3"/>
+      <text x="600" y="27" font-family="Spectral,serif" font-size="9" text-anchor="middle" fill="#3a2a1c">N</text>
+      <g class="needle"><path d="M600 26 l4 14 l-4 14 l-4 -14z" fill="#3a2a1c"/><path d="M600 26 l4 14 h-8z" fill="#8e2a1a"/></g>
+      <circle cx="600" cy="40" r="2.5" fill="#c79a46"/>
+
+      <g class="waves-c"><use href="#wave" class="ink" stroke-width="1.5" transform="translate(0,120)"/></g>
+      <g class="waves-b"><use href="#wave" class="ink" stroke-width="2" transform="translate(-25,140)"/></g>
+
+      <g class="voyage">
+        <path class="ink wake" stroke-width="2" d="M220 178 q-40 4 -90 -2 M226 186 q-50 6 -120 2"/>
+        <g class="ship">
+          <path d="M228 150 h150 q-8 30 -36 34 h-82 q-26 -4 -32 -34z" fill="#7a4a26" stroke="#2a1a0e" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M236 160 h132" stroke="#c79a46" stroke-width="2"/>
+          <g fill="#2a1a0e"><circle cx="262" cy="170" r="3"/><circle cx="290" cy="171" r="3"/><circle cx="318" cy="171" r="3"/><circle cx="346" cy="170" r="3"/></g>
+          <path d="M378 150 L410 128" stroke="#2a1a0e" stroke-width="2.5" stroke-linecap="round"/>
+          <path class="sail" d="M262 66 q28 -8 56 0 q7 36 0 72 q-28 -6 -56 0 q-7 -36 0 -72z" fill="#f6ecd4" stroke="#2a1a0e" stroke-width="2" stroke-linejoin="round"/>
+          <path class="sail s2" d="M316 88 q20 -6 40 0 q6 26 0 52 q-20 -5 -40 0 q-6 -26 0 -52z" fill="#f6ecd4" stroke="#2a1a0e" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M262 102 q28 -5 56 0 M316 114 q20 -4 40 0" stroke="#2a1a0e" stroke-width="1.2" fill="none" opacity=".5"/>
+          <path d="M378 150 L404 130 L370 128 Z" fill="#efe1c0" stroke="#2a1a0e" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M290 150 V52 M336 150 V72" stroke="#2a1a0e" stroke-width="3" stroke-linecap="round"/>
+          <path class="flag" d="M290 52 h24 l-6 7 l6 7 h-24z" fill="#8e2a1a" stroke="#2a1a0e" stroke-width="1.5"/>
+        </g>
+      </g>
+
+      <g class="waves-a">
+        <path d="M0 186 q25 -10 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V220 H0z" fill="#e6d4ad" stroke="#3a2a1c" stroke-width="2.5" stroke-linejoin="round"/>
+        <use href="#wave" class="ink" stroke-width="1.5" transform="translate(-25,202)" opacity=".5"/>
+      </g>
+    </g>
+  </svg>
+
+  <p class="note">sailing you back to the map…</p>
+  <noscript><p><a href="/#hub">Back to the map</a></p></noscript>
+</main>
+<script>
+// the page is a short voyage: after ~5 seconds the ship leaves and the visitor is back on the map
+(() => {
+  const home = "/#hub", reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const go = () => location.replace(home);
+  if (reduced) { setTimeout(go, 3500); return; }
+  setTimeout(() => {
+    const v = document.querySelector(".voyage");
+    // freeze the ship where its sailing loop currently is, then send it off the page
+    const x = new DOMMatrix(getComputedStyle(v).transform).m41;
+    document.body.classList.add("leave"); v.style.transform = `translateX(${x}px)`;
+    requestAnimationFrame(() => requestAnimationFrame(() => { v.style.transform = ""; v.classList.add("go"); }));
+    setTimeout(go, 2100);
+  }, 4800);
+})();
+</script>
+</body>
+</html>
