@@ -50,8 +50,9 @@ body.side-off #back{left:34px}
 #opening{transition:opacity .8s}
 #opening:not(.on){opacity:0}
 #opening.on{opacity:1}
-#opening .choose{margin-top:36px;display:flex;gap:14px;pointer-events:auto;opacity:0;transform:translateY(14px);transition:opacity .8s,transform .8s}
+#opening .choose{margin-top:36px;display:flex;flex-wrap:wrap;gap:14px;pointer-events:auto;opacity:0;transform:translateY(14px);transition:opacity .8s,transform .8s}
 #opening .choose.on{opacity:1;transform:none}
+#opening .choose .ask{flex-basis:100%;margin:0 0 2px;font:700 15px 'Cinzel Decorative',serif;letter-spacing:3px;color:#e9d2a0}
 #opening .pick{min-width:120px;padding:14px 30px;border-radius:4px;cursor:pointer;background:rgba(14,9,5,.72);border:1px solid #c79a46;color:#f3dca6;font:700 22px 'Cinzel Decorative',serif;letter-spacing:2px;transition:transform .25s,background .25s,color .25s}
 #opening .pick:hover,#opening .pick:focus-visible{transform:translateY(-3px);background:linear-gradient(180deg,#f0d08a,#c79a46);color:#2a1a08;outline:none}
 
@@ -304,6 +305,7 @@ body.pp-on #pp-hint{opacity:.85}
   <p class="role">Creative Software Developer</p>
   <p class="sub">Front-end development &amp; UI/UX design</p>
   <div class="choose" hidden>
+    <p class="ask">Choose a version</p>
     <button class="pick" data-pick="3d">3D</button>
     <button class="pick" data-pick="classic">2D</button>
   </div>
