@@ -6,7 +6,12 @@ import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
-import { buildMap, MAP_SPOTS } from "./map.js";
+import { buildMap, MAP_SPOTS as SPOTS_3D } from "./map.js";
+import { buildMap as buildMapClassic, MAP_SPOTS as SPOTS_CLASSIC } from "./mapClassic.js";
+// two map styles share one desk: "classic" (the hand-drawn ink map) and "3d" (the island diorama)
+let MODE = (() => { try { return localStorage.getItem("fc-map") === "classic" ? "classic" : "3d"; } catch (e) { return "3d"; } })();
+const SPOTS = () => MODE === "classic" ? SPOTS_CLASSIC : SPOTS_3D;
+const MAP_SPOTS = SPOTS_3D;
 import { Story } from "./story.js";
 import { Popup } from "./popup.js";
 import { Why } from "./why.js";
@@ -654,9 +659,9 @@ const pointer = { nx: .25, ny: .55, has: false, down: false, world: new V3(1.6, 
 const ray = new THREE.Raycaster(); const plane = new THREE.Plane(new V3(0, 1, 0), 0);
 addEventListener("pointermove", e => { pointer.nx = e.clientX / innerWidth; pointer.ny = e.clientY / innerHeight; pointer.has = true;
   // over the side bar or any button the visitor gets their normal mouse; the glove only lives above the desk
-  S.overUI = !!(e.target.closest && e.target.closest("#side, #sidefold, header, .ui, #links, .pp-side, #quickview, #casestudy, #lightbox, #skillcard, #pp-info")); });
+  S.overUI = !!(e.target.closest && e.target.closest("#side, #sidefold, #modeSwitch, header, .ui, #links, .pp-side, #quickview, #casestudy, #lightbox, #skillcard, #pp-info")); });
 document.documentElement.addEventListener("pointerleave", () => { S.overUI = true; });
-addEventListener("pointerdown", e => { pointer.down = true; if (e.target.closest && e.target.closest(".ui, header, #side, #sidefold, #quickview, #casestudy, #lightbox, .pp-side, #pp-info")) return; onClick(); });
+addEventListener("pointerdown", e => { pointer.down = true; if (e.target.closest && e.target.closest(".ui, header, #side, #sidefold, #modeSwitch, #quickview, #casestudy, #lightbox, .pp-side, #pp-info")) return; onClick(); });
 addEventListener("pointerup", () => { pointer.down = false; });
 function pointerOnTable() { ray.setFromCamera(new V2(pointer.nx * 2 - 1, -(pointer.ny * 2 - 1)), camera); const p = new V3(); return ray.ray.intersectPlane(plane, p) ? p : null; }
 
@@ -676,11 +681,12 @@ function stepTweens(now) { tweens = tweens.filter(t => { const k = (now - t.s) /
 // =====================================================================
 // INK: name, start note, map
 // =====================================================================
-const map = buildMap(inkG, PAPER);
+const map3d = buildMap(inkG, PAPER), mapC = buildMapClassic(inkG, PAPER);
+const map = map3d; const curMap = () => MODE === "classic" ? mapC : map3d;
 // ---- 3D relief: when the map is drawn, its islands rise gently out of the paper
 const RELIEF = (() => {
   const P = pg.attributes.position, base = new Float32Array(P.count), hgt = new Float32Array(P.count);
-  const MW = 512, MH = 350, img = map.heightMask(MW, MH).data;
+  const MW = 512, MH = 350, img = mapC.heightMask(MW, MH).data;
   for (let i = 0; i < P.count; i++) {
     base[i] = P.getZ(i);
     const u = P.getX(i) / PAPER.w + .5, v = .5 - P.getY(i) / PAPER.h;
@@ -706,8 +712,7 @@ function setRoll(k) {
   }
   P.needsUpdate = true; pg.computeVertexNormals();
 }
-function setRelief(k) {
-  return; // the islands are real 3D objects now; the paper itself stays flat
+function setRelief(k) { // only the classic map lifts its islands out of the paper; the 3D map has real islands
   if (Math.abs(k - RELIEF.k) < .004 || ROLL.k < 1) return; RELIEF.k = k;
   const P = pg.attributes.position; for (let i = 0; i < P.count; i++) P.setZ(i, RELIEF.base[i] + RELIEF.hgt[i] * .12 * k);
   P.needsUpdate = true; pg.computeVertexNormals();
@@ -715,7 +720,7 @@ function setRelief(k) {
 const INK = { title: 0, titleFade: 1, sub: 0, start: 0, map: 0 };
 function drawInk() {
   inkG.clearRect(0, 0, ink.width, ink.height);
-  map.drawBase(inkG);
+  curMap().drawBase(inkG);
   // the name: a thin debossed edge where the foil was pressed into the paper
   if (INK.title > 0 && INK.titleFade > 0) {
     inkG.save(); inkG.globalAlpha = INK.titleFade * .55;
@@ -724,10 +729,10 @@ function drawInk() {
     inkG.restore();
     if (INK.sub > 0) { inkG.save(); inkG.globalAlpha = INK.sub * INK.titleFade; inkG.font = "70px Caveat"; inkG.fillStyle = "#3a2414"; inkG.textAlign = "center"; inkG.translate(1024, 830); inkG.rotate(-.02); inkG.fillText("creative software developer  ·  portfolio", 0, 0); inkG.restore(); }
   }
-  if (INK.map > 0) map.draw(inkG, INK.map, S.hover, performance.now());
+  if (INK.map > 0) curMap().draw(inkG, INK.map, S.hover, performance.now());
   // the islands only stand up on the map view; when a book or the trunk lies on the paper, the map flattens
   const reliefTarget = (S.phase === "hub" || S.phase === "await" || S.phase === "intro" || S.phase === "tour") ? Math.min(1, Math.max(0, (INK.map - .25) / .6)) : 0;
-  RELIEF.cur += (reliefTarget - RELIEF.cur) * (reliefTarget < RELIEF.cur ? .25 : .06); setRelief(RELIEF.cur < .003 ? 0 : RELIEF.cur);
+  RELIEF.cur += (reliefTarget - RELIEF.cur) * (reliefTarget < RELIEF.cur ? .25 : .06); setRelief(MODE === "classic" && RELIEF.cur >= .003 ? RELIEF.cur : 0);
   inkTex.needsUpdate = true;
 }
 
@@ -945,8 +950,13 @@ async function intro() {
   tween(5.0, k => { camera.position.copy(CAM_OPEN).add(new V3(0, .2 * (1 - k), .8 * (1 - k))); camera.lookAt(camLook); }, "o");
   // the title card: name, role, "portfolio website", next to the character
   const op = document.getElementById("opening"); setTimeout(() => { if (S.phase !== "intro") return; op.hidden = false; requestAnimationFrame(() => op.classList.add("on")); }, 500);
-  await wait(4.4); if (S.phase !== "intro") return;
-  op.classList.remove("on"); setTimeout(() => { op.hidden = true; }, 1000);
+  await wait(2.4); if (S.phase !== "intro") return;
+  // the visitor chooses: the 3D world of islands, or the classic hand-drawn map
+  const ch = op.querySelector(".choose"); ch.hidden = false; requestAnimationFrame(() => ch.classList.add("on")); document.body.classList.add("choosing");
+  const picked = await new Promise(res => ch.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); res(b.dataset.pick); }, { once: true })));
+  if (S.phase !== "intro") return;
+  setMode(picked); ch.classList.remove("on"); document.body.classList.remove("choosing");
+  op.classList.remove("on"); setTimeout(() => { op.hidden = true; ch.hidden = true; }, 1000);
   if (/hold/.test(location.search)) { tweens = []; FLAMES.forEach(f => f.k = 1); S.L = .75; camera.position.copy(CAM_OPEN); camera.lookAt(camLook); return; }
   // crane up and over the desk, straight to the map
   document.body.classList.remove("opening");
@@ -962,7 +972,15 @@ async function intro() {
   await tween(2.2, k => setRoll(k), "io", 1.9); if (S.phase !== "intro") return;
   fabian.visible = false; prepareSections();
   // then the map draws itself and its islands rise
-  await tween(4.6, k => { INK.map = k; }, "lin"); if (S.phase !== "intro") return;
+  if (MODE === "3d") {
+    tween(4.2, k => { INK.map = k; }, "lin");
+    await wait(1.6); if (S.phase !== "intro") return;
+    // fly low over the sea, past the islands, then rise to take in the whole world
+    const P = [HUB_CAM.pos.clone(), p2w(300, 1250, 1.9), p2w(700, 980, 1.25), p2w(1200, 900, 1.15), p2w(1750, 820, 1.6), HUB_CAM.pos.clone()];
+    const L = [HUB_CAM.look.clone(), p2w(430, 560, .3), p2w(930, 650, .3), p2w(1400, 760, .3), p2w(1640, 360, .4), HUB_CAM.look.clone()];
+    const cp = new THREE.CatmullRomCurve3(P), cl = new THREE.CatmullRomCurve3(L);
+    await tween(8.5, k => { camera.position.copy(cp.getPoint(k)); camLook.copy(cl.getPoint(k)); camera.lookAt(camLook); }, "io"); if (S.phase !== "intro") return;
+  } else { await tween(4.6, k => { INK.map = k; }, "lin"); if (S.phase !== "intro") return; }
   S.phase = "hub"; document.getElementById("skip").hidden = true; hubHint.hidden = false; store.set("fc-seen", String(Date.now())); markSide(null);
 }
 function completeIntro() { skipIntro(); }
@@ -1005,7 +1023,8 @@ async function openSection(id) {
   store.set("fc-last", chapter ? `${id}@${chapter}` : id); markSide(id);
   document.body.classList.add("insec"); S.phase = "section"; active = sections[id]; S.hover = null; hubHint.hidden = true;
   const L = active.light; readLamp.color.set(L.color); readLamp.position.set(...L.pos); readLamp.target.position.set(...L.target); readLamp.angle = L.angle;
-  const spot = MAP_SPOTS.find(s => s.id === fullId) || MAP_SPOTS.find(s => s.id === id); const sp = p2w(spot.x, spot.y);
+  const spot = SPOTS().find(s => s.id === fullId) || SPOTS().find(s => s.id === id); const sp = p2w(spot.x, spot.y);
+  if (MODE === "3d") { const isl = p2w(spot.x, spot.y, .15); await moveCamera(isl.clone().add(new V3(0, 2.3, 2.7)), isl, 1.15, "io"); }
   // push in towards the place on the map, then the object arrives
   tween(.6, k => { S.focus = k; }, "io");
   await active.open(sp);
@@ -1050,6 +1069,19 @@ const sideBtn = document.getElementById("sidefold");
 function foldSide(off) { document.body.classList.toggle("side-off", off); sideBtn.setAttribute("aria-expanded", String(!off)); sideBtn.setAttribute("aria-label", off ? "Show the menu" : "Hide the menu"); try { localStorage.setItem("fc-side-off", off ? "1" : "0"); } catch (e) {} }
 sideBtn.addEventListener("click", e => { e.stopPropagation(); foldSide(!document.body.classList.contains("side-off")); });
 try { if (localStorage.getItem("fc-side-off") === "1") foldSide(true); } catch (e) {}
+function setMode(m) { MODE = m; try { localStorage.setItem("fc-map", MODE); } catch (err) {} document.querySelectorAll("#modeSwitch button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === MODE))); }
+// Classic | 3D switch: flips the map style; the map redraws itself in the new style
+{
+  const sw = document.createElement("div"); sw.id = "modeSwitch"; sw.setAttribute("role", "group"); sw.setAttribute("aria-label", "Map style");
+  sw.innerHTML = `<button data-mode="classic">2D</button><button data-mode="3d">3D</button><span class="knob" aria-hidden="true"></span>`;
+  document.body.appendChild(sw);
+  const mark = () => sw.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === MODE)));
+  mark();
+  sw.addEventListener("click", e => {
+    e.stopPropagation(); setMode(MODE === "3d" ? "classic" : "3d");
+    if (S.phase === "hub") { INK.map = .45; tween(2.6, k => { INK.map = .45 + .55 * k; }, "o"); }
+  });
+}
 // light up the side bar item of the place you are in
 function markSide(id) { document.querySelectorAll("#side .si").forEach(a => a.classList.toggle("on", id ? a.dataset.go === id : a.hasAttribute("data-map"))); }
 document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); go(b.dataset.go); }));
@@ -1119,9 +1151,13 @@ function frame() {
   pointerLight.position.set(pw.x - .4, 1.6, pw.z + .2); pointerLight.intensity = 1.8 * S.handOn * S.L * (1 - S.focus * .7);
   // hover over hotspots
   if (S.phase === "hub") {
-    const [px, py] = w2p(pw); let h = null; MAP_SPOTS.forEach(s => { if (Math.hypot(px - s.x, py - s.y) < s.r) h = s.id; }); { const mh = MINI.pick(ctx.ray()); if (mh) h = mh; } S.hover = S.overUI ? null : h; { const sp = MAP_SPOTS.find(x => x.id === S.hover); const txt = sp ? `${sp.label}: ${sp.sub}` : "Select a place on the map"; if (hubHint.textContent !== txt) hubHint.textContent = txt; }
+    const [px, py] = w2p(pw); let h = null; SPOTS().forEach(s => { if (Math.hypot(px - s.x, py - s.y) < s.r) h = s.id; }); if (MODE === "3d") { const mh = MINI.pick(ctx.ray()); if (mh) h = mh; } S.hover = S.overUI ? null : h; { const sp = SPOTS().find(x => x.id === S.hover); const txt = sp ? `${sp.label}: ${sp.sub}` : "Select a place on the map"; if (hubHint.textContent !== txt) hubHint.textContent = txt; }
   }
-  MINI.update(t, { k: INK.map, relief: RELIEF.cur, hover: S.hover, show: S.phase === "hub" || S.phase === "intro" || S.phase === "await" || S.phase === "tour" });
+  if (MODE === "3d" && S.phase === "hub" && !document.body.classList.contains("qv")) {
+    const tx = HUB_CAM.pos.x + (pointer.nx - .5) * .9, ty = HUB_CAM.pos.y - (pointer.ny - .5) * .5, tz = HUB_CAM.pos.z + (pointer.ny - .5) * .3;
+    camera.position.x += (tx - camera.position.x) * .02; camera.position.y += (ty - camera.position.y) * .02; camera.position.z += (tz - camera.position.z) * .02; camera.lookAt(camLook);
+  }
+  MINI.update(t, { k: INK.map, relief: RELIEF.cur, hover: S.hover, show: MODE === "3d" && (S.phase === "hub" || S.phase === "intro" || S.phase === "await" || S.phase === "tour") });
   spotGlows.forEach((g, i) => { const on = 0; g.material.opacity += ((on * (.65 + Math.sin(t * 3 + i) * .15)) * INK.map - g.material.opacity) * .12; });
   if (S.phase === "await") { const dd = pw.distanceTo(startSeal.position), near = Math.max(0, 1 - dd / 1.2); sealRing.material.opacity += ((.32 + Math.sin(t * 2.4) * .14) * (1 - near) + near * (.75 + Math.sin(t * 5) * .2) - sealRing.material.opacity) * .12; sealRing.scale.setScalar(1.25 + Math.sin(t * 2.4) * .12 + near * .3); document.body.classList.toggle("pp-hover", dd < .45); if (S.press === 0 || S.press === undefined) startSeal.scale.setScalar(1 + Math.sin(t * 2.4) * .025 + (dd < .45 ? .06 : 0)); }
   else { sealRing.material.opacity *= .9; if (S.phase === "tour") document.body.classList.remove("pp-hover"); }

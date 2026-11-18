@@ -42,6 +42,36 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
     bg.rotateX(-Math.PI / 2); bg.translate(0, .02, 0); const beach = new T.Mesh(bg, SAND); beach.receiveShadow = true; g.add(beach);
   });
 
+  // ---------------------------------------------------------------- living water over the painted sea
+  const water = (() => {
+    const MW = 512, MH = 350, id = map.heightMask(MW, MH); const mask = new T.DataTexture(new Uint8Array(id.data), MW, MH, T.RGBAFormat); mask.flipY = false; mask.needsUpdate = true; mask.minFilter = mask.magFilter = T.LinearFilter;
+    const a = W(110, 100), b = W(1938, 1300), w = b.x - a.x, d = b.z - a.z;
+    const g = new T.PlaneGeometry(w, d, 1, 1); g.rotateX(-Math.PI / 2); g.translate((a.x + b.x) / 2, 0, (a.z + b.z) / 2);
+    const m = new T.ShaderMaterial({ transparent: true, depthWrite: false,
+      uniforms: { t: { value: 0 }, k: { value: 0 }, mask: { value: mask }, light: { value: new T.Vector3(3.5, 5, -3).normalize() }, box: { value: new T.Vector4(a.x, a.z, w, d) }, paper: { value: new T.Vector2(W(2048, 0).x * 2, W(0, 1400).z * 2) } },
+      vertexShader: `varying vec3 vW; void main(){ vec4 p = modelMatrix * vec4(position, 1.); vW = p.xyz; gl_Position = projectionMatrix * viewMatrix * p; }`,
+      fragmentShader: `uniform float t, k; uniform sampler2D mask; uniform vec3 light; uniform vec4 box; uniform vec2 paper; varying vec3 vW;
+        float h(vec2 p){ return sin(p.x * 9. + t * 1.1) * .5 + sin(p.y * 11. - t * .9 + p.x * 3.) * .5 + sin((p.x + p.y) * 23. + t * 1.7) * .25 + sin((p.x - p.y * 1.3) * 31. - t * 2.1) * .15; }
+        void main(){
+          vec2 uv = vec2((vW.x - box.x) / box.z, (vW.z - box.y) / box.w);
+          float land = texture2D(mask, vec2(vW.x / paper.x + .5, vW.z / paper.y + .5)).r;
+          float e = 0.004; vec2 p = vW.xz;
+          vec3 n = normalize(vec3(-(h(p + vec2(e, 0.)) - h(p)) / e * .012, 1., -(h(p + vec2(0., e)) - h(p)) / e * .012));
+          vec3 v = normalize(cameraPosition - vW);
+          float fres = pow(1. - max(dot(n, v), 0.), 3.);
+          float spec = pow(max(dot(reflect(-light, n), v), 0.), 90.);
+          vec3 deep = vec3(.03, .30, .38), shallow = vec3(.18, .58, .58);
+          vec3 col = mix(deep, shallow, smoothstep(0., .5, land) * .9 + fres * .25);
+          float foamBand = smoothstep(.06, .22, land) * (1. - smoothstep(.3, .5, land));
+          float foam = foamBand * smoothstep(.2, .9, sin(t * 1.4 + land * 40. + h(p * 1.7) * 2.) * .5 + .5);
+          col += vec3(1., .9, .72) * spec * 1.4 + vec3(.95) * foam * .75;
+          float edge = smoothstep(0., .03, uv.x) * smoothstep(0., .03, uv.y) * smoothstep(0., .03, 1. - uv.x) * smoothstep(0., .03, 1. - uv.y);
+          float a = (.5 + fres * .3 + spec * .5 + foam * .4) * (1. - smoothstep(.45, .6, land)) * edge * k;
+          gl_FragColor = vec4(col, a);
+        }` });
+    const mesh = new T.Mesh(g, m); mesh.position.y = .048; mesh.renderOrder = 2; scene.add(mesh); return mesh;
+  })();
+
   // ---------------------------------------------------------------- landmarks
   const items = [];
   function place(id, px, py, build, scale = 1, ry = 0) {
@@ -219,6 +249,7 @@ export function buildMiniatures({ THREE: T, scene, p2w, shadowy, MAT, map, glowS
   // ---------------------------------------------------------------- update
   function update(t, { k, relief, hover, show }) {
     const vis = show && relief > .01;
+    water.material.uniforms.t.value = t; water.material.uniforms.k.value = vis ? prog(k, .3, .6) : 0; water.visible = vis;
     // islands rise out of the paper as the map finishes, then the landmarks pop up
     const ir = vis ? easeBack(prog(k, .55, .8)) * Math.min(1, relief * 1.2) : 0;
     islands.visible = trees.visible = piers.visible = ir > .002; [islands, trees, piers].forEach(o => o.scale.set(1, Math.max(.001, ir), 1));
