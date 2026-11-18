@@ -634,7 +634,7 @@ const finalPass = new ShaderPass({
       float v=1.-dot(c*vec2(1.05,1.25),c*vec2(1.05,1.25))*1.25*vig; col*=clamp(v,0.,1.);
       col+=(h(uv*res+fract(time)*100.)-.5)*.025;
       // switching versions: the old picture dissolves into the new one in soft patches
-      if(swap>.001){ float n=nz(uv*res/120.)*.65+nz(uv*res/30.)*.35; float w=swap*1.2-.1; vec3 pv=texture2D(tPrev,uv).rgb; float m=smoothstep(n-.07,n+.07,w); col=mix(col,pv,m); col+=vec3(.55,.8,1.)*smoothstep(.04,0.,abs(w-n))*.35*step(swap,.999); }
+      if(swap>.001){ float n=nz(uv*res/260.)*.7+nz(uv*res/70.)*.3; float w=swap*1.5-.25; vec3 pv=texture2D(tPrev,uv).rgb; col=mix(col,pv,smoothstep(n-.25,n+.25,w)); }
       col*=1.-fade;
       if(abs(uv.y-.5)>.5-bars) col=vec3(0.);
       gl_FragColor=vec4(col,1.);
@@ -684,7 +684,9 @@ export function moveCamera(pos, look, dur, e = "io") {
 
 // tweens --------------------------------------------------------------------------------------
 let tweens = [];
-export function tween(dur, fn, e = "io", delay = 0) { return new Promise(res => tweens.push({ s: performance.now() + delay * 1000, d: dur * 1000, fn, e: ease[e] || ease.io, res })); }
+// (a test can drive the clock through window.__clock to inspect any moment of an animation)
+const nowT = () => window.__clock ?? performance.now();
+export function tween(dur, fn, e = "io", delay = 0) { return new Promise(res => tweens.push({ s: nowT() + delay * 1000, d: dur * 1000, fn, e: ease[e] || ease.io, res })); }
 export const wait = s => tween(s, () => { }, "lin");
 function stepTweens(now) { tweens = tweens.filter(t => { const k = (now - t.s) / t.d; if (k < 0) return true; const c = Math.min(1, k); t.fn(t.e(c), c); if (c >= 1) { t.res(); return false; } return true; }); }
 
@@ -1061,6 +1063,12 @@ export async function closeSection() {
   active = null; S.phase = "hub"; hubHint.hidden = false; document.body.classList.remove("insec"); store.set("fc-last", null); markSide(null);
 }
 ctx.closeSection = closeSection;
+// a page swaps its content behind a soft dissolve: the last frame is kept and fades out in patches
+ctx.dissolve = fn => new Promise(res => {
+  if (REDUCED) { fn(); res(); return; }
+  S.doSwap = () => { S.doSwap = null; fn(); const u = finalPass.uniforms.swap, id = (S.swapId = (S.swapId || 0) + 1); u.value = 1; tween(.6, k => { if (id === S.swapId) u.value = 1 - k; }, "io"); res(); };
+  snapWanted = true;
+});
 function onClick() {
   if (S.phase === "await") { const p = pointerOnTable(); if (p && p.distanceTo(startSeal.position) < .7) startTour(); else if (hovered) clickObject(hovered); }
   else if (S.phase === "hub" && S.hover) openSection(S.hover);
@@ -1129,7 +1137,7 @@ qv.addEventListener("pointerdown", e => e.stopPropagation());
 document.getElementById("lightbox").addEventListener("click", e => { e.currentTarget.hidden = true; });
 addEventListener("keydown", e => { if (e.key !== "Escape") return; const cs = document.getElementById("casestudy"), lb = document.getElementById("lightbox"); if (!lb.hidden) lb.hidden = true; else if (!qv.hidden) closeQuick(); else if (cs && !cs.hidden) cs.hidden = true; else if (S.phase === "inSection") closeSection(); });
 if (location.hash === "#quick-view") openQuick();
-window.__app = { map, setRoll, rightHand, completeIntro, INTER, clickObject, go, ray, pointerOnTable, S, skipIntro, openSection, closeSection, startTour, camera, pointer, sections, INK };
+window.__app = { scene, inkMesh, map, setRoll, rightHand, completeIntro, INTER, clickObject, go, ray, pointerOnTable, S, skipIntro, openSection, closeSection, startTour, camera, pointer, sections, INK };
 
 // =====================================================================
 // FRAME LOOP
@@ -1147,7 +1155,7 @@ function adapt() {
 }
 function frame() {
   if (window.__paused) { requestAnimationFrame(frame); return; } // the classic view is showing
-  const now = performance.now(), t = clock.getElapsedTime();
+  const now = nowT(), t = clock.getElapsedTime();
   stepTweens(now);
   // candle flicker (smoothed noise, shared so all lights breathe together a bit)
   flick += (Math.random() - .5) * .45; flick *= .82;

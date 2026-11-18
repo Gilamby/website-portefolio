@@ -190,29 +190,25 @@ export class Popup {
       P.needsUpdate = true; m.geometry.computeVertexNormals(); });
   }
   async nav(dir) {
-    if (this.busy) { this.queued = dir; return; } this.busy = true; const { tween, ease } = this.ctx;
-    const from = this.art(this.i), ni = (this.i + dir + PROJECTS.length) % PROJECTS.length, to = this.art(ni);
-    const seg = (t, a, b) => Math.min(1, Math.max(0, (t - a) / (b - a)));
-    const o0 = this.orbitMat.uniforms.k.value; let stage = 0;
-    const layers = [this.back.piv, this.card.piv, this.front.piv];
-    // 1) the pop-up folds completely flat, 2) a page turns with the real pages on it, 3) the next scene unfolds
-    await tween(1.9, t => {
-      const down = ease.io(seg(t, 0, .3)), turn = ease.io(seg(t, .3, .7)), up = ease.o(seg(t, .7, 1));
-      if (stage === 0 && t >= .3) { stage = 1;
-        layers.forEach(l => l.visible = false); this.apply(to, "layers");
-        const pf = dir > 0 ? from.spread : to.spread, pb = dir > 0 ? to.spread : from.spread;
-        this.sweepF.material.map = this.sweepF.material.emissiveMap = pf; this.sweepB.material.map = this.sweepB.material.emissiveMap = pb;
-        this.apply(to, dir > 0 ? "R" : "L"); this.sweepPiv.visible = true; }
-      if (stage === 1 && t >= .7) { stage = 2; this.sweepPiv.visible = false; this.apply(to, dir > 0 ? "L" : "R"); layers.forEach(l => l.visible = true); this.i = ni; this.updateSide(); this.prefetch(); }
-      if (stage === 0) this.setFold(1 - down); else if (stage === 2) this.setFold(up);
-      // the turning page lifts in a soft arc
-      const a = dir > 0 ? turn * Math.PI : Math.PI - turn * Math.PI; this.sweepPiv.rotation.z = a; this.sweepPiv.position.y = .17 + Math.sin(turn * Math.PI) * .05;
-      this.curl(Math.sin(turn * Math.PI) * (dir > 0 ? 1 : -1));
-      this.orbitMat.uniforms.k.value = o0 * (t < .5 ? 1 - seg(t, 0, .25) : seg(t, .75, 1));
-    }, "lin");
-    this.curl(0); this.busy = false;
+    if (this.busy) { this.queued = dir; return; } this.busy = true; const { tween } = this.ctx;
+    const ni = (this.i + dir + PROJECTS.length) % PROJECTS.length, to = this.art(ni);
+    const layers = [this.front.piv, this.card.piv, this.back.piv], x0 = layers.map(l => l.position.x);
+    const o0 = this.orbitMat.uniforms.k.value;
+    const backOut = x => { const c = 1.4; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+    // 1) the pop-up slides aside and folds itself down into the page, front layer first
+    await tween(.5, k => { layers.forEach((l, j) => { const q = Math.min(1, Math.max(0, (k - j * .12) / (1 - j * .12))), e = q * q * (3 - 2 * q);
+      l.scale.y = Math.max(.02, 1 - e); l.position.x = x0[j] - dir * .35 * e; });
+      this.orbitMat.uniforms.k.value = o0 * (1 - k); }, "lin");
+    // 2) the page itself changes with a soft dissolve, 3) the next pop-up springs up from the other side
+    await this.ctx.dissolve(() => { this.apply(to); this.i = ni; this.updateSide(); this.prefetch(); });
+    await tween(.8, k => { layers.forEach((l, j) => { const q = Math.min(1, Math.max(0, (k - (2 - j) * .1) / (1 - (2 - j) * .1)));
+      l.scale.y = Math.max(.02, backOut(q)); l.position.x = x0[j] + dir * .35 * (1 - Math.min(1, q * 1.4)) ; });
+      this.orbitMat.uniforms.k.value = o0 * k; }, "lin");
+    layers.forEach((l, j) => { l.scale.y = 1; l.position.x = x0[j]; });
+    this.busy = false;
     if (this.queued) { const q = this.queued; this.queued = 0; this.nav(q); }
   }
+
 
 
   visit() {

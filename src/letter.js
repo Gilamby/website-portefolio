@@ -25,7 +25,7 @@ export class Letter {
     g.fillStyle = "#2a1c12"; g.font = "64px Caveat"; g.fillText("Dear reader,", 90, 200);
     g.font = "700 74px 'Cinzel Decorative'"; g.fillText("Get in touch", 90, 320);
     g.font = "48px Caveat"; g.fillStyle = "#3a2a1c";
-    let y = wrap(g, "Thank you for visiting my portfolio. Are you looking for a front-end developer, or do you have a project in mind? I would be glad to hear from you.", 92, 420, w - 180, 62);
+    let y = wrap(g, "Thank you for visiting my portfolio. Are you looking for a full-stack developer, or do you have a project in mind? I would be glad to hear from you.", 92, 420, w - 180, 62);
     const rows = [["Email", CONTACT.email], ["Phone", CONTACT.phone], ["Works", "Remote or on-site"]];
     y += 40; rows.forEach(([k, v]) => { g.fillStyle = "#8e2a1a"; g.font = "46px Caveat"; g.fillText(k, 92, y); g.fillStyle = "#2a1c12"; g.font = "56px Caveat"; g.fillText(v, 330, y); y += 92; });
     g.font = "52px Caveat"; g.fillStyle = "#3a2a1c"; g.fillText("Kind regards,", 92, h - 300);
@@ -65,7 +65,7 @@ export class Letter {
   }
   async open(from) {
     const { tween, moveCamera } = this.ctx; const T = this.T; this.build();
-    this.group.visible = true; this.letter.visible = false; this.flapPivot.rotation.x = 0; this.sealMats.forEach(([m]) => { m.clippingPlanes = []; m.needsUpdate = true; }); this.sealL.rotation.set(0, 0, 0); this.sealR.rotation.set(0, 0, 0); this.env.position.set(0, 0, .9); this.env.updateMatrixWorld();
+    this.group.visible = true; this.letter.visible = false; this.flapPivot.rotation.x = 0; this.sealMats.forEach(([m]) => { m.clippingPlanes = []; m.needsUpdate = true; }); this.sealL.rotation.set(0, 0, 0); this.sealR.rotation.set(0, 0, 0); this.env.position.set(0, .012, .9); this.env.updateMatrixWorld();
     this.sealL.position.x = 0; this.sealR.position.x = 0; this.sealL.visible = this.sealR.visible = true;
     moveCamera(new T.Vector3(.7, 6.6, 3.0), new T.Vector3(0, 0, .05), 2.1, "io");
     const start = new T.Vector3(from.x, 3.5, from.z - 1), end = new T.Vector3(0, 0, .9);
@@ -79,7 +79,7 @@ export class Letter {
     // the letter slides out, rises, and unfolds
     this.letter.visible = true; this.setFold(0);
     await tween(.9, k => { this.letter.position.set(0, .05 + k * .2, .9 - k * 1.6); }, "io");
-    await tween(1.2, k => { this.letter.position.set(0, .25 + Math.sin(k * Math.PI) * .9 - k * .14, -.7 + k * .95); this.env.position.set(-k * 3.6, 0, .9 + k * 1.9); this.setFold(ease(k)); }, "io");
+    await tween(1.2, k => { this.letter.position.set(0, .25 + Math.sin(k * Math.PI) * .9 - k * .14, -.7 + k * .95); this.env.position.set(-k * 3.6, .012, .9 + k * 1.9); this.setFold(ease(k)); }, "io");
     this.ctx.showLinks([["Email me", `mailto:${CONTACT.email}`], ["LinkedIn", CONTACT.linkedin], ["GitHub", CONTACT.github]]);
     function ease(t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
   }

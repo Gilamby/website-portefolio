@@ -7,7 +7,7 @@
 export const PROFILE = {
   name: "Fabian Corsalini",
   role: "Creative Software Developer",
-  focus: "Front-end development & UI/UX design",
+  focus: "Full-stack development: front-end, back-end & UI/UX",
   age: 18,
   // what you are doing right now
   current: { title: "Software Developer", company: "OptimaSys", type: "Internship · on-site", place: "Marbella, Spain", since: "Oct 2026" },
@@ -15,13 +15,13 @@ export const PROFILE = {
   languages: "Dutch (native) · English (professional) · Italian (beginner)",
   mobility: "Remote or on-site · open to relocate",
   // handwritten notes next to the photo in About Me: what is useful to know before working with you
-  notes: ["Front-end & UI/UX", "Remote or on-site", "Dutch & English", "International work experience"],
-  openTo: "Front-end roles and projects",
+  notes: ["Full-stack: front-end & back-end", "Remote or on-site", "Dutch & English", "International work experience"],
+  openTo: "Full-stack roles and projects",
   // shown at the top of Quick view
-  availability: "Open to front-end roles and projects",
+  availability: "Open to full-stack roles and projects",
 
   about: [
-    "I am a creative software developer with a strong eye for design and a drive to build products that people actually use. I take an idea from the first sketch to a working product, and I care about the details on both sides: how it looks and how it is built.",
+    "I am a full-stack software developer with a strong eye for design. In my projects I build both sides myself: the interface people see and the back-end that makes it work, from APIs and payments to the database. I take an idea from the first sketch to a working product, and I care about the details on both sides: how it looks and how it is built.",
     "I currently work as a software developer at OptimaSys, where I build features across the front-end and back-end of QR-Codex, a commercial web application.",
     "I learn new technologies quickly, work independently and take ownership of what I deliver."
   ],
@@ -32,20 +32,46 @@ export const PROFILE = {
     ["Fast learner", "I started experimenting with code at around eight. Since then I have worked with HTML, CSS, JavaScript, TypeScript, React and Figma. Every company uses a different stack, and I pick a new one up quickly."],
     ["Design-minded", "Development is not only about making something work; it should look and feel right too. I pay attention to the details of layouts and interactions, because they decide how people experience a product."]
   ],
-  lookingFor: "A front-end role or project where I can build interfaces people use, take ownership and keep learning."
+  lookingFor: "A full-stack role or project where I build the whole product, from the database to the interface, take ownership and keep learning."
 };
 
 // "My Story": your journey as chapters, oldest first. Add a chapter when something new starts.
 export const STORY = {
-  intro: "From a first line of code at eight to building commercial software abroad.",
+  intro: "From a first line of code at eight to building commercial software abroad. This is who I am, how I got here and what I can do.",
+  // shown on the first page: who I am in a few lines
+  who: "I am Fabian, an 18-year-old full-stack developer from Delft. I build complete web products: the interface people use, the back-end behind it, and everything that connects the two. I study Software Development at the Grafisch Lyceum Rotterdam and I currently work abroad, in Marbella, on a commercial product with real paying customers.",
   chapters: [
-    { when: "Age 8", title: "The first line of code", img: null, learned: ["A lasting curiosity for how software is made", "The ambition to build games one day"],  text: "My dad and my uncle introduced me to computers and programming. I wanted to build games, and that curiosity never left. It is what pulled me into IT." },
-    { when: "2023 · age 15", title: "Municipality of Delft & Rijswijk", img: "gemeente", learned: ["Writing a project plan for a real client", "Oracle APEX and PL/SQL in production", "Interviewing the mayor about the project"],  text: "My first internship. Instead of only observing, I was given a real assignment: a platform where young people in Delft could submit and vote on ideas for local events. I wrote the plan, designed the interface, built it in Oracle APEX and interviewed the mayor about it. The team deliberately let me solve problems on my own, and that taught me more than any tutorial." },
-    { when: "2024", title: "Delta-N", img: "laadpaal", learned: ["Spotting a problem nobody asked me to solve", "Shipping software people use every day"],  text: "Colleagues walked to the car park only to find every charging station taken. I proposed a reservation app, built it with low-code tools and delivered it. It went live and is still in daily use." },
-    { when: "2024 – present", title: "Grafisch Lyceum Rotterdam", img: "funfactory", learned: ["Working in teams for real clients", "From wireframe and prototype to pitch"],  text: "Studying Software Development. Here I learned to work as part of a team: project plans, wireframes, prototypes, pitches and client meetings, from idea to delivery." },
-    { when: "Oct 2026 – present", title: "OptimaSys, Marbella", img: "qrcodex", learned: ["Full-stack work on a commercial product", "Payments, analytics, APIs and five languages", "Working independently abroad"],  text: "My current internship abroad. As a software developer I work on QR-Codex and other digital products, on both the front-end and the back-end, with the freedom to make technical decisions that matter for the business." }
+    { when: "Age 8", title: "The first line of code",
+      context: "My dad and my uncle introduced me to computers and programming. What I wanted most was to build my own games.",
+      did: "I started experimenting with code and slowly built small things of my own. When something did not work, I kept trying until it did, and that habit never left.",
+      result: "Curiosity for how software is made became the reason I chose IT.",
+      learned: ["Curiosity is the best teacher", "Building something yourself beats only using it"] },
+    { when: "2023 · age 15", title: "Municipality of Delft & Rijswijk",
+      context: "My first internship. Young people in Delft had no simple way to share ideas for local events with the municipality. Instead of only observing, I was given that problem as a real assignment.",
+      did: "I wrote the project plan, designed the interface and built the platform in Oracle APEX. A four-step form collects the idea, the target group and contact details, with a summary before sending. In PL/SQL I wrote the back-end logic: every submission sends one email to the municipality and a confirmation back to the young person. I also interviewed the mayor about the project.",
+      result: "Delivered to the municipality as a working platform.",
+      learned: ["Planning a project for a real client", "Back-end logic and email automation in PL/SQL", "Presenting my work to management"],
+      skills: "Oracle APEX · PL/SQL · UI design · project planning" },
+    { when: "2024", title: "Delta-N",
+      context: "Colleagues walked to the car park only to find every charging station taken. Nobody had asked for a solution, but the problem cost people time every day.",
+      did: "I proposed a reservation app and built it myself with low-code tools. You see in real time which stations are free (green) or taken (red), pick a date and a time slot in a simple form, and reserve with one tap.",
+      result: "The app went live and is still used every day.",
+      learned: ["Spotting a problem nobody asked me to solve", "Pitching an idea and delivering it", "Building software people rely on daily"],
+      skills: "Low-code · UX for everyday use · solo delivery" },
+    { when: "2024 – present", title: "Grafisch Lyceum Rotterdam",
+      context: "I study Software Development (Creative Software Developer, MBO 4). Here I learned to work in a team for real clients, from the first meeting to delivery.",
+      did: "Project plans, wireframes, style guides in Figma, clickable prototypes, pitches and client meetings, then building it. For FunFactory, a sustainable toy webshop, I designed every page and built the site in HTML, CSS and JavaScript. With my class I built Red Frontier, Marktplaats and Quizzy.",
+      result: "A process I now use on every project: understand the problem, design it, build it, present it.",
+      learned: ["Working in a team with deadlines", "From wireframe and prototype to a working site", "Explaining technical choices to non-technical people"],
+      skills: "HTML · CSS · JavaScript · Figma · teamwork" },
+    { when: "Oct 2026 – present", title: "OptimaSys, Marbella",
+      context: "My current internship, abroad and on-site. I work as a software developer on QR-Codex, a commercial web app where businesses create QR codes, change where they point at any time and see every scan.",
+      did: "I build features across the whole stack: subscriptions and Stripe payments, scan analytics, business tools, the APIs between the promotional website and the app, and support for five languages. I also built the Flexichat website with a working demo chat, pricing with Stripe checkout and a CMS for every text.",
+      result: "Code I wrote runs in production for paying customers.",
+      learned: ["Full-stack work on a real product", "Payments, analytics and APIs that must not fail", "Working independently in another country"],
+      skills: "JavaScript · Node.js · APIs · Stripe · Payload CMS" }
   ],
-  next: { title: "What's next", text: "My long-term goal is to start my own company and build digital products. For now I want to keep growing as a front-end developer, on products that real people use. Game development remains a passion: it is the reason I started." }
+  next: { title: "What's next", text: "My long-term goal is to start my own company and build digital products for businesses. Until then I want to grow as a full-stack developer on products that real people use, in a team where I can take ownership. Game development is still a passion: it is the reason I started." }
 };
 
 // newest first

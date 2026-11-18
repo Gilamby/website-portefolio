@@ -109,7 +109,7 @@ export class Story {
     g.shadowColor = "rgba(0,0,0,.7)"; g.shadowOffsetY = 3; g.shadowBlur = 2;
     g.font = "700 87px 'Cinzel Decorative'"; g.fillText("My Story", w / 2 + 20, 340);
     g.font = "700 37px 'Cinzel Decorative'"; g.fillText("Fabian Corsalini", w / 2 + 20, 430);
-    g.font = "700 25px 'Cinzel Decorative'"; g.fillText("Creative Software Developer  ·  MMXXVI", w / 2 + 20, h - 150);
+    g.font = "700 25px 'Cinzel Decorative'"; g.fillText("Full-stack Developer  ·  MMXXVI", w / 2 + 20, h - 150);
     // medallion
     g.shadowBlur = 0; g.lineWidth = 6; g.beginPath(); g.arc(w / 2 + 20, h * .5 + 140, 120, 0, 7); g.stroke(); g.lineWidth = 2; g.beginPath(); g.arc(w / 2 + 20, h * .5 + 140, 100, 0, 7); g.stroke();
     for (let i = 0; i < 16; i++) { g.save(); g.translate(w / 2 + 20, h * .5 + 140); g.rotate(i / 16 * Math.PI * 2); g.beginPath(); g.moveTo(0, -125); g.lineTo(10, -160); g.lineTo(0, -195 + (i % 2) * 20); g.lineTo(-10, -160); g.closePath(); g.fill(); g.restore(); }
@@ -126,16 +126,19 @@ export class Story {
       g.fillStyle = ink; g.font = F(31); return wrap(g, body, x, oy + 96, w, 46) + 26;
     };
     const P = [];
+    // one chapter per page, written out: the situation, what I did, the result, what I learned and the tools
+    const label = (g, t, x, y) => { g.fillStyle = meta; g.font = F(40, "Caveat"); g.fillText(t, x, y); return y + 40; };
     const chapter = (g, x, y, w, c, n) => {
-      g.fillStyle = meta; g.font = F(46, "Caveat"); g.fillText(`Chapter ${n} · ${c.when}`, x, y);
-      g.fillStyle = ink; g.font = "700 46px 'Cinzel Decorative'"; y = wrap(g, c.title, x, y + 66, w, 54);
+      g.fillStyle = meta; g.font = F(44, "Caveat"); g.fillText(`Chapter ${n} · ${c.when}`, x, y);
+      g.fillStyle = ink; g.font = "700 44px 'Cinzel Decorative'"; y = wrap(g, c.title, x, y + 62, w, 52);
       g.strokeStyle = "rgba(138,90,20,.55)"; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y - 30); g.quadraticCurveTo(x + 200, y - 22, x + 420, y - 34); g.stroke();
-      g.fillStyle = ink; g.font = F(34); y = wrap(g, c.text, x, y + 26, w, 52);
-      if (c.img && IMG[c.img]) { const need = c.learned ? 92 + c.learned.length * 48 : 0; const sc = Math.max(.62, Math.min(1, (PY - 50 - y - need) / 430)); y += 30; polaroid(g, IMG[c.img], x + w / 2 + 20, y + 190 * sc, 560 * sc, 400 * sc, (n % 2 ? -1 : 1) * .03, c.title); tape(g, x + w / 2 + 20, y - 4, 150, 44, (n % 2 ? 1 : -1) * .1); y += 420 * sc; }
-      if (c.learned) {
-        y += 10; g.fillStyle = meta; g.font = F(42, "Caveat"); g.fillText("What I took from it", x, y + 20); y += 72;
-        c.learned.forEach(t => { g.fillStyle = gold; g.font = "700 26px 'Cinzel Decorative'"; g.fillText("✦", x + 4, y); g.fillStyle = soft; g.font = F(40, "Caveat"); y = wrap(g, t, x + 44, y, w - 50, 44) + 6; });
-      }
+      g.fillStyle = soft; g.font = "italic 31px Spectral"; y = wrap(g, c.context, x, y + 14, w, 45) + 8;
+      y = label(g, "What I did", x, y + 22); g.fillStyle = ink; g.font = F(31); y = wrap(g, c.did, x, y, w, 45) + 8;
+      if (c.result) { y += 14; g.fillStyle = "rgba(138,90,20,.1)"; const top = y - 32; g.font = "700 29px Spectral"; const lines = Math.ceil(g.measureText("Result: " + c.result).width / (w - 40)); g.fillRect(x - 14, top, w + 14, lines * 41 + 22); g.fillStyle = gold; g.fillRect(x - 14, top, 5, lines * 41 + 22); g.fillStyle = ink; y = wrap(g, "Result: " + c.result, x + 8, y, w - 30, 41) + 18; }
+      // the lessons only when they fit on the page, so nothing is ever cut off at the bottom
+      if (c.learned && y + 90 + c.learned.length * 46 < PY - 70) { y = label(g, "What I took from it", x, y + 26);
+        c.learned.forEach(t => { g.fillStyle = gold; g.font = "700 22px 'Cinzel Decorative'"; g.fillText("✦", x + 2, y); g.fillStyle = soft; g.font = F(30); y = wrap(g, t, x + 40, y, w - 46, 42) + 4; }); }
+      if (c.skills && y + 60 < PY - 70) { y += 22; g.fillStyle = meta; g.font = "italic 26px Spectral"; y = wrap(g, "Tools: " + c.skills, x, y, w, 36); }
       return y + 40;
     };
     const chs = STORY.chapters, rest = chs.slice(1), per = Math.max(1, Math.ceil(rest.length / 4));
@@ -144,16 +147,17 @@ export class Story {
       g.fillStyle = "#4a2210"; g.fillRect(0, 0, w, h);
       g.save(); g.translate(30, 30); paperBG(g, w - 60, h - 60, { gutter: "right", sx: .15, sy: .3 }); g.restore();
       g.fillStyle = gold; g.font = "900 82px 'Cinzel Decorative'"; g.fillText("My Story", 100, 190);
-      g.fillStyle = soft; g.font = "italic 36px Spectral"; let y = wrap(g, STORY.intro, 100, 260, 820, 50);
-      if (IMG.char) { const ih = 380, iw = ih * IMG.char.width / IMG.char.height; g.globalAlpha = .9; g.drawImage(IMG.char, w - iw - 70, y - 10, iw, ih); g.globalAlpha = 1; }
-      chapter(g, 100, y + 440, 820, chs[0], 1);
+      g.fillStyle = soft; g.font = "italic 32px Spectral"; let y = wrap(g, STORY.intro, 100, 250, 820, 44);
+      y = label(g, "Who I am", 100, y + 34); g.fillStyle = ink; g.font = F(30); y = wrap(g, STORY.who, 100, y, 820, 43);
+      g.strokeStyle = "rgba(138,90,20,.4)"; g.lineWidth = 2; g.beginPath(); g.moveTo(100, y + 24); g.lineTo(920, y + 24); g.stroke();
+      chapter(g, 100, y + 100, 820, chs[0], 1);
     }, true));
     // P1..P4 — the following chapters
     for (let p = 0; p < 4; p++) {
       const list = rest.slice(p * per, p * per + per);
       P.push(this.canvasTex((g, w, h) => {
         paperBG(g, w, h, { gutter: p % 2 ? "right" : "left", sx: .2 + p * .1, sy: .3 });
-        let y = 140; list.forEach((c, i) => { y = chapter(g, 110, y, 800, c, 2 + p * per + i); });
+        let y = 130; list.forEach((c, i) => { y = chapter(g, 110, y, 800, c, 2 + p * per + i); });
       }, p % 2 === 1));
     }
     // P5 — what's next
