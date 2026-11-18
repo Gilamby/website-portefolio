@@ -2,11 +2,11 @@
 // Everything is drawn into the paper's ink canvas (2048 x 1400 px).
 
 export const MAP_SPOTS = [
-  { id: "story", x: 440, y: 440, r: 160, label: "My Story", sub: "internships, school and work, chapter by chapter" },
-  { id: "about", x: 1235, y: 320, r: 140, label: "About Me", sub: "profile, skills and why hire me" },
-  { id: "built", x: 1035, y: 655, r: 160, label: "Projects", sub: "my work, with case studies and live links" },
+  { id: "story", x: 440, y: 460, r: 170, label: "My Story", sub: "internships, school and work, chapter by chapter" },
+  { id: "about", x: 1235, y: 340, r: 150, label: "About Me", sub: "profile, skills and why hire me" },
+  { id: "built", x: 1050, y: 670, r: 165, label: "Projects", sub: "my work, with case studies and live links" },
   { id: "letter", x: 1700, y: 390, r: 150, label: "Contact", sub: "email, LinkedIn and GitHub" },
-  { id: "why", x: 1430, y: 1110, r: 140, label: "Why Hire Me", sub: "four reasons, each with the story behind it" },
+  { id: "why", x: 1440, y: 1110, r: 150, label: "Why Hire Me", sub: "four reasons, each with the story behind it" },
 ];
 
 let seed = 99;
@@ -87,7 +87,7 @@ export function buildMap() {
     g.save(); g.globalAlpha = a; g.fillStyle = "rgba(70,110,60,.35)"; g.beginPath(); g.arc(x, y - s, s, 0, 7); g.fill();
     g.strokeStyle = INK; g.lineWidth = 2; g.beginPath(); g.arc(x, y - s, s, Math.PI * .9, Math.PI * 2.1); g.stroke(); g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - s * .4); g.stroke(); g.restore();
   }
-  function wave(g, x, y, s, a) { g.save(); g.globalAlpha = a * .7; g.strokeStyle = "rgba(40,80,90,.8)"; g.lineWidth = 2; g.beginPath(); g.moveTo(x - s, y); g.quadraticCurveTo(x - s / 2, y - s * .4, x, y); g.quadraticCurveTo(x + s / 2, y - s * .4, x + s, y); g.stroke(); g.restore(); }
+  function wave(g, x, y, s, a) { g.save(); g.globalAlpha = a * .7; g.strokeStyle = "rgba(232,244,238,.85)"; g.lineWidth = 2.4; g.beginPath(); g.moveTo(x - s, y); g.quadraticCurveTo(x - s / 2, y - s * .4, x, y); g.quadraticCurveTo(x + s / 2, y - s * .4, x + s, y); g.stroke(); g.restore(); }
   function label(g, txt, x, y, size, a, font = "italic", color = INK, rot = 0, track = 0) {
     if (a <= 0) return; g.save(); g.globalAlpha = a; g.translate(x, y); g.rotate(rot); g.fillStyle = color; g.textAlign = "center"; g.textBaseline = "middle";
     g.font = `700 ${Math.round(size * .74)}px 'Cinzel Decorative'`; if (track) { g.letterSpacing = track + "px"; } g.fillText(txt, 0, 0); g.restore();
@@ -235,7 +235,30 @@ export function buildMap() {
   }
 
 
+  // a watercolour sea around the islands, painted once
+  const seaCanvas = (() => {
+    const c = document.createElement("canvas"); c.width = 2048; c.height = 1400; const g = c.getContext("2d");
+    const gr = g.createRadialGradient(1000, 760, 120, 1000, 760, 1250); gr.addColorStop(0, "rgba(34,128,150,.78)"); gr.addColorStop(.7, "rgba(24,104,130,.84)"); gr.addColorStop(1, "rgba(18,80,104,.88)");
+    g.fillStyle = gr; g.fillRect(70, 70, 1908, 1260);
+    // soft blooms of darker and lighter pigment, like watercolour drying unevenly
+    for (let i = 0; i < 60; i++) { const x = R(100, 1950), y = R(100, 1300), r = R(60, 220); const b = g.createRadialGradient(x, y, 0, x, y, r); const dark = i % 3 === 0; b.addColorStop(0, dark ? "rgba(40,90,104,.12)" : "rgba(180,214,210,.10)"); b.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = b; g.fillRect(x - r, y - r, r * 2, r * 2); }
+    // the islands are cut out, with a soft shallow-water rim around them
+    g.fillStyle = "#000"; g.save(); g.globalCompositeOperation = "destination-out"; g.filter = "blur(10px)"; Object.values(lands).forEach(p => { fillPoly(g, p); g.fill(); }); g.restore();
+    g.save(); g.globalCompositeOperation = "destination-out"; Object.values(lands).forEach(p => { fillPoly(g, p); g.fill(); }); g.restore();
+    g.save(); g.globalCompositeOperation = "source-atop"; g.filter = "blur(14px)"; g.strokeStyle = "rgba(200,232,226,.55)"; g.lineWidth = 34; Object.values(lands).forEach(p => { fillPoly(g, p); g.stroke(); }); g.restore();
+    // fade at the torn paper edge
+    g.save(); g.globalCompositeOperation = "destination-in"; const e = g.createRadialGradient(1024, 700, 500, 1024, 700, 1150); e.addColorStop(0, "rgba(0,0,0,1)"); e.addColorStop(1, "rgba(0,0,0,.25)"); g.fillStyle = e; g.fillRect(0, 0, 2048, 1400); g.restore();
+    return c;
+  })();
+  const ripples = [[760, 1010], [1880, 700], [300, 860], [1230, 470], [900, 170]];
+  function rippleRings(g, now, a) {
+    if (a <= 0) return; g.save(); g.lineWidth = 2.2;
+    ripples.forEach(([x, y], i) => { for (let r = 0; r < 3; r++) { const f = ((now / 5200 + i * .37 + r / 3) % 1); g.strokeStyle = `rgba(230,246,244,${(1 - f) * .45 * a})`; g.beginPath(); g.ellipse(x, y, 16 + f * 70, (16 + f * 70) * .42, 0, 0, 7); g.stroke(); } });
+    g.restore();
+  }
+
   return {
+    seaCanvas, route, mountains: mountains.slice(0, 6), lands, // the journey line in map pixels, drawn in 3D as a glowing path
     // a soft height map of the land, used to lift the islands out of the paper
     heightMask(w, h) {
       const full = document.createElement("canvas"); full.width = 2048; full.height = 1400; const f = full.getContext("2d");
@@ -256,37 +279,21 @@ export function buildMap() {
     draw(g, k, hover, now) {
       TNOW = now;
       const sea = prog(k, 0, .22);
-      if (sea > 0) { g.save(); g.globalAlpha = sea * .5; const gr = g.createRadialGradient(1024, 700, 200, 1024, 700, 1200); gr.addColorStop(0, "rgba(110,150,140,.18)"); gr.addColorStop(1, "rgba(70,110,110,.34)"); g.fillStyle = gr; g.fillRect(90, 90, 1868, 1220); g.restore(); }
-      coastline(g, lands.low, prog(k, .05, .3), "rgba(214,190,130,1)");
-      coastline(g, lands.iberia, prog(k, .12, .38), "rgba(220,186,120,1)");
-      coastline(g, lands.isle, prog(k, .2, .4), "rgba(214,190,130,1)");
-      coastline(g, lands.cape, prog(k, .24, .44), "rgba(214,190,130,1)");
-      coastline(g, lands.unknown, prog(k, .3, .46), "rgba(214,190,130,1)");
+      if (sea > 0) { g.save(); g.globalAlpha = sea; g.drawImage(seaCanvas, 0, 0, g.canvas.width, g.canvas.height); g.restore(); }
+      rippleRings(g, now, prog(k, .4, .6));
+      coastline(g, lands.low, prog(k, .05, .3), "rgba(170,182,112,1)");
+      coastline(g, lands.iberia, prog(k, .12, .38), "rgba(182,178,110,1)");
+      coastline(g, lands.isle, prog(k, .2, .4), "rgba(170,182,112,1)");
+      coastline(g, lands.cape, prog(k, .24, .44), "rgba(170,182,112,1)");
+      coastline(g, lands.unknown, prog(k, .3, .46), "rgba(170,182,112,1)");
       waves.forEach((w, i) => wave(g, w[0] + Math.sin(now / 2400 + i) * 7, w[1], w[2], prog(k, .3 + i * .002, .5 + i * .002) * (insideAny(w[0], w[1]) || nearSpot(w[0], w[1]) ? 0 : .7)));
-      mountains.slice(0, 6).forEach((m, i) => mountain(g, m[0], m[1] - 20, m[2] * .8, prog(k, .36 + i * .01, .46 + i * .01)));
-      forests.slice(0, 10).forEach((t, i) => tree(g, t[0], t[1] + 150, t[2], prog(k, .4 + i * .004, .5 + i * .004)));
-      // a dotted route across the sea that ends where the next project will be: X marks the spot
-      const rt = prog(k, .5, .75);
-      if (rt > 0) { g.save(); g.setLineDash([20, 14]); g.strokeStyle = RED; g.lineWidth = 6; g.lineCap = "round"; strokePartial(g, route, rt, false); g.restore(); }
-      // the little ship sails the route from start to finish, slowly, then sets out again
-      { const u = (now / 90000) % 1, at = along(u), ah = along(Math.min(1, u + .01)), fade = Math.min(1, u / .08, (1 - u) / .08);
-        wake(g, u, now, prog(k, .62, .72) * fade); ship(g, at[0], at[1] - 14, prog(k, .62, .72) * fade, now, ah[0] < at[0] ? -1 : 1); }
-      gulls(g, now, prog(k, .7, .85));
-      const xa = prog(k, .74, .8);
-      if (xa > 0) { g.save(); g.globalAlpha = xa; g.strokeStyle = RED; g.lineWidth = 12; g.lineCap = "round"; const X = 1400, Y = 1080, r = 30; g.beginPath(); g.moveTo(X - r, Y - r); g.lineTo(X + r, Y + r); g.moveTo(X + r, Y - r); g.lineTo(X - r, Y + r); g.stroke(); g.restore(); }
       rose(g, 380, 1130, 70, prog(k, .8, .92), now);
-      treasure(g, 1430, 1086, prog(k, .82, 1), hover === "why", now);
-      ribbon(g, 1440, 1150, 340, "Why Hire Me", "", prog(k, .9, 1), hover === "why");
+      ribbon(g, 1440, 1176, 340, "Why Hire Me", "", prog(k, .9, 1), hover === "why");
       // the four destinations
-      const sp = prog(k, .82, 1);
-      tower(g, 440, 450, sp, hover === "story");
-      chest(g, 1235, 330, sp, hover === "about");
-      workshop(g, 1060, 650, sp, hover === "built", now);
-      lighthouse(g, 1700, 400, sp, hover === "letter", now);
-      ribbon(g, 440, 488, 290, "My Story", "", prog(k, .86, 1), hover === "story");
-      ribbon(g, 1235, 352, 290, "About Me", "", prog(k, .87, 1), hover === "about");
-      ribbon(g, 1050, 680, 290, "Projects", "", prog(k, .88, 1), hover === "built");
-      ribbon(g, 1700, 440, 260, "Contact", "", prog(k, .9, 1), hover === "letter");
+      ribbon(g, 440, 520, 290, "My Story", "", prog(k, .86, 1), hover === "story");
+      ribbon(g, 1235, 412, 290, "About Me", "", prog(k, .87, 1), hover === "about");
+      ribbon(g, 1050, 742, 290, "Projects", "", prog(k, .88, 1), hover === "built");
+      ribbon(g, 1700, 436, 260, "Contact", "", prog(k, .9, 1), hover === "letter");
     }
   };
   function nearSpot(x, y) { return MAP_SPOTS.some(s => Math.hypot(x - s.x, y - s.y) < 230) || Math.hypot(x - 980, y - 1160) < 120 || (x < 660 && y > 1020); }

@@ -10,6 +10,7 @@ import { buildMap, MAP_SPOTS } from "./map.js";
 import { Story } from "./story.js";
 import { Popup } from "./popup.js";
 import { Why } from "./why.js";
+import { buildMiniatures } from "./miniatures.js";
 import { Letter } from "./letter.js";
 import { About } from "./about.js";
 import { loadImages } from "./pages.js";
@@ -686,8 +687,13 @@ const RELIEF = (() => {
     const x = Math.min(MW - 1, Math.max(0, Math.round(u * (MW - 1)))), y = Math.min(MH - 1, Math.max(0, Math.round(v * (MH - 1))));
     const m = img[(y * MW + x) * 4] / 255; hgt[i] = m * m * (3 - 2 * m);   // smooth slopes along the coast
   }
-  return { base, hgt, k: 0, cur: 0 };
+  return { base, hgt, k: 0, cur: 0, img, MW, MH };
 })();
+// world height of the map surface at a map pixel, with the islands fully raised
+function heightAt(px, py) {
+  const x = Math.min(RELIEF.MW - 1, Math.max(0, Math.round(px / PAPER.px * (RELIEF.MW - 1)))), y = Math.min(RELIEF.MH - 1, Math.max(0, Math.round(py / PAPER.py * (RELIEF.MH - 1))));
+  const m = RELIEF.img[(y * RELIEF.MW + x) * 4] / 255; return .026 + m * m * (3 - 2 * m) * .12;
+}
 // the map sheet can be rolled up: k = 0 rolled at the far edge, k = 1 lying flat
 const ROLL = (() => { const P = pg.attributes.position, by = new Float32Array(P.count); for (let i = 0; i < P.count; i++) by[i] = P.getY(i); return { by, k: 1 }; })();
 function setRoll(k) {
@@ -768,6 +774,7 @@ const SEAL_AT = [1024, 1215]; const startSeal = waxSeal(.3, "F"); startSeal.posi
 const sealRing = glowSprite(0xffb060, 1.6, 0); sealRing.position.copy(startSeal.position).add(new V3(0, .1, 0)); scene.add(sealRing);
 
 // map hotspots glow
+const MINI = buildMiniatures({ THREE, scene, p2w, shadowy, MAT, map, heightAt, glowSprite, PAPER });
 const spotGlows = MAP_SPOTS.map(s => { const g = glowSprite(0xffc070, 1.4, 0); g.position.copy(p2w(s.x, s.y, .15)); scene.add(g); return g; });
 
 // sections
@@ -1054,7 +1061,7 @@ qv.addEventListener("pointerdown", e => e.stopPropagation());
 document.getElementById("lightbox").addEventListener("click", e => { e.currentTarget.hidden = true; });
 addEventListener("keydown", e => { if (e.key !== "Escape") return; const cs = document.getElementById("casestudy"), lb = document.getElementById("lightbox"); if (!lb.hidden) lb.hidden = true; else if (!qv.hidden) closeQuick(); else if (cs && !cs.hidden) cs.hidden = true; else if (S.phase === "inSection") closeSection(); });
 if (location.hash === "#quick-view") openQuick();
-window.__app = { setRoll, rightHand, completeIntro, INTER, clickObject, go, ray, pointerOnTable, S, skipIntro, openSection, closeSection, startTour, camera, pointer, sections, INK };
+window.__app = { map, setRoll, rightHand, completeIntro, INTER, clickObject, go, ray, pointerOnTable, S, skipIntro, openSection, closeSection, startTour, camera, pointer, sections, INK };
 
 // =====================================================================
 // FRAME LOOP
@@ -1110,8 +1117,9 @@ function frame() {
   pointerLight.position.set(pw.x - .4, 1.6, pw.z + .2); pointerLight.intensity = 1.8 * S.handOn * S.L * (1 - S.focus * .7);
   // hover over hotspots
   if (S.phase === "hub") {
-    const [px, py] = w2p(pw); let h = null; MAP_SPOTS.forEach(s => { if (Math.hypot(px - s.x, py - s.y) < s.r) h = s.id; }); S.hover = S.overUI ? null : h; { const sp = MAP_SPOTS.find(x => x.id === S.hover); const txt = sp ? `${sp.label}: ${sp.sub}` : "Select a place on the map"; if (hubHint.textContent !== txt) hubHint.textContent = txt; }
+    const [px, py] = w2p(pw); let h = null; MAP_SPOTS.forEach(s => { if (Math.hypot(px - s.x, py - s.y) < s.r) h = s.id; }); { const mh = MINI.pick(ctx.ray()); if (mh) h = mh; } S.hover = S.overUI ? null : h; { const sp = MAP_SPOTS.find(x => x.id === S.hover); const txt = sp ? `${sp.label}: ${sp.sub}` : "Select a place on the map"; if (hubHint.textContent !== txt) hubHint.textContent = txt; }
   }
+  MINI.update(t, { k: INK.map, relief: RELIEF.cur, hover: S.hover, show: S.phase === "hub" || S.phase === "intro" || S.phase === "await" || S.phase === "tour" });
   spotGlows.forEach((g, i) => { const on = S.phase === "hub" ? (S.hover === MAP_SPOTS[i].id ? 1 : .25) : 0; g.material.opacity += ((on * (.65 + Math.sin(t * 3 + i) * .15)) * INK.map - g.material.opacity) * .12; });
   if (S.phase === "await") { const dd = pw.distanceTo(startSeal.position), near = Math.max(0, 1 - dd / 1.2); sealRing.material.opacity += ((.32 + Math.sin(t * 2.4) * .14) * (1 - near) + near * (.75 + Math.sin(t * 5) * .2) - sealRing.material.opacity) * .12; sealRing.scale.setScalar(1.25 + Math.sin(t * 2.4) * .12 + near * .3); document.body.classList.toggle("pp-hover", dd < .45); if (S.press === 0 || S.press === undefined) startSeal.scale.setScalar(1 + Math.sin(t * 2.4) * .025 + (dd < .45 ? .06 : 0)); }
   else { sealRing.material.opacity *= .9; if (S.phase === "tour") document.body.classList.remove("pp-hover"); }
