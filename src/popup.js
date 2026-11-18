@@ -252,7 +252,21 @@ export class Popup {
   click(ray) {
     if (this.busy) return;
     if (ray.intersectObject(this.card.m).length) { this.visit(); return; }
+    if (ray.intersectObject(this.back.m).length) { this.fireworks(); return; }
     if (!ray.intersectObject(this.root, true).length) this.ctx.closeSection();
+  }
+  // HIDDEN FEATURE: tap the skyline behind the card and fireworks go up over the pop-up
+  async fireworks() {
+    if (this.fw) return; this.fw = true; this.ctx.secret("fireworks"); const { tween, burst } = this.ctx, V = this.T.Vector3;
+    const cols = [0xffd070, 0x7fd3ff, 0xff7a9a, 0xb6ff8a, 0xd7a0ff, 0xfff2c0];
+    const shots = cols.map((c, i) => new Promise(res => setTimeout(async () => {
+      const x = (i % 2 ? 1 : -1) * (.4 + (i * .37) % 1.3), z = -.6 + (i % 3) * .2, top = 2.4 + (i % 3) * .35;
+      await tween(.75, k => { const p = this.root.localToWorld(new V(x * (1 - k * .15), .3 + top * (1 - (1 - k) * (1 - k)), z)); burst(p, { n: 2, speed: .12, up: [-.4, -.1], g: -1, life: .5, size: .6, color: 0xffe0a0 }); }, "lin");
+      const p = this.root.localToWorld(new V(x * .85, .3 + top, z));
+      burst(p, { n: 70, speed: 1.5, up: [-1, 1], flat: 1, g: -.9, life: 1.5, size: 1.2, drag: .97, color: c });
+      burst(p, { n: 24, speed: .6, up: [-.5, .5], g: -.6, life: 1.9, size: .8, color: 0xffffff });
+      res(); }, i * 420)));
+    await Promise.all(shots); setTimeout(() => this.fw = false, 1200);
   }
   key(k) { if (k === "ArrowRight") this.nav(1); if (k === "ArrowLeft") this.nav(-1); if (k === "Enter") this.visit(); }
   update(t) {

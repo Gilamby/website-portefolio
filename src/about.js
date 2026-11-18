@@ -123,7 +123,23 @@ export class About {
     const hits = ray.intersectObjects(this.badges, false);
     if (hits.length) { const b = hits[0].object; const { tween } = this.ctx; tween(.7, k => { b.rotation.y = -Math.PI / 2 + k * Math.PI * 2; b.position.y = b.userData.z0 - Math.sin(k * Math.PI) * .12; }, "io"); this.showArea(b.userData.label); return; }
     this.showArea(null);
-    if (!ray.intersectObject(this.trunk, true).length) this.ctx.closeSection();
+    if (!ray.intersectObject(this.trunk, true).length) { this.ctx.closeSection(); return; }
+    if (!ray.intersectObject(this.poster, false).length) this.zeroGravity();
+  }
+  // HIDDEN FEATURE: tap the trunk and the skill pins float off the poster and orbit it, then click back into place
+  async zeroGravity() {
+    if (this.floating) return; this.floating = true; this.ctx.secret("trunk"); const { tween } = this.ctx;
+    const home = this.badges.map(b => ({ p: b.position.clone(), r: b.rotation.clone() }));
+    const cx = home.reduce((a, h) => a + h.p.x, 0) / home.length, cz = home.reduce((a, h) => a + h.p.z, 0) / home.length;
+    const ring = (b, i, a) => [cx + Math.cos(a + i * Math.PI / 2) * .95, cz + Math.sin(a + i * Math.PI / 2) * .62];
+    await tween(.9, k => this.badges.forEach((b, i) => { const [x, z] = ring(b, i, 0); b.position.set(home[i].p.x + (x - home[i].p.x) * k, home[i].p.y - .32 * Math.sin(k * Math.PI / 2), home[i].p.z + (z - home[i].p.z) * k); b.rotation.y = home[i].r.y + k * Math.PI; }), "io");
+    let lastSpark = 0;
+    await tween(5.2, k => { const a = k * Math.PI * 4; this.badges.forEach((b, i) => { const [x, z] = ring(b, i, a); b.position.set(x, home[i].p.y - .32 + Math.sin(a * 2 + i) * .05, z); b.rotation.y = home[i].r.y + Math.PI + a * 1.5; b.rotation.x = home[i].r.x + Math.sin(a + i) * .3; });
+      if (k - lastSpark > .04) { lastSpark = k; this.badges.forEach(b => this.ctx.burst(b.getWorldPosition(new this.T.Vector3()), { n: 2, speed: .15, up: [-.1, .1], g: 0, life: .9, size: .7, color: 0xffd890 })); } }, "lin");
+    const from = this.badges.map(b => ({ p: b.position.clone(), ry: b.rotation.y, rx: b.rotation.x }));
+    await tween(1.1, k => this.badges.forEach((b, i) => { b.position.lerpVectors(from[i].p, home[i].p, k); b.position.y -= Math.sin(k * Math.PI) * .06; b.rotation.y = from[i].ry + (home[i].r.y + Math.PI * 6 - from[i].ry) * k; b.rotation.x = from[i].rx + (home[i].r.x - from[i].rx) * k; }), "back");
+    this.badges.forEach((b, i) => { b.position.copy(home[i].p); b.rotation.copy(home[i].r); this.ctx.burst(b.getWorldPosition(new this.T.Vector3()), { n: 10, speed: .5, life: .6, size: .8 }); });
+    this.floating = false;
   }
   flip(side, instant) {
     this.side = side; this.showArea(null);

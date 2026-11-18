@@ -805,7 +805,7 @@ const linksEl = document.getElementById("links");
 function showLinks(list) { linksEl.innerHTML = ""; list.forEach(([t, href]) => { const a = document.createElement("a"); a.className = "ui link"; a.textContent = t; a.href = href; if (href.startsWith("#nav:")) { a.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); if (active && active.nav) active.nav(+href.slice(5)); }); } else if (href === "#map") { a.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); closeSection(); }); } else if (href.startsWith("#go:")) { a.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); go(href.slice(4)); }); } else if (href.startsWith("#act:")) { a.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); if (active && active.action) active.action(href.slice(5)); }); } else { if (!href.startsWith("mailto")) a.target = "_blank"; a.rel = "noopener"; } linksEl.appendChild(a); }); }
 const fastTween = (d, fn, e, delay = 0) => tween(d * (REDUCED ? .2 : .8), fn, e, delay * (REDUCED ? .2 : .8));
 const fastCam = (p, l, d, e) => moveCamera(p, l, d * (REDUCED ? .25 : .9), e);
-const ctx = { ray: () => { ray.setFromCamera(new V2(pointer.nx * 2 - 1, -(pointer.ny * 2 - 1)), camera); return ray; }, showLinks, THREE, scene, camera, renderer, tween: fastTween, wait, moveCamera: fastCam, MAT, tex, canvasTex, shadowy, waxSeal, glowSprite, leatherN, paperAlb, paperN, R, ease, S, CAM_HOME, lathe, RoundedBoxGeometry, pointer, burst: (...a) => burst(...a) };
+const ctx = { ray: () => { ray.setFromCamera(new V2(pointer.nx * 2 - 1, -(pointer.ny * 2 - 1)), camera); return ray; }, showLinks, THREE, scene, camera, renderer, tween: fastTween, wait, moveCamera: fastCam, MAT, tex, canvasTex, shadowy, waxSeal, glowSprite, leatherN, paperAlb, paperN, R, ease, S, CAM_HOME, lathe, RoundedBoxGeometry, pointer, burst: (...a) => burst(...a), secret: id => secret(id) };
 document.getElementById("pp-info").addEventListener("click", e => { const b = e.target.closest("[data-nav],[data-act]"); if (!b || !active) return; e.stopPropagation(); if (b.dataset.nav && active.nav) active.nav(+b.dataset.nav); else if (b.dataset.act && active.action) active.action(b.dataset.act); });
 document.getElementById("pp-prev").addEventListener("click", e => { e.stopPropagation(); if (active && active.nav) active.nav(-1); });
 document.getElementById("pp-next").addEventListener("click", e => { e.stopPropagation(); if (active && active.nav) active.nav(1); });
@@ -1073,7 +1073,7 @@ function onClick() {
   else if (S.phase === "hub" && S.hover === "alive") toggleAlive();
   else if (S.phase === "hub" && S.hover) openSection(S.hover);
   else if (S.phase === "hub" && hovered) clickObject(hovered);
-  else if (S.phase === "inSection" && active) active.click(ray);
+  else if (S.phase === "inSection" && active && active.click) active.click(ray);
 }
 addEventListener("keydown", e => {
   if (S.phase === "inSection" && active && active.key) active.key(e.key);
@@ -1115,13 +1115,46 @@ function setMode(m, animate) {
 }
 // a secret: clicking the compass rose raises the islands out of the drawing, a second click folds them back (no label on purpose)
 const ROSE = { classic: [380, 1130, 95], "3d": [300, 1150, 115] };
-function toggleAlive() { if (S.phase !== "hub") return; setMode(is3D() ? "classic" : "3d", true); store.set("fc-alive", "1"); S.hover = null; }
+function toggleAlive() { if (S.phase !== "hub") return; setMode(is3D() ? "classic" : "3d", true); secret("compass"); S.hover = null; }
+// HIDDEN FEATURES: the intro promises six. There are five, on purpose.
+const SECRET_NAMES = { compass: "The living map", trunk: "Zero gravity", flipbook: "Flipbook", fireworks: "Fireworks", treasure: "Treasure dance" };
+const secretsFound = (() => { try { return new Set(JSON.parse(localStorage.getItem("fc-secrets") || "[]")); } catch (e) { return new Set(); } })();
+const secretBadge = document.createElement("div"); secretBadge.id = "secrets"; secretBadge.setAttribute("role", "status");
+document.body.appendChild(secretBadge);
+const secretToast = document.createElement("div"); secretToast.id = "secret-toast"; secretToast.setAttribute("aria-live", "polite"); document.body.appendChild(secretToast);
+function renderSecrets() { secretBadge.innerHTML = `<span class="st" aria-hidden="true">✦</span><b>${secretsFound.size}</b> / 6 hidden features`; }
+renderSecrets();
+function secret(id) {
+  if (!SECRET_NAMES[id] || secretsFound.has(id)) return;
+  secretsFound.add(id); try { localStorage.setItem("fc-secrets", JSON.stringify([...secretsFound])); } catch (e) {}
+  renderSecrets(); secretBadge.classList.remove("pop"); void secretBadge.offsetWidth; secretBadge.classList.add("pop");
+  secretToast.innerHTML = `<small>Hidden feature found</small>${SECRET_NAMES[id]}<span>${secretsFound.size} of 6</span>`;
+  secretToast.classList.add("on"); clearTimeout(secretToast._t); secretToast._t = setTimeout(() => secretToast.classList.remove("on"), 3600);
+}
 // light up the side bar item of the place you are in
 function markSide(id) { document.querySelectorAll("#side .si").forEach(a => a.classList.toggle("on", id ? a.dataset.go === id : a.hasAttribute("data-map"))); }
 // UNDER THE HOOD: the back-end of my projects, opened from the side bar or from a case study
 const ENGINE = buildEngine({ reduced: REDUCED });
-document.addEventListener("click", e => { const b = e.target.closest("[data-engine]"); if (!b) return; e.preventDefault(); e.stopPropagation();
-  const side = document.querySelector('#side [data-engine]'); side.classList.add("on"); ENGINE.open(b.dataset.engine || "scan", () => side.classList.remove("on")); });
+// going under the ground: the camera dives into the map, the earth scrolls past, and the engine room opens below
+const descentEl = document.getElementById("descent");
+function dig(dir) { return new Promise(res => { if (REDUCED) { res(); return; } descentEl.classList.remove("down", "up"); void descentEl.offsetWidth; descentEl.classList.add("on", dir); setTimeout(res, dir === "down" ? 1500 : 1300); }); }
+async function openEngine(id) {
+  if (ENGINE.isOpen || S.engineBusy) return; S.engineBusy = true;
+  const side = document.querySelector('#side [data-engine]'); side.classList.add("on");
+  const fromHub = S.phase === "hub", back = fromHub ? { p: camera.position.clone(), l: camLook.clone() } : null;
+  if (fromHub) { S.phase = "engine"; hubHint.hidden = true; if (!REDUCED) await moveCamera(new V3(0, 1.6, 1.2), new V3(0, -1, -.1), .9, "i"); }
+  await dig("down");
+  ENGINE.open(id || "scan", async () => {
+    side.classList.remove("on"); S.engineBusy = true;
+    descentEl.classList.add("on");
+    await dig("up"); descentEl.classList.remove("on", "up", "down");
+    if (back) { await moveCamera(back.p, back.l, 1.1, "o"); S.phase = "hub"; hubHint.hidden = false; }
+    S.engineBusy = false;
+  });
+  setTimeout(() => { descentEl.classList.remove("on"); }, 450);
+  S.engineBusy = false;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-engine]"); if (!b) return; e.preventDefault(); e.stopPropagation(); openEngine(b.dataset.engine); });
 document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); go(b.dataset.go); }));
 const qv = document.getElementById("quickview");
 function openQuick(e) { if (e) { e.preventDefault(); e.stopPropagation(); } qv.hidden = false; document.body.classList.add("qv"); qv.querySelector(".qv-close").focus(); }

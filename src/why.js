@@ -68,6 +68,28 @@ export class Why {
     for (let i = 0; i < P.count; i++) { const y = this.clothY0[i]; if (y >= yf) { P.setY(i, y); P.setZ(i, 0); continue; } const th = (yf - y) / r; P.setY(i, yf - r * Math.sin(th)); P.setZ(i, r * (1 - Math.cos(th))); }
     P.needsUpdate = true; this.cloth.geometry.computeVertexNormals();
   }
+  // HIDDEN FEATURE: tap the chest and it bursts with coins while the four cards dance around it, then land again
+  click(ray) {
+    if (this.busy || this.dancing) return;
+    if (ray.intersectObject(this.chest, true).length) { this.treasure(); return; }
+    if (!ray.intersectObjects(this.cards, false).length) this.ctx.closeSection();
+  }
+  async treasure() {
+    this.dancing = true; this.ctx.secret("treasure"); const { tween, burst } = this.ctx, V = this.T.Vector3;
+    const c = this.chest.position.clone(), home = this.cards.map(m => ({ p: m.position.clone(), r: m.rotation.clone() }));
+    const top = this.chest.localToWorld(new V(0, .75, 0));
+    burst(top, { n: 140, speed: 1.1, up: [1.4, 2.6], g: -3.2, life: 1.8, size: 1.3, flat: .8, color: 0xffcf5a });
+    setTimeout(() => burst(top, { n: 60, speed: .8, up: [1.2, 2], g: -3, life: 1.6, size: 1, color: 0xfff0b0 }), 350);
+    const g0 = this.glow.intensity; tween(2.6, k => { this.glow.intensity = g0 + Math.sin(k * Math.PI) * 9; this.chest.rotation.z = Math.sin(k * Math.PI * 10) * .04 * (1 - k); }, "lin");
+    await tween(3.2, k => this.cards.forEach((m, i) => {
+      const off = new V().subVectors(home[i].p, c), r = Math.hypot(off.x, off.z), a0 = Math.atan2(off.z, off.x), a = a0 + k * Math.PI * 2;
+      const lift = Math.sin(k * Math.PI);
+      m.position.set(c.x + Math.cos(a) * r * (1 - .25 * lift), home[i].p.y + lift * (.9 + .15 * Math.sin(k * Math.PI * 6 + i)), c.z + Math.sin(a) * r * (1 - .25 * lift));
+      m.rotation.set(home[i].r.x + lift * .6, home[i].r.y, home[i].r.z + k * Math.PI * 2);
+    }), "io");
+    this.cards.forEach((m, i) => { m.position.copy(home[i].p); m.rotation.copy(home[i].r); burst(m.getWorldPosition(new V()), { n: 8, speed: .4, life: .6, size: .8 }); });
+    this.dancing = false;
+  }
   place(m, k, f, from) { // f: 0 inside the chest, 1 resting on the desk
     const [x, z] = SPOTS[k], T = this.T, side = k % 2 ? 1 : -1;
     const a = from.clone().add(new T.Vector3(0, .5, 0)), b = new T.Vector3(x, .12 + k * .004, z);

@@ -254,7 +254,17 @@ export class Story {
     if (this.spread < 1) return;
     const hits = ray.intersectObject(this.hit); if (!hits.length) { this.ctx.closeSection(); return; }
     const local = this.group.worldToLocal(hits[0].point.clone());
+    if (this.spread === 1 && local.x < 0 && local.z < -PH * .28) { this.flipbook(); return; }
     this.turn(local.x > 0 ? 1 : -1);
+  }
+  // HIDDEN FEATURE: tap the title "My Story" and every page riffles through like a flipbook, then settles back
+  async flipbook() {
+    if (this.busy) return; this.busy = true; this.ctx.secret("flipbook"); const { tween } = this.ctx; const L = this.leaves;
+    this.gemLight.intensity = 0;
+    await Promise.all(L.map((l, i) => tween(.55, k => { l.dir = 1; l.theta = Math.PI * k; this.setFlips(); if (k > .5 && !l._b) { l._b = 1; this.ctx.burst(this.group.localToWorld(new this.T.Vector3(-.4, .5, 0)), { n: 6, speed: .5, life: .8, size: .8, color: 0xffe2a0 }); } }, "io", i * .11)));
+    await this.ctx.wait(.25);
+    await Promise.all(L.map((l, i) => tween(.55, k => { l.dir = -1; l.theta = Math.PI * (1 - k); this.setFlips(); }, "io", (L.length - 1 - i) * .11)));
+    L.forEach(l => { l.theta = 0; l._b = 0; }); this.setFlips(); this.busy = false;
   }
   key(k) { if (k === "ArrowRight") this.turn(1); if (k === "ArrowLeft") this.turn(-1); }
   update(t) { if (this.gemMat) this.gemMat.emissiveIntensity = .6 + Math.sin(t * 2.2) * .35; (this.glowMats || []).forEach(m => m.emissiveIntensity = .16 * this.ctx.S.focus); }
