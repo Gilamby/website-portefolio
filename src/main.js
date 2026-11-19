@@ -1073,7 +1073,7 @@ function onClick() {
   else if (S.phase === "hub" && S.hover === "alive") toggleAlive();
   else if (S.phase === "hub" && S.hover) openSection(S.hover);
   else if (S.phase === "hub" && hovered) clickObject(hovered);
-  else if (S.phase === "inSection" && active && active.click) active.click(ray);
+  else if (S.phase === "inSection" && active && active.click) active.click(ctx.ray());
 }
 addEventListener("keydown", e => {
   if (S.phase === "inSection" && active && active.key) active.key(e.key);

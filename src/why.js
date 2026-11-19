@@ -104,7 +104,7 @@ export class Why {
     const { tween, moveCamera } = this.ctx, T = this.T; this.build();
     this.group.visible = true; this.hinge.rotation.x = 0; this.glow.intensity = 0;
     this.cards.forEach(m => m.visible = false);
-    moveCamera(new T.Vector3(0, 9.0, 3.3), new T.Vector3(0, 0, .5), 2.0, "io");
+    moveCamera(new T.Vector3(0, 10.2, 3.0), new T.Vector3(0, 0, -.05), 2.0, "io");
     const end = this.chestAt.clone(), start = end.clone().add(new T.Vector3(0, .45, -.6));
     await tween(1.4, k => { this.chest.position.lerpVectors(start, end, k); }, "o");
     this.cloth.visible = true; this.unroll(0);
@@ -125,7 +125,6 @@ export class Why {
     const p0 = this.chest.position.clone(); await tween(.9, k => { this.chest.position.set(p0.x, p0.y + k * 2.4, p0.z - k * 1.4); }, "io");
     this.group.visible = false; this.cloth.visible = false;
   }
-  click() { this.ctx.closeSection(); }
   update(t) {
     if (!this.built || !this.group.visible) return;
     const hit = this.landed && this.ctx.ray ? this.ctx.ray().intersectObjects(this.cards, false)[0] : null;
