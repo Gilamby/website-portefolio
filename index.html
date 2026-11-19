@@ -205,86 +205,80 @@ body.pp-panel #pp-info{opacity:1;transform:translate(0,-50%);pointer-events:auto
 #modeSwitch button{position:relative;z-index:1;border:0;background:none;color:#d8bd85;font:700 15px 'Cinzel Decorative',serif;letter-spacing:1px;padding:7px 18px;border-radius:20px;cursor:pointer;transition:color .3s}
 #modeSwitch button[aria-pressed="true"]{color:#2a1a08}
 #modeSwitch button:focus-visible{outline:2px solid #f3d58c;outline-offset:2px}
-/* UNDER THE HOOD: back-end schematics */
-#opening .tip{margin-top:26px;font:italic 17px Spectral,serif;color:#e2c27e;opacity:0;transition:opacity 1s 1.4s}
-#opening.on .tip{opacity:1}
-#secrets{position:fixed;right:22px;top:20px;z-index:20;display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:20px;background:rgba(20,12,5,.78);border:1px solid rgba(214,170,90,.4);color:#cdbf9f;font:italic 14.5px Spectral,serif;transition:opacity .6s}
-#secrets b{font:700 15px Spectral,serif;font-style:normal;color:#f3d58c}
-#secrets .st{color:#f0c060}
-#secrets.pop{animation:secretPop 1.2s cubic-bezier(.2,.8,.2,1)}
-@keyframes secretPop{0%{transform:scale(1)}25%{transform:scale(1.18);box-shadow:0 0 30px rgba(240,192,96,.6)}100%{transform:scale(1)}}
-body.opening #secrets,body.prehub #secrets,body.plain #secrets{opacity:0;pointer-events:none}
-#secret-toast{position:fixed;left:50%;top:84px;z-index:70;transform:translate(-50%,-20px);opacity:0;pointer-events:none;padding:14px 28px 15px;border-radius:14px;background:linear-gradient(180deg,rgba(42,28,12,.96),rgba(24,15,6,.96));border:1px solid #c79a46;box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 40px rgba(240,192,96,.25);color:#fff0cf;font:700 22px 'Cinzel Decorative',serif;text-align:center;transition:opacity .5s,transform .6s cubic-bezier(.2,.8,.2,1)}
-#secret-toast.on{opacity:1;transform:translate(-50%,0)}
-#secret-toast small{display:block;font:italic 14px Spectral,serif;color:#e2c27e;margin-bottom:3px}
-#secret-toast span{display:block;font:italic 14px Spectral,serif;color:#b9a77f;margin-top:4px}
-@media (prefers-reduced-motion:reduce){#secrets.pop{animation:none}#secret-toast{transition:opacity .3s}}
+/* THE ENGINE ROOM: back-end skills as machines, below the map */
 #engine{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(80% 70% at 50% 40%,#16120e,#070605);opacity:0;transition:opacity .4s;padding:24px 24px 24px 120px}
 #engine.on{opacity:1}
-#engine .en-in{position:relative;width:min(1180px,100%);max-height:calc(100vh - 48px);overflow:auto;background:radial-gradient(120% 90% at 20% 0%,#16263a 0%,#0c1622 60%,#09111a 100%);border:1px solid rgba(199,154,70,.45);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 0 0 6px rgba(199,154,70,.06);color:#e8dcc4;padding:34px 40px 30px;transform:translateY(14px);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+#engine .en-in{position:relative;width:min(1240px,100%);max-height:calc(100vh - 48px);overflow:auto;border:1px solid rgba(199,154,70,.5);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.6);color:#e8dcc4;padding:34px 40px 28px;transform:translateY(14px);transition:transform .5s cubic-bezier(.2,.8,.2,1);
+  background:radial-gradient(60% 40% at 50% -6%,rgba(255,190,100,.16),transparent 70%),repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 46px),radial-gradient(120% 90% at 20% 0%,#1d1a17 0%,#121010 55%,#0b0a09 100%)}
 #engine.on .en-in{transform:none}
-#engine .en-close{position:absolute;right:18px;top:14px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(199,154,70,.5);background:transparent;color:#f3d58c;font-size:24px;line-height:1;cursor:pointer}
+#engine .en-in:before{content:"";position:absolute;left:0;right:0;top:0;height:10px;border-radius:16px 16px 0 0;background:repeating-linear-gradient(90deg,#3a2c1a 0 18px,#2a2014 18px 22px);opacity:.8}
+#engine .en-close{position:absolute;right:18px;top:18px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(199,154,70,.5);background:transparent;color:#f3d58c;font-size:24px;line-height:1;cursor:pointer}
 #engine .en-close:hover,#engine .en-close:focus-visible{background:rgba(199,154,70,.15);outline:none}
-#engine h2{margin:0;font:700 34px 'Cinzel Decorative',serif;color:#f3d58c;letter-spacing:.5px}
-#engine .lead{max-width:70ch;margin:10px 0 22px;font:17px/1.6 Spectral,serif;color:#cdbf9f}
-#engine .en-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-#engine .en-tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 16px;border-radius:10px;border:1px solid rgba(199,154,70,.3);background:rgba(255,255,255,.02);color:#e8dcc4;font:600 15px Spectral,serif;cursor:pointer;transition:background .25s,border-color .25s}
-#engine .en-tabs button small{font:italic 12.5px Spectral,serif;color:#9fb0c0}
-#engine .en-tabs button[aria-selected="true"]{background:rgba(199,154,70,.16);border-color:#c79a46;color:#fff3d6}
-#engine .en-tabs button:hover,#engine .en-tabs button:focus-visible{border-color:#c79a46;outline:none}
-#engine .en-stage{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(260px,1fr);gap:26px;align-items:start}
-#engine .en-diagram{background:rgba(0,0,0,.22);border:1px solid rgba(199,154,70,.18);border-radius:12px;padding:16px 16px 12px}
-#engine .en-diagram h3{margin:2px 4px 8px;font:600 18px Spectral,serif;color:#f0e2c2}
-#engine svg{width:100%;height:auto;display:block}
-#engine .edge{fill:none;stroke:rgba(159,176,192,.28);stroke-width:2.5;stroke-dasharray:6 7;transition:stroke .4s}
-#engine .edge.on{stroke:#d9aa55;stroke-dasharray:none;filter:drop-shadow(0 0 4px rgba(240,190,90,.6))}
-#engine .node rect{fill:#122133;stroke:rgba(159,176,192,.4);stroke-width:1.5;transition:fill .4s,stroke .4s}
-#engine .node.on rect{fill:#2a2412;stroke:#f0c060;filter:drop-shadow(0 0 10px rgba(240,190,90,.45))}
-#engine .node .n{fill:#f0e2c2;font:600 17px Spectral,serif;text-anchor:middle}
-#engine .node .s{fill:#9fb0c0;font:italic 13.5px Spectral,serif;text-anchor:middle}
-#engine .node.on .s{fill:#e2c27e}
-#engine .en-ctrl{display:flex;justify-content:center;gap:10px;margin-top:8px}
-#engine .en-ctrl button{min-width:44px;height:38px;padding:0 16px;border-radius:19px;border:1px solid rgba(199,154,70,.45);background:transparent;color:#f3d58c;font:600 15px Spectral,serif;cursor:pointer}
-#engine .en-ctrl .play{min-width:96px;background:linear-gradient(180deg,#f0d08a,#c79a46);color:#2a1a08;border:0}
-#engine .en-ctrl button:focus-visible{outline:2px solid #f3d58c;outline-offset:2px}
-#engine .en-steps{list-style:none;margin:0;padding:0;counter-reset:st;display:grid;gap:8px}
-#engine .en-steps li{counter-increment:st}
-#engine .en-steps button{display:grid;grid-template-columns:30px 1fr;gap:10px;width:100%;text-align:left;padding:11px 12px;border-radius:10px;border:1px solid transparent;background:transparent;color:#a99c82;font:15.5px/1.5 Spectral,serif;cursor:pointer;transition:background .3s,color .3s,border-color .3s}
-#engine .en-steps button:before{content:counter(st);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;border:1px solid rgba(199,154,70,.4);color:#c79a46;font:600 14px Spectral,serif}
-#engine .en-steps li.done button{color:#cdbf9f}
-#engine .en-steps li.on button{background:rgba(199,154,70,.12);border-color:rgba(199,154,70,.5);color:#fff3d6}
-#engine .en-steps li.on button:before{background:#c79a46;color:#1c1006;border-color:#c79a46}
-#engine .en-steps button:focus-visible{outline:2px solid #f3d58c}
-#engine .en-foot{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:22px;padding-top:18px;border-top:1px solid rgba(199,154,70,.2)}
-#engine h4{margin:0 0 8px;font:600 15px Spectral,serif;color:#f3d58c;letter-spacing:.3px}
-#engine .en-shows{margin:0;padding-left:18px;font:15.5px/1.7 Spectral,serif;color:#d8cbae}
+#engine h2{margin:0;font:700 34px 'Cinzel Decorative',serif;color:#f3d58c}
+#engine .lead{max-width:72ch;margin:10px 0 24px;font:17px/1.6 Spectral,serif;color:#cdbf9f}
+#engine .machines{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+#engine .mc{position:relative;display:flex;flex-direction:column;min-height:400px;padding:18px 18px 16px;border-radius:14px;background:linear-gradient(180deg,#221d18,#16130f);border:1px solid rgba(199,154,70,.28);box-shadow:inset 0 1px 0 rgba(255,220,160,.06),0 10px 24px rgba(0,0,0,.35);transition:transform .18s ease-in,border-color .3s}
+#engine .mc.turn{transform:perspective(800px) rotateY(90deg)}
+#engine .mc.spot{border-color:#f0c060;box-shadow:0 0 0 2px rgba(240,192,96,.35),0 10px 24px rgba(0,0,0,.35)}
+#engine .mc:before,#engine .mc:after{content:"";position:absolute;top:10px;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e8c07a,#6a4a1c)}
+#engine .mc:before{left:10px}#engine .mc:after{right:10px}
+#engine .face,#engine .back{display:flex;flex-direction:column;flex:1;min-height:0}
+#engine .face[hidden],#engine .back[hidden]{display:none}
+#engine .mh{display:flex;gap:12px;align-items:center}
+#engine .mh svg{width:44px;height:44px;flex:none;fill:none;stroke:#e2b866;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#engine .mh svg .fill{fill:#f0c060;stroke:none}
+#engine .mc.run .mh svg{animation:hum .35s ease-in-out infinite alternate}
+@keyframes hum{to{transform:translateY(-2px) rotate(-3deg)}}
+#engine h3{margin:0;font:700 17px 'Cinzel Decorative',serif;color:#f0e2c2}
+#engine .sk{margin:2px 0 0;font:italic 14px Spectral,serif;color:#c79a46}
+#engine .say{margin:12px 0 10px;font:15px/1.55 Spectral,serif;color:#d8cbae}
+#engine .opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+#engine .opts button{padding:5px 10px;border-radius:12px;border:1px solid rgba(159,176,192,.3);background:transparent;color:#b9c4cf;font:12.5px ui-monospace,Menlo,monospace;cursor:pointer}
+#engine .opts button[aria-pressed="true"]{border-color:#c79a46;color:#fff3d6;background:rgba(199,154,70,.16)}
+#engine .pw{display:flex;align-items:center;gap:8px;margin-bottom:10px;font:italic 14px Spectral,serif;color:#b9a77f}
+#engine .pw input{flex:1;min-width:0;padding:6px 10px;border-radius:8px;border:1px solid rgba(159,176,192,.35);background:#0b0f14;color:#e8eef4;font:13px ui-monospace,Menlo,monospace}
+#engine .pw input:focus{outline:2px solid #c79a46;outline-offset:1px}
+#engine .screen{flex:1;min-height:150px;display:flex;flex-direction:column;gap:5px;padding:12px;border-radius:10px;background:#06090c;border:1px solid rgba(159,176,192,.18);box-shadow:inset 0 0 22px rgba(0,0,0,.6);font:12.5px/1.55 ui-monospace,Menlo,monospace;color:#d6dee6;overflow:auto}
+#engine .screen pre{margin:0;white-space:pre-wrap;font:inherit}
+#engine .screen .dim{color:#6f8090}
+#engine .screen .small{font-size:11.5px}
+#engine .screen .req{color:#9fb7cc}
+#engine .screen .res{font-weight:700}
+#engine .screen .c2{color:#8fdc95}#engine .screen .c4{color:#f0a070}
+#engine .screen .json{color:#e8dcc4;animation:logIn .4s ease-out}
+#engine .screen table{border-collapse:collapse;margin-top:4px}
+#engine .screen th,#engine .screen td{padding:3px 12px 3px 0;text-align:left}
+#engine .screen th{color:#c79a46;font-weight:600;border-bottom:1px solid rgba(199,154,70,.35)}
+#engine .screen tr.in{animation:logIn .35s ease-out}
+#engine .screen .st{color:#6f8090;padding-left:20px;position:relative}
+#engine .screen .st:before{content:"○";position:absolute;left:0}
+#engine .screen .st.ok{color:#d6dee6}
+#engine .screen .st.ok:before{content:"✓";color:#8fdc95}
+#engine .screen .done{margin-top:auto;color:#f3d58c;font-weight:700;animation:logIn .4s ease-out}
+#engine .screen .chute{display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+#engine .screen .hash{word-break:break-all;color:#f0c060;font-size:13px}
+#engine .screen .env{align-self:flex-start;padding:4px 10px;border-radius:6px;background:#efe3c6;color:#2a1a08;font:13px Spectral,serif;animation:chute .55s cubic-bezier(.3,1.4,.5,1)}
+@keyframes chute{from{transform:translateY(-24px);opacity:0}}
+#engine .screen .title{margin-top:8px;font:600 21px/1.3 Spectral,serif;color:#fff3d6}
+#engine .screen .title.in{animation:flipIn .45s ease-out}
+@keyframes flipIn{from{transform:rotateX(80deg);opacity:0}}
+#engine .mf{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+#engine .lever{padding:9px 18px;border-radius:20px;border:0;background:linear-gradient(180deg,#f0d08a,#c79a46);color:#2a1a08;font:700 14.5px Spectral,serif;cursor:pointer;box-shadow:0 3px 0 #7a5a20;transition:transform .1s,box-shadow .1s}
+#engine .lever:active,#engine .mc.run .lever{transform:translateY(3px);box-shadow:0 0 0 #7a5a20}
+#engine .flip{padding:8px 12px;border-radius:16px;border:1px solid rgba(199,154,70,.4);background:transparent;color:#e2c27e;font:italic 14px Spectral,serif;cursor:pointer}
+#engine button:focus-visible{outline:2px solid #f3d58c;outline-offset:2px}
+#engine .back pre{flex:1;margin:0 0 12px;padding:14px;border-radius:10px;background:#06090c;border:1px solid rgba(159,176,192,.18);overflow:auto;font:12.5px/1.6 ui-monospace,Menlo,monospace;color:#d6dee6;white-space:pre}
+#engine .back .flip{align-self:flex-start}
+#engine .k{color:#f0c060;font-style:normal}#engine .s{color:#9fd4a0;font-style:normal}#engine .c{color:#6f8090;font-style:normal}
+@keyframes logIn{from{transform:translateX(-8px);opacity:0}}
+#engine .fine{margin:16px 0 0;font:italic 13.5px Spectral,serif;color:#8e8370}
+#engine .tools{margin-top:14px;padding-top:14px;border-top:1px solid rgba(199,154,70,.2)}
+#engine h4{margin:0 0 8px;font:600 15px Spectral,serif;color:#f3d58c}
 #engine .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0}
 #engine .chips span{padding:5px 12px;border-radius:14px;border:1px solid rgba(159,176,192,.35);font:14px Spectral,serif;color:#cfd8e0}
-#engine .en-term{margin-top:14px;border-radius:10px;background:#070b10;border:1px solid rgba(159,176,192,.22);overflow:hidden}
-#engine .en-tt{display:flex;align-items:center;gap:2px;padding:6px 8px 0;background:#0d141c;border-bottom:1px solid rgba(159,176,192,.15)}
-#engine .en-tt button{padding:7px 14px;border:0;border-radius:7px 7px 0 0;background:transparent;color:#8494a4;font:600 13.5px Spectral,serif;cursor:pointer}
-#engine .en-tt button[aria-selected="true"]{background:#070b10;color:#f3d58c}
-#engine .en-tt .lang{margin-left:auto;padding-right:6px;font:italic 12.5px Spectral,serif;color:#7d8b98}
-#engine .en-pane{margin:0;padding:14px 16px;min-height:168px;max-height:240px;overflow:auto;font:13.5px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6dee6;white-space:pre}
-#engine .en-pane .k{color:#f0c060;font-style:normal}
-#engine .en-pane .s{color:#9fd4a0;font-style:normal}
-#engine .en-pane .c{color:#6f8090;font-style:normal}
-#engine .en-pane[data-p="log"] span{display:inline-block;opacity:.6}
-#engine .en-pane[data-p="log"] span.new{opacity:1;color:#fff3d6;animation:logIn .5s ease-out}
-@keyframes logIn{from{transform:translateX(-8px);opacity:0}}
-#engine .en-pane[data-p="model"]{display:flex;gap:14px;flex-wrap:wrap;white-space:normal}
-#engine .en-pane[data-p="model"][hidden]{display:none}
-#engine .tbl{min-width:200px;border:1px solid rgba(199,154,70,.4);border-radius:8px;overflow:hidden}
-#engine .tbl b{display:block;padding:6px 12px;background:rgba(199,154,70,.18);color:#f3d58c;font:600 13.5px ui-monospace,Menlo,monospace}
-#engine .tbl span{display:block;padding:4px 12px;border-top:1px solid rgba(159,176,192,.12);color:#cfd8e0;font:13px ui-monospace,Menlo,monospace}
-#engine .note{margin:0;padding:7px 16px 9px;border-top:1px solid rgba(159,176,192,.12);font:italic 12.5px Spectral,serif;color:#7d8b98}
-/* underground: the engine room lives below the map */
-#engine .en-in{background:
-  radial-gradient(60% 40% at 50% -6%,rgba(255,190,100,.16),transparent 70%),
-  repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 46px),
-  radial-gradient(120% 90% at 20% 0%,#1d1a17 0%,#121010 55%,#0b0a09 100%)!important;border-color:rgba(199,154,70,.5)!important}
-#engine .en-in:before{content:"";position:absolute;left:0;right:0;top:0;height:10px;border-radius:16px 16px 0 0;background:repeating-linear-gradient(90deg,#3a2c1a 0 18px,#2a2014 18px 22px);opacity:.8}
-#engine .en-diagram{background:rgba(8,14,20,.75)!important}
+@media (max-width:1100px){#engine .machines{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){#engine{padding:10px}#engine .machines{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){#engine,#engine .en-in,#engine .mc{transition:none}#engine *{animation:none!important}}
 #descent{position:fixed;inset:0;z-index:58;pointer-events:none;opacity:0;overflow:hidden;background:#0b0907}
 #descent.on{opacity:1}
 #descent .strata{position:absolute;left:0;right:0;top:0;height:420vh;background:
@@ -391,14 +385,14 @@ body.pp-on #pp-hint{opacity:.85}
     <a href="#about" data-go="about" class="si"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="12" width="22" height="14" rx="2"/><path d="M5 12a11 6 0 0 1 22 0"/><path d="M5 17h22"/><rect x="14" y="15" width="4" height="5" rx="1"/></svg></span><span class="lb">About</span></a>
     <a href="#story" data-go="story" class="si"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 9c-3-2-7-3-11-2v17c4-1 8 0 11 2 3-2 7-3 11-2V7c-4-1-8 0-11 2z"/><path d="M16 9v17"/></svg></span><span class="lb">Story</span></a>
     <a href="#built" data-go="built" class="si"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 25h26"/><path d="M6 25l10-4 10 4"/><rect x="9" y="7" width="14" height="11" rx="1"/><path d="M12 11h8M12 14h5"/><path d="M11 18l-2 3M21 18l2 3"/></svg></span><span class="lb">Projects</span></a>
-    <a href="#engine" data-engine="" class="si"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="7" rx="2"/><rect x="6" y="13" width="20" height="7" rx="2"/><rect x="6" y="21" width="20" height="7" rx="2"/><path d="M10 8.5h.01M10 16.5h.01M10 24.5h.01M15 8.5h7M15 16.5h7M15 24.5h7"/></svg></span><span class="lb">Back-end</span></a>
+    <a href="#engine" data-under="" class="si"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="7" rx="2"/><rect x="6" y="13" width="20" height="7" rx="2"/><rect x="6" y="21" width="20" height="7" rx="2"/><path d="M10 8.5h.01M10 16.5h.01M10 24.5h.01M15 8.5h7M15 16.5h7M15 24.5h7"/></svg></span><span class="lb">Back-end</span></a>
     <a href="#why" data-go="why" class="si"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 14h22v12H5z"/><path d="M5 14c0-5 5-8 11-8s11 3 11 8"/><path d="M5 19h22"/><rect x="14" y="17" width="4" height="5" rx="1"/><path d="M24 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="currentColor" stroke="none"/></svg></span><span class="lb">Why me</span></a>
     <a href="#letter" data-go="letter" class="si"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="24" height="17" rx="2"/><path d="M4 9l12 9 12-9"/><circle cx="16" cy="19" r="3" fill="currentColor" stroke="none" opacity=".75"/></svg></span><span class="lb">Contact</span></a>
   </div>
     <a href="#cv" data-quick class="si cv"><span class="ic"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h10l6 6v18H9z"/><path d="M19 4v6h6"/><path d="M12 15h10M12 19h10M12 23h6"/></svg></span><span class="lb">CV</span></a>
 </nav>
 <div id="links"></div>
-<div id="descent" aria-hidden="true"><div class="strata"></div><div class="cable" style="left:18%"><i></i></div><div class="cable" style="left:63%"><i style="animation-delay:.5s"></i></div><div class="cable" style="left:84%"><i style="animation-delay:.2s"></i></div><p class="label">Going under the hood</p></div>
+<div id="descent" aria-hidden="true"><div class="strata"></div><div class="cable" style="left:18%"><i></i></div><div class="cable" style="left:63%"><i style="animation-delay:.5s"></i></div><div class="cable" style="left:84%"><i style="animation-delay:.2s"></i></div><p class="label">Down to the engine room</p></div>
 <div id="opening" hidden aria-hidden="false">
   <p class="kicker">Portfolio website</p>
   <h1><span>Fabian</span><span>Corsalini</span></h1>
@@ -427,7 +421,7 @@ body.pp-on #pp-hint{opacity:.85}
   <p>I am a full-stack software developer with a strong eye for design. In my projects I build both sides myself: the interface people see and the back-end that makes it work, from APIs and payments to the database. I take an idea from the first sketch to a working product, and I care about the details on both sides: how it looks and how it is built.</p><p>I currently work as a software developer at OptimaSys, where I build features across the front-end and back-end of QR-Codex, a commercial web application.</p><p>I learn new technologies quickly, work independently and take ownership of what I deliver.</p>
   <div class="btns"><a href="Fabian-Corsalini-CV.pdf" target="_blank" rel="noopener">Open my CV</a><a href="mailto:fabichelsea555@outlook.com">Email me</a><a href="https://www.linkedin.com/in/fabian-corsalini-731a583b5" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/Gilamby" target="_blank" rel="noopener">GitHub</a></div>
   <h2 id="qv-projects">Projects</h2><div class="grid"><article class="proj"><img src="img/qrcodex-site-1.jpg" alt="Screenshot of QR-Codex" loading="lazy"><h3>QR-Codex</h3><div class="meta">2026 · OptimaSys internship · full-stack</div><p><b>Role:</b> Front-end &amp; back-end developer (intern)</p><p>A web app where businesses create, manage and track their own QR codes. Print a code once, change where it points whenever you want, and see every scan. I build features on the front-end and the back-end: subscriptions and Stripe payments, scan analytics, business tools, the APIs between the website and the app, and five languages.</p><p><b>Result:</b> A commercial SaaS product with paid subscriptions, live in production.</p><a href="https://qr-codex.com/" target="_blank" rel="noopener">Visit qr-codex.com</a> <a href="https://my.qr-codex.com/" target="_blank" rel="noopener">Open the app</a> </article><article class="proj"><img src="img/laadpaal-1.jpg" alt="Screenshot of Charging Station App" loading="lazy"><h3>Charging Station App</h3><div class="meta">2024 · Delta-N internship · low-code</div><p><b>Role:</b> Solo developer</p><p>Delta-N had charging stations but no way to reserve them. I proposed a fix and built a low-code app: see which stations are free, pick a time slot and reserve it in seconds.</p><p><b>How it works:</b></p><ol><li>Check availability: free stations show green, taken ones red, in real time.</li><li>Pick a time: choose the date, start time and end time in a simple form.</li><li>Reserve: one tap and the reservation is confirmed.</li></ol><p><b>Result:</b> Replaced walking-and-hoping with reservations; the app is still used daily.</p></article><article class="proj"><img src="img/gemeente-2.jpg" alt="Screenshot of Youth Voting Platform" loading="lazy"><h3>Youth Voting Platform</h3><div class="meta">2023 · Municipality of Delft · solo, age 15</div><p><b>Role:</b> Solo developer &amp; designer</p><p>An event-ideas mailbox for young people in Delft. I wrote the project plan, designed the interface, built it in Oracle APEX and wrote the email logic in PL/SQL: every submission sends one email to the municipality and one back to the young person.</p><p><b>How it works:</b></p><ol><li>Submit an idea: a four-step form with name, age, contact details, target group and the event idea.</li><li>Review: a summary of everything before submitting.</li><li>Back-end: two automatic emails per submission, written in PL/SQL.</li></ol><p><b>Result:</b> Delivered to the Municipality of Delft as a working platform.</p></article><article class="proj"><img src="img/flexichat-1.jpg" alt="Screenshot of Flexichat website" loading="lazy"><h3>Flexichat website</h3><div class="meta">2026 · OptimaSys internship · web</div><p><b>Role:</b> Web developer (intern)</p><p>The promotional website for Flexichat, a chat assistant that answers customers on a company's website and on WhatsApp Business. It has a working demo chat in the hero, a step-by-step setup guide, pricing with Stripe checkout and five languages, and every text can be edited in a CMS.</p><p><b>Result:</b> A multilingual sales site that lets visitors try the product and buy a plan directly.</p></article><article class="proj"><img src="img/funfactory.png" alt="Screenshot of FunFactory" loading="lazy"><h3>FunFactory</h3><div class="meta">2024 · School · design &amp; front-end</div><p><b>Role:</b> Designer &amp; front-end developer</p><p>A full web design project for a sustainable toy webshop: wireframes for every page, a style guide in Figma, then the whole site built in HTML, CSS and JavaScript.</p><p><b>How it works:</b></p><ol><li>Research &amp; wireframes: every page mapped out in low fidelity.</li><li>UI design in Figma: palette, typography and components in a style guide.</li><li>Build: homepage, product, detail and cart pages in HTML, CSS and JavaScript.</li></ol><p><b>Result:</b> A complete design system and a working webshop built from it.</p></article><article class="proj"><img src="img/red-frontier.png" alt="Screenshot of Red Frontier" loading="lazy"><h3>Red Frontier</h3><div class="meta">2025 · School · group project</div><p><b>Role:</b> Team member: design &amp; front-end</p><p>A group project at school: a travel website for trips to Mars, with facilities, recreation and flight tickets.</p><p><b>Result:</b> A finished, live group website delivered within the school sprint.</p><a href="https://102454.stu.sd-lab.nl/gr7_M2M-main/gr7_M2M-main/index.html" target="_blank" rel="noopener">Live demo</a> </article><article class="proj"><img src="img/marktplaats.png" alt="Screenshot of Marktplaats" loading="lazy"><h3>Marktplaats</h3><div class="meta">2025 · School · group project</div><p><b>Role:</b> Team member: front-end</p><p>A marketplace website built with my class: product listings, categories and featured products.</p><p><b>Result:</b> A working marketplace prototype, live online.</p><a href="https://102454.stu.sd-lab.nl/Marktplaats-main/" target="_blank" rel="noopener">Live demo</a> </article><article class="proj"><img src="img/quizzy.png" alt="Screenshot of Quizzy" loading="lazy"><h3>Quizzy</h3><div class="meta">2025 · School · group project</div><p><b>Role:</b> Team member: front-end</p><p>A quiz web app built with my class: create quizzes, pick a category and play.</p><p><b>Result:</b> A playable quiz application, live online.</p><a href="https://102454.stu.sd-lab.nl/Quizzy-main/" target="_blank" rel="noopener">Live demo</a> </article></div>
-  <h2 id="qv-backend">Under the hood: back-end</h2><h3>What happens when someone scans a code <small>(QR-Codex)</small></h3><ol><li>A customer scans the printed code. The code holds a short link to our server, not the final page. That is what makes it editable.</li><li>The phone opens the short link and the server receives the request with the code's ID.</li><li>The server looks up where this code points right now and saves the scan: time, device and rough location.</li><li>The visitor is sent on to the current destination, in a fraction of a second.</li><li>The owner's dashboard reads the saved scans and shows them as statistics. Changing the destination later needs no new print.</li></ol><h3>How a customer pays for a subscription <small>(QR-Codex)</small></h3><ol><li>A customer picks a plan on the pricing page of the website.</li><li>They pay on Stripe Checkout. Card details go straight to Stripe and never touch our own server.</li><li>Stripe calls our webhook to report that the payment succeeded.</li><li>The server checks the message's signature, so only real messages from Stripe count, then stores the subscription.</li><li>The account unlocks the paid features straight away. Renewals and cancellations arrive the same way.</li></ol><h3>How the website, the CMS and the app work together <small>(QR-Codex &amp; Flexichat)</small></h3><ol><li>Every text and price lives in the CMS, so it can be changed without a developer.</li><li>The website loads that content through the CMS, in the visitor's language: one of five.</li><li>A visitor signs up on the website.</li><li>The website sends the sign-up to the app's API, which checks the data before anything is created.</li><li>The new customer can log into the app straight away.</li></ol><h3>How a young person's idea reaches the municipality <small>(Municipality of Delft)</small></h3><ol><li>A young person enters their idea, the target group and contact details in four steps, and checks a summary before sending.</li><li>APEX validates every field before anything is saved.</li><li>The idea is stored in the Oracle database.</li><li>A PL/SQL procedure I wrote emails the idea to the municipality.</li><li>The same procedure sends a confirmation back to the young person.</li></ol>
+  <h2 id="qv-backend">The engine room: back-end</h2><ul><li><strong>APIs:</strong> I build the APIs that apps and websites talk through: routes, validation, status codes and clean JSON.</li><li><strong>Databases:</strong> I design tables, write the queries and keep the data fast to search, even with thousands of rows.</li><li><strong>Payments:</strong> I connect Stripe for one-off payments and subscriptions, and only trust payment messages that are verified.</li><li><strong>Accounts &amp; security:</strong> Logins, sessions and roles. Passwords are only ever stored as a hash, never as plain text.</li><li><strong>Automation:</strong> Things that happen by themselves: emails, confirmations and background jobs, so nobody has to do it by hand.</li><li><strong>CMS &amp; languages:</strong> Content that non-developers can edit in a CMS, served in five languages with a fallback when a text is missing.</li></ul>
   <h2 id="qv-experience">Experience</h2><ul class="tl"><li><span class="yr">Oct 2026 – present · Marbella, Spain</span><b>Software Developer · OptimaSys · Internship · on-site</b><br>Development of web applications and digital products. Main project: QR-Codex, a web app for creating, managing and tracking QR codes. Front-end and back-end: subscription and payment systems, analytics, business tools, APIs and multilingual support.</li><li><span class="yr">2024</span><b>App Developer · Delta-N · Internship</b><br>Identified the need for a charging-station reservation system and built a low-code app to check availability and book time slots. Live and in daily use.</li><li><span class="yr">2023</span><b>Developer · Municipality of Delft &amp; Rijswijk · Internship</b><br>Designed and built a youth participation platform in Oracle APEX with PL/SQL email automation, and interviewed the mayor about the project.</li></ul>
   <h2 id="qv-education">Education</h2><ul class="tl"><li><span class="yr">2024 – present</span><b>Software Development · Grafisch Lyceum Rotterdam · Creative Software Developer (MBO 4)</b><br>Team projects for real clients: project plans, wireframes, prototypes, pitches and presentations, from idea to delivery.</li></ul>
   <h2 id="qv-skills">Skills</h2><p><b>Front-end development.</b> Most of my work is building interfaces from the ground up: well structured, responsive on every screen and fast to load. I never copy code I do not understand; everything in my code is there for a reason.</p><div class="tags"><span>HTML</span><span>CSS</span><span>JavaScript</span><span>React</span></div><p><b>Back-end &amp; data.</b> I also build the logic behind the screen: APIs, user accounts, subscription payments and content management. That means I can deliver a complete product, not only the part you see.</p><div class="tags"><span>Node.js</span><span>APIs</span><span>Stripe</span><span>Payload CMS</span><span>PL/SQL</span></div><p><b>UI/UX design.</b> Before I code, I design in Figma: wireframes, a style guide and a clickable prototype. A good interface makes sense the moment you see it, so I design for clarity first and looks second.</p><div class="tags"><span>Figma</span><span>Wireframes</span><span>Prototypes</span><span>Style guides</span></div><p><b>How I work.</b> Git for version control and VS Code as my editor. I use AI tools to explore approaches faster, never to do the work for me. Give me the documentation of a new stack and I will be productive quickly.</p><div class="tags"><span>Git</span><span>VS Code</span><span>AI tools</span><span>Documentation</span></div>

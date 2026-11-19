@@ -1,277 +1,206 @@
 // ======================================================================
-//  UNDER THE HOOD: the back-end of my projects, shown as live schematics.
-//  Each flow is a real feature; a glowing request travels the system step by step.
+//  THE ENGINE ROOM: below the map, every machine is a back-end skill.
+//  Pull a lever and it runs (a simulation in the browser); turn it around for the code.
 // ======================================================================
 
-export const FLOWS = [
+export const MACHINES = [
   {
-    id: "scan", tab: "QR scan", project: "QR-Codex", title: "What happens when someone scans a code",
-    nodes: { phone: ["Phone", "scans the code", 110, 230], server: ["Redirect server", "short link /r/code", 390, 110], db: ["Database", "codes and scans", 680, 110], dest: ["Destination", "menu, site, Wi-Fi, vCard", 390, 350], dash: ["Dashboard", "live statistics", 900, 290] },
-    steps: [
-      [null, "phone", "A customer scans the printed code. The code holds a short link to our server, not the final page. That is what makes it editable."],
-      [["phone", "server"], "server", "The phone opens the short link and the server receives the request with the code's ID."],
-      [["server", "db"], "db", "The server looks up where this code points right now and saves the scan: time, device and rough location."],
-      [["server", "dest"], "dest", "The visitor is sent on to the current destination, in a fraction of a second."],
-      [["db", "dash"], "dash", "The owner's dashboard reads the saved scans and shows them as statistics. Changing the destination later needs no new print."]
-    ],
-    shows: ["A redirect that is fast for every visitor", "Data saved on every request without slowing it down", "Statistics built from raw scan data"]
+    id: "api", name: "The request tube", skill: "APIs", icon: "tube",
+    say: "I build the APIs that apps and websites talk through: routes, validation, status codes and clean JSON.",
+    lever: "Send request",
+    options: [["GET /api/codes/42", 200, `{\n  "id": 42,\n  "slug": "8fK2aQ",\n  "destination": "https://example.com/menu",\n  "scans": 1284,\n  "active": true\n}`],
+              ["POST /api/codes  { }", 422, `{\n  "errors": [\n    { "field": "destination", "message": "Required" }\n  ]\n}`],
+              ["GET /api/codes/999", 404, `{\n  "error": "Code not found"\n}`]],
+    code: `app.get("/api/codes/:id", auth, async (req, res) => {
+  const code = await Codes.findOne({ id: req.params.id, ownerId: req.user.id });
+  if (!code) return res.status(404).json({ error: "Code not found" });
+  res.json(code);
+});`
   },
   {
-    id: "pay", tab: "Subscriptions", project: "QR-Codex", title: "How a customer pays for a subscription",
-    nodes: { site: ["Pricing page", "plan chosen", 110, 230], stripe: ["Stripe Checkout", "secure payment", 380, 100], hook: ["Webhook endpoint", "our server", 640, 230], db: ["Database", "subscriptions", 900, 100], app: ["The app", "paid features", 900, 360] },
-    steps: [
-      [null, "site", "A customer picks a plan on the pricing page of the website."],
-      [["site", "stripe"], "stripe", "They pay on Stripe Checkout. Card details go straight to Stripe and never touch our own server."],
-      [["stripe", "hook"], "hook", "Stripe calls our webhook to report that the payment succeeded."],
-      [["hook", "db"], "db", "The server checks the message's signature, so only real messages from Stripe count, then stores the subscription."],
-      [["db", "app"], "app", "The account unlocks the paid features straight away. Renewals and cancellations arrive the same way."]
-    ],
-    shows: ["Payments without storing card data", "Trusting only verified messages", "Keeping account and subscription in sync"]
+    id: "db", name: "The archive", skill: "Databases", icon: "archive",
+    say: "I design tables, write the queries and keep the data fast to search, even with thousands of rows.",
+    lever: "Run query",
+    options: [["Scans per day", "SELECT DATE(at) AS day, COUNT(*) AS scans\nFROM scans GROUP BY day\nORDER BY day DESC LIMIT 3;", [["day", "scans"], ["18 Nov", "212"], ["17 Nov", "187"], ["16 Nov", "240"]]],
+              ["Top codes", "SELECT c.slug, COUNT(s.id) AS scans\nFROM codes c JOIN scans s ON s.code_id = c.id\nGROUP BY c.id ORDER BY scans DESC LIMIT 3;", [["slug", "scans"], ["menu-01", "1284"], ["wifi", "903"], ["promo", "455"]]],
+              ["New users", "SELECT COUNT(*) AS new_users\nFROM users\nWHERE created_at > NOW() - INTERVAL 7 DAY;", [["new_users"], ["38"]]]],
+    code: `CREATE TABLE scans (
+  id       BIGINT PRIMARY KEY AUTO_INCREMENT,
+  code_id  INT NOT NULL REFERENCES codes(id),
+  at       DATETIME NOT NULL,
+  device   VARCHAR(40),
+  INDEX (code_id, at)        -- fast stats per code
+);`
   },
   {
-    id: "connect", tab: "Website and app", project: "QR-Codex & Flexichat", title: "How the website, the CMS and the app work together",
-    nodes: { cms: ["Payload CMS", "texts and prices", 110, 100], visitor: ["Visitor", "on the website", 110, 360], site: ["Website", "five languages", 400, 230], api: ["API", "validates and creates", 680, 230], app: ["The app", "new account", 910, 230] },
-    steps: [
-      [null, "cms", "Every text and price lives in the CMS, so it can be changed without a developer."],
-      [["cms", "site"], "site", "The website loads that content through the CMS, in the visitor's language: one of five."],
-      [["visitor", "site"], "site", "A visitor signs up on the website."],
-      [["site", "api"], "api", "The website sends the sign-up to the app's API, which checks the data before anything is created."],
-      [["api", "app"], "app", "The new customer can log into the app straight away."]
-    ],
-    shows: ["Content that non-developers can manage", "Two products talking through an API", "One codebase serving five languages"]
+    id: "pay", name: "The safe", skill: "Payments", icon: "safe",
+    say: "I connect Stripe for one-off payments and subscriptions, and only trust payment messages that are verified.",
+    lever: "Pay €9",
+    steps: ["Checkout opened at Stripe", "Card paid, never touching my server", "Webhook received", "Signature verified", "Plan upgraded to Pro"],
+    code: `const event = stripe.webhooks.constructEvent(
+  req.body, req.headers["stripe-signature"], WEBHOOK_SECRET
+);  // throws when the message is not really from Stripe
+if (event.type === "checkout.session.completed") {
+  await Subscriptions.activate(event.data.object.metadata.userId);
+}`
   },
   {
-    id: "delft", tab: "Idea platform", project: "Municipality of Delft", title: "How a young person's idea reaches the municipality",
-    nodes: { form: ["Four-step form", "idea, group, contact", 110, 230], apex: ["Oracle APEX", "validation", 390, 230], db: ["Oracle database", "stored ideas", 650, 230], muni: ["Municipality", "email with the idea", 910, 100], young: ["Young person", "confirmation email", 910, 360] },
-    steps: [
-      [null, "form", "A young person enters their idea, the target group and contact details in four steps, and checks a summary before sending."],
-      [["form", "apex"], "apex", "APEX validates every field before anything is saved."],
-      [["apex", "db"], "db", "The idea is stored in the Oracle database."],
-      [["db", "muni"], "muni", "A PL/SQL procedure I wrote emails the idea to the municipality."],
-      [["db", "young"], "young", "The same procedure sends a confirmation back to the young person."]
-    ],
-    shows: ["Server-side validation", "Database logic in PL/SQL", "Automatic email for both sides"]
-  }
-];
+    id: "lock", name: "The lock", skill: "Accounts & security", icon: "lock",
+    say: "Logins, sessions and roles. Passwords are only ever stored as a hash, never as plain text.",
+    lever: "Hash it",
+    code: `// on sign-up: store only the hash
+const hash = await bcrypt.hash(password, 12);
+await Users.create({ email, passwordHash: hash });
 
-
-// The technical side of each step: a request-log line and a short, simplified code example.
-// (Simplified to show how it works, not copied from the private repositories.)
-const TECH = {
-  scan: {
-    lang: "JavaScript (Node.js)",
-    model: [["codes", "id, slug, destination, type, owner_id, active"], ["scans", "id, code_id, at, device, country"]],
-    steps: [
-      ["QR  →  https://qr-codex.com/r/8fK2aQ", `// the printed code only holds a short link, never the destination
-const shortUrl = \`\${BASE_URL}/r/\${code.slug}\`;
-await QRCode.toFile(\`codes/\${code.slug}.png\`, shortUrl, { errorCorrectionLevel: "M" });`],
-      ["GET /r/8fK2aQ   iPhone, Safari", `app.get("/r/:slug", async (req, res) => {
-  const code = await db.codes.findOne({ slug: req.params.slug, active: true });
-  if (!code) return res.status(404).render("code-not-found");`],
-      ["INSERT INTO scans  1 row  4 ms", `  // save the scan without making the visitor wait for it
-  db.scans.insert({
-    codeId: code.id,
-    at: new Date(),
-    device: parseDevice(req.headers["user-agent"]),
-    country: geo.lookup(req.ip)?.country,
-  }).catch(logError);`],
-      ["302 Found  Location: https://example-restaurant.com/menu  18 ms", `  res.redirect(302, code.destination);
-});`],
-      ["GET /api/codes/42/stats?range=30d  200 OK  31 ms", `-- scans per day for the dashboard chart
-SELECT DATE(at) AS day, COUNT(*) AS scans
-FROM scans
-WHERE code_id = ? AND at > NOW() - INTERVAL 30 DAY
-GROUP BY day ORDER BY day;`]
-    ]
+// on login: compare, never decrypt
+const ok = await bcrypt.compare(password, user.passwordHash);`
   },
-  pay: {
-    lang: "JavaScript (Node.js) + Stripe",
-    model: [["users", "id, email, password_hash, created_at"], ["subscriptions", "user_id, stripe_id, plan, status, renews_at"]],
-    steps: [
-      ["GET /pricing  200 OK", `const plans = await payload.find({ collection: "plans", sort: "price" });
-res.render("pricing", { plans, locale: req.locale });`],
-      ["POST /api/checkout  303  checkout.stripe.com", `const session = await stripe.checkout.sessions.create({
-  mode: "subscription",
-  customer_email: req.user.email,
-  line_items: [{ price: plan.stripePriceId, quantity: 1 }],
-  metadata: { userId: req.user.id },
-  success_url: \`\${APP_URL}/welcome\`,
-  cancel_url: \`\${SITE_URL}/pricing\`,
-});
-res.redirect(303, session.url);`],
-      ["POST /webhooks/stripe  event: checkout.session.completed", `app.post("/webhooks/stripe", express.raw({ type: "application/json" }), async (req, res) => {
-  let event;
-  try {
-    event = stripe.webhooks.constructEvent(req.body, req.headers["stripe-signature"], WEBHOOK_SECRET);
-  } catch {
-    return res.status(400).send("Invalid signature");   // not from Stripe: ignored
-  }`],
-      ["UPSERT subscriptions  status=active  1 row", `  if (event.type === "checkout.session.completed") {
-    const s = event.data.object;
-    await db.subscriptions.upsert({ userId: s.metadata.userId, stripeId: s.subscription, status: "active" });
-  }
-  res.sendStatus(200);   // tell Stripe we handled it
-});`],
-      ["GET /api/me  200 OK  { plan: \"pro\" }", `// every paid feature checks the subscription on the server, never in the browser
-const requirePlan = (plan) => (req, res, next) =>
-  req.user.subscription?.status === "active" && rank(req.user.subscription.plan) >= rank(plan)
-    ? next()
-    : res.status(402).json({ error: "Upgrade required" });`]
-    ]
+  {
+    id: "mail", name: "The mail chute", skill: "Automation", icon: "mail",
+    say: "Things that happen by themselves: emails, confirmations and background jobs, so nobody has to do it by hand.",
+    lever: "Submit a form",
+    code: `-- PL/SQL: after a form is saved, both sides get an email
+APEX_MAIL.SEND(p_to => l_team,   p_from => l_noreply,
+               p_subj => 'New submission', p_body => l_body);
+APEX_MAIL.SEND(p_to => :P10_EMAIL, p_from => l_noreply,
+               p_subj => 'Thanks, we got it!', p_body => l_thanks);
+APEX_MAIL.PUSH_QUEUE;`
   },
-  connect: {
-    lang: "TypeScript (Payload CMS + Node.js)",
-    model: [["pages (CMS)", "slug, title, body, localized in en, es, nl, fr, de"], ["accounts (app)", "id, email, plan, locale, created_at"]],
-    steps: [
-      ["Payload admin  pages.update  saved", `export const Pages: CollectionConfig = {
-  slug: "pages",
-  fields: [
-    { name: "title", type: "text", localized: true },
-    { name: "body", type: "richText", localized: true },
-  ],
-};`],
-      ["GET /api/pages?slug=home&locale=es  200 OK", `const { docs } = await payload.find({
+  {
+    id: "cms", name: "The translator", skill: "CMS & languages", icon: "globe",
+    say: "Content that non-developers can edit in a CMS, served in five languages with a fallback when a text is missing.",
+    lever: null,
+    langs: [["EN", "Smart QR codes for your business"], ["ES", "Códigos QR inteligentes para tu negocio"], ["NL", "Slimme QR-codes voor je bedrijf"], ["FR", "Des QR codes intelligents pour votre entreprise"], ["DE", "Smarte QR-Codes für dein Unternehmen"]],
+    code: `const { docs } = await payload.find({
   collection: "pages",
   where: { slug: { equals: "home" } },
   locale: lang,            // en, es, nl, fr or de
   fallbackLocale: "en",
-});`],
-      ["POST /signup  { email, plan }", `const errors = validate(req.body, {
-  email: isEmail,
-  password: minLength(10),
-  plan: oneOf(PLANS),
-});
-if (errors.length) return res.status(422).json({ errors });`],
-      ["POST /api/accounts (app)  201 Created", `const r = await fetch(\`\${APP_URL}/api/accounts\`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json", Authorization: \`Bearer \${APP_API_KEY}\` },
-  body: JSON.stringify({ email, plan, locale: lang }),
-});
-if (!r.ok) throw new Error(\`Account not created: \${r.status}\`);`],
-      ["302  /login  session started", `// on the app side: only the website, with its key, may create accounts
-app.post("/api/accounts", requireApiKey, async (req, res) => {
-  const user = await accounts.create({ ...req.body, passwordHash: await hash(req.body.password) });
-  res.status(201).json({ id: user.id });
-});`]
-    ]
-  },
-  delft: {
-    lang: "Oracle APEX + PL/SQL",
-    model: [["ideas", "id, title, description, target_group, name, email, created_at"]],
-    steps: [
-      ["Page 10  step 4 of 4  Submit", `-- the form is one APEX page in four regions; Next shows the next region
--- and the last step lists everything as a summary before sending`],
-      ["Validation P10_EMAIL  passed", `IF NOT REGEXP_LIKE(:P10_EMAIL, '^[^@ ]+@[^@ ]+\\.[a-z]{2,}$', 'i') THEN
-  RETURN 'Please enter a valid email address.';
-END IF;
-RETURN NULL;`],
-      ["INSERT INTO ideas  1 row", `INSERT INTO ideas (title, description, target_group, name, email, created_at)
-VALUES (:P10_TITLE, :P10_DESCRIPTION, :P10_TARGET, :P10_NAME, :P10_EMAIL, SYSDATE)
-RETURNING id INTO l_id;`],
-      ["APEX_MAIL.SEND  to municipality  queued", `APEX_MAIL.SEND(
-  p_to   => l_municipality_email,
-  p_from => l_noreply,
-  p_subj => 'New idea: ' || :P10_TITLE,
-  p_body => l_body);`],
-      ["APEX_MAIL.SEND  confirmation  queued, PUSH_QUEUE  sent", `APEX_MAIL.SEND(
-  p_to   => :P10_EMAIL,
-  p_from => l_noreply,
-  p_subj => 'Thank you for your idea!',
-  p_body => l_confirmation);
-APEX_MAIL.PUSH_QUEUE;   -- send both emails now`]
-    ]
+});`
   }
+];
+
+const TOOLBOX = ["Node.js", "TypeScript", "REST APIs", "SQL", "Stripe", "Payload CMS", "Oracle APEX", "PL/SQL", "Auth & sessions"];
+
+const ICONS = {
+  tube: `<path d="M8 40V18a10 10 0 0 1 10-10h12a10 10 0 0 1 10 10v22"/><path d="M4 40h12M32 40h12"/><circle cx="24" cy="20" r="4" class="fill"/>`,
+  archive: `<rect x="8" y="6" width="32" height="36" rx="3"/><path d="M8 18h32M8 30h32M20 12h8M20 24h8M20 36h8"/>`,
+  safe: `<rect x="6" y="8" width="36" height="32" rx="4"/><circle cx="24" cy="24" r="8"/><path d="M24 16v4M24 28v4M16 24h4M28 24h4"/><path d="M10 40v4M38 40v4"/>`,
+  lock: `<rect x="10" y="22" width="28" height="20" rx="4"/><path d="M16 22v-6a8 8 0 0 1 16 0v6"/><circle cx="24" cy="31" r="3" class="fill"/>`,
+  mail: `<path d="M8 6h32v12H8z"/><path d="M14 18l-4 24h28l-4-24"/><path d="M16 30l8 5 8-5"/>`,
+  globe: `<circle cx="24" cy="24" r="17"/><path d="M7 24h34M24 7c-6 6-6 28 0 34M24 7c6 6 6 28 0 34"/>`
 };
-const esc = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-// tiny highlighter: comments, strings, keywords
+
+const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 function hl(code) {
   return esc(code).split("\n").map(line => {
-    const ci = line.search(/(\/\/|--)/); let body = ci >= 0 ? line.slice(0, ci) : line, com = ci >= 0 ? line.slice(ci) : "";
-    body = body.replace(/(&quot;|"|'|`)(?:(?!\1).)*\1/g, m => `<i class="s">${m}</i>`)
-      .replace(/\b(const|let|await|async|return|if|else|try|catch|throw|new|export|SELECT|FROM|WHERE|GROUP BY|ORDER BY|INSERT INTO|VALUES|RETURNING|INTO|IF|THEN|END IF|NOT|AND|RETURN|NULL)\b/g, '<i class="k">$1</i>');
+    const ci = line.search(/(\/\/ |-- )/); let body = ci >= 0 ? line.slice(0, ci) : line; const com = ci >= 0 ? line.slice(ci) : "";
+    body = body.replace(/("|'|`)(?:(?!\1).)*\1/g, m => `<i class="s">${m}</i>`)
+      .replace(/\b(const|let|await|async|return|if|else|new|CREATE TABLE|PRIMARY KEY|NOT NULL|REFERENCES|INDEX|SELECT|FROM|WHERE|JOIN|ON|GROUP BY|ORDER BY|LIMIT|DESC|AS)\b/g, '<i class="k">$1</i>');
     return body + (com ? `<i class="c">${com}</i>` : "");
   }).join("\n");
 }
-
-const TOOLBOX = ["Node.js", "REST APIs", "Stripe and webhooks", "Payload CMS", "Databases", "User accounts", "Oracle APEX", "PL/SQL"];
+const wait = ms => new Promise(r => setTimeout(r, ms));
 
 export function buildEngine({ reduced }) {
-  const el = document.createElement("section"); el.id = "engine"; el.hidden = true; el.setAttribute("aria-label", "Under the hood: back-end");
+  const el = document.createElement("section"); el.id = "engine"; el.hidden = true;
   el.innerHTML = `
     <div class="en-in" role="dialog" aria-modal="true" aria-labelledby="en-title">
-      <button class="en-close" aria-label="Close">×</button>
-      <header><h2 id="en-title">Under the hood</h2>
-        <p class="lead">Half of what I build is never seen: the server, the database and the connections between systems. These are real features from my projects, shown the way the data travels, with the code, the requests and the data behind every step.</p></header>
-      <nav class="en-tabs" role="tablist">${FLOWS.map((f, i) => `<button role="tab" data-i="${i}">${f.tab}<small>${f.project}</small></button>`).join("")}</nav>
-      <div class="en-stage">
-        <div class="en-diagram"><h3></h3><svg viewBox="0 50 1010 360" role="img"></svg>
-          <div class="en-ctrl"><button data-c="prev" aria-label="Previous step">‹</button><button data-c="play" class="play">Play</button><button data-c="next" aria-label="Next step">›</button></div>
-          <div class="en-term"><div class="en-tt" role="tablist"><button data-t="code" aria-selected="true">Code</button><button data-t="log" aria-selected="false">Request log</button><button data-t="model" aria-selected="false">Data model</button><span class="lang"></span></div>
-            <pre class="en-pane" data-p="code"><code></code></pre><pre class="en-pane" data-p="log" hidden></pre><div class="en-pane" data-p="model" hidden></div>
-            <p class="note">Simplified example code: it shows how the feature works, not a copy of the private repository.</p></div></div>
-        <ol class="en-steps"></ol>
-      </div>
-      <div class="en-foot"><div><h4>What this shows</h4><ul class="en-shows"></ul></div><div><h4>My back-end toolbox</h4><p class="chips">${TOOLBOX.map(t => `<span>${t}</span>`).join("")}</p></div></div>
+      <button class="en-close" aria-label="Back up to the map">×</button>
+      <header><h2 id="en-title">The engine room</h2>
+        <p class="lead">Welcome below the map. Up there you see the front-end; down here is everything that makes it work. Every machine in this room is something I build. Pull a lever to see it run, or turn a machine around to read its code.</p></header>
+      <div class="machines">${MACHINES.map(m => `
+        <article class="mc" data-m="${m.id}">
+          <div class="face">
+            <div class="mh"><svg viewBox="0 0 48 48" aria-hidden="true">${ICONS[m.icon]}</svg><div><h3>${m.name}</h3><p class="sk">${m.skill}</p></div></div>
+            <p class="say">${m.say}</p>
+            ${m.options ? `<div class="opts" role="group">${m.options.map((o, i) => `<button data-o="${i}" aria-pressed="${i === 0}">${esc(o[0])}</button>`).join("")}</div>` : ""}
+            ${m.langs ? `<div class="opts" role="group">${m.langs.map((l, i) => `<button data-l="${i}" aria-pressed="${i === 0}">${l[0]}</button>`).join("")}</div>` : ""}
+            ${m.id === "lock" ? `<label class="pw">Password <input type="text" value="correct horse battery" spellcheck="false" autocomplete="off"></label>` : ""}
+            <div class="screen" aria-live="polite"></div>
+            <div class="mf">${m.lever ? `<button class="lever">${m.lever}</button>` : "<span></span>"}<button class="flip">See the code</button></div>
+          </div>
+          <div class="back" hidden><pre><code>${hl(m.code)}</code></pre><button class="flip">Back to the machine</button></div>
+        </article>`).join("")}</div>
+      <p class="fine">The machines run a small simulation in your browser. The code shows how I build the real thing.</p>
+      <div class="tools"><h4>My back-end toolbox</h4><p class="chips">${TOOLBOX.map(t => `<span>${t}</span>`).join("")}</p></div>
     </div>`;
   document.body.appendChild(el);
-  const svg = el.querySelector("svg"), stepsEl = el.querySelector(".en-steps"), title = el.querySelector(".en-diagram h3"), playB = el.querySelector(".play");
-  const NS = "http://www.w3.org/2000/svg";
-  let flow = null, step = -1, playing = false, raf = 0, timer = 0, paths = {};
 
-  const edgeD = (a, b) => { const [x1, y1] = [a[2], a[3]], [x2, y2] = [b[2], b[3]], mx = (x1 + x2) / 2; return `M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`; };
-  function draw(i) {
-    flow = FLOWS[i]; paths = {}; svg.innerHTML = ""; title.textContent = flow.title; svg.setAttribute("aria-label", flow.title);
-    el.querySelectorAll(".en-tabs button").forEach((b, j) => b.setAttribute("aria-selected", String(i === j)));
-    const defs = document.createElementNS(NS, "defs"); defs.innerHTML = `<radialGradient id="en-glow"><stop offset="0" stop-color="#fff3c8"/><stop offset=".35" stop-color="#f0c060"/><stop offset="1" stop-color="#f0c060" stop-opacity="0"/></radialGradient><pattern id="en-grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="rgba(199,154,70,.07)"/></pattern>`;
-    svg.appendChild(defs);
-    const bg = document.createElementNS(NS, "rect"); bg.setAttribute("width", "1010"); bg.setAttribute("height", "460"); bg.setAttribute("y", "0"); bg.setAttribute("fill", "url(#en-grid)"); svg.appendChild(bg);
-    flow.steps.forEach(([e]) => { if (!e) return; const k = e.join(">"); if (paths[k]) return; const p = document.createElementNS(NS, "path"); p.setAttribute("d", edgeD(flow.nodes[e[0]], flow.nodes[e[1]])); p.setAttribute("class", "edge"); svg.appendChild(p); paths[k] = p; });
-    Object.entries(flow.nodes).forEach(([id, [name, sub, x, y]]) => {
-      const g = document.createElementNS(NS, "g"); g.setAttribute("class", "node"); g.dataset.id = id; g.setAttribute("transform", `translate(${x} ${y})`);
-      g.innerHTML = `<rect x="-92" y="-38" width="184" height="76" rx="12"/><text class="n" y="-4">${name}</text><text class="s" y="20">${sub}</text>`;
-      svg.appendChild(g);
-    });
-    const dot = document.createElementNS(NS, "circle"); dot.setAttribute("r", "16"); dot.setAttribute("fill", "url(#en-glow)"); dot.setAttribute("class", "packet"); svg.appendChild(dot);
-    stepsEl.innerHTML = flow.steps.map(([, , t], j) => `<li><button data-s="${j}">${t}</button></li>`).join("");
-    el.querySelector(".en-shows").innerHTML = flow.shows.map(t => `<li>${t}</li>`).join("");
-    const tc = TECH[flow.id]; el.querySelector(".lang").textContent = tc.lang;
-    el.querySelector('[data-p="model"]').innerHTML = tc.model.map(([t, cols]) => `<div class="tbl"><b>${t}</b>${cols.split(", ").map(c => `<span>${esc(c)}</span>`).join("")}</div>`).join("");
-    step = -1; show(0, true);
+  const M = id => MACHINES.find(m => m.id === id);
+  const state = {};
+  const scr = card => card.querySelector(".screen");
+
+  // what each machine shows when it is idle
+  function idle(card) {
+    const m = M(card.dataset.m), s = scr(card);
+    if (m.id === "api") s.innerHTML = `<span class="dim">Pick a request and send it.</span>`;
+    if (m.id === "db") s.innerHTML = `<pre class="sql">${hl(m.options[state.db || 0][1])}</pre>`;
+    if (m.id === "pay") s.innerHTML = m.steps.map(t => `<span class="st">${t}</span>`).join("");
+    if (m.id === "lock") s.innerHTML = `<span class="dim">Stored in the database as:</span><span class="hash">?</span>`;
+    if (m.id === "mail") s.innerHTML = `<div class="chute"><span class="dim">A form is waiting to be sent.</span></div>`;
+    if (m.id === "cms") lang(card, state.cms || 0, true);
   }
-  function show(j, instant) {
-    cancelAnimationFrame(raf); step = j; const [e, node] = flow.steps[j];
-    const tc = TECH[flow.id];
-    el.querySelector('[data-p="code"] code').innerHTML = hl(tc.steps[j][1]);
-    const t0s = 14 * 3600 + 32 * 60 + 7, ts = k => { const v = t0s + k; return `${String(v / 3600 | 0).padStart(2, "0")}:${String(v / 60 % 60 | 0).padStart(2, "0")}:${String(v % 60).padStart(2, "0")}`; };
-    el.querySelector('[data-p="log"]').innerHTML = tc.steps.slice(0, j + 1).map(([l], k) => `<span class="${k === j ? "new" : ""}"><i class="c">${ts(k)}</i>  ${esc(l)}</span>`).join("\n");
-    stepsEl.querySelectorAll("li").forEach((li, k) => { li.classList.toggle("on", k === j); li.classList.toggle("done", k < j); });
-    svg.querySelectorAll(".node").forEach(n => n.classList.remove("on"));
-    svg.querySelectorAll(".edge").forEach(p => p.classList.remove("on"));
-    const dot = svg.querySelector(".packet");
-    const light = () => { const n = svg.querySelector(`.node[data-id="${node}"]`); if (n) n.classList.add("on"); };
-    if (!e || instant || reduced) { const [, , x, y] = flow.nodes[node]; dot.setAttribute("cx", x); dot.setAttribute("cy", y); if (e) paths[e.join(">")].classList.add("on"); light(); return; }
-    const p = paths[e.join(">")], L = p.getTotalLength(), t0 = performance.now(), dur = 900; p.classList.add("on");
-    const tick = now => { const k = Math.min(1, (now - t0) / dur), q = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2, pt = p.getPointAtLength(L * q); dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y); if (k < 1) raf = requestAnimationFrame(tick); else light(); };
-    raf = requestAnimationFrame(tick);
+  function lang(card, i, instant) {
+    const m = M("cms"), s = scr(card); state.cms = i;
+    card.querySelectorAll("[data-l]").forEach((b, j) => b.setAttribute("aria-pressed", String(i === j)));
+    s.innerHTML = `<span class="dim">GET /api/pages/home?locale=${m.langs[i][0].toLowerCase()}</span><b class="title ${instant ? "" : "in"}">${m.langs[i][1]}</b>`;
   }
-  function setPlaying(on) {
-    playing = on; playB.textContent = on ? "Pause" : "Play"; clearTimeout(timer);
-    if (!on) return;
-    const next = () => { if (!playing) return; if (step >= flow.steps.length - 1) { show(0, true); } else show(step + 1); timer = setTimeout(next, 3400); };
-    if (step >= flow.steps.length - 1) show(0, true); timer = setTimeout(next, 1200);
+  async function run(card) {
+    if (card.classList.contains("run")) return; card.classList.add("run");
+    const m = M(card.dataset.m), s = scr(card), lag = reduced ? 0 : 1;
+    try {
+      if (m.id === "api") {
+        const [req, code, body] = m.options[state.api || 0];
+        s.innerHTML = `<span class="req">→ ${esc(req)}</span>`; await wait(450 * lag);
+        const ms = 12 + Math.round(Math.random() * 30);
+        s.innerHTML += `<span class="res c${String(code)[0]}">← ${code} ${{ 200: "OK", 404: "Not Found", 422: "Unprocessable Entity" }[code]}  ${ms} ms</span><pre class="json">${esc(body)}</pre>`;
+      }
+      if (m.id === "db") {
+        const [, sql, rows] = m.options[state.db || 0];
+        s.innerHTML = `<pre class="sql">${hl(sql)}</pre><table></table>`; const tb = s.querySelector("table");
+        await wait(350 * lag);
+        tb.innerHTML = `<tr>${rows[0].map(h => `<th>${h}</th>`).join("")}</tr>`;
+        for (const r of rows.slice(1)) { await wait(180 * lag); tb.insertAdjacentHTML("beforeend", `<tr class="in">${r.map(c => `<td>${c}</td>`).join("")}</tr>`); }
+      }
+      if (m.id === "pay") {
+        idle(card); const st = s.querySelectorAll(".st");
+        for (const x of st) { await wait(520 * lag); x.classList.add("ok"); }
+        s.insertAdjacentHTML("beforeend", `<span class="done">Pro unlocked</span>`);
+      }
+      if (m.id === "lock") {
+        const pw = card.querySelector("input").value; const data = new TextEncoder().encode("salt:fc:" + pw);
+        const buf = await crypto.subtle.digest("SHA-256", data); const hex = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+        idle(card); const h = s.querySelector(".hash"); h.textContent = "";
+        for (let i = 0; i < hex.length; i += 4) { h.textContent += hex.slice(i, i + 4); if (lag) await wait(18); }
+        s.insertAdjacentHTML("beforeend", `<span class="dim small">A real SHA-256 of your text with a salt, made just now. Change one letter and the whole hash changes; the password itself is never saved.</span>`);
+      }
+      if (m.id === "mail") {
+        const ch = s.querySelector(".chute") || (idle(card), s.querySelector(".chute")); ch.innerHTML = `<span class="req">→ INSERT INTO submissions  1 row</span>`;
+        await wait(400 * lag);
+        ch.insertAdjacentHTML("beforeend", `<span class="env">✉ To the team: New submission</span>`); await wait(450 * lag);
+        ch.insertAdjacentHTML("beforeend", `<span class="env">✉ To you: Thanks, we got it!</span>`); await wait(350 * lag);
+        ch.insertAdjacentHTML("beforeend", `<span class="done">2 emails sent automatically</span>`);
+      }
+    } finally { setTimeout(() => card.classList.remove("run"), 300); }
   }
+
   el.addEventListener("click", e => {
     if (e.target === el || e.target.closest(".en-close")) { close(); return; }
-    const tab = e.target.closest(".en-tabs button"); if (tab) { setPlaying(false); draw(+tab.dataset.i); setPlaying(!reduced); return; }
-    const s = e.target.closest("[data-s]"); if (s) { setPlaying(false); show(+s.dataset.s); return; }
-    const tt = e.target.closest("[data-t]"); if (tt) { el.querySelectorAll("[data-t]").forEach(b => b.setAttribute("aria-selected", String(b === tt))); el.querySelectorAll(".en-pane").forEach(p => p.hidden = p.dataset.p !== tt.dataset.t); return; }
-    const c = e.target.closest("[data-c]"); if (!c) return;
-    if (c.dataset.c === "play") setPlaying(!playing);
-    else { setPlaying(false); show(Math.max(0, Math.min(flow.steps.length - 1, step + (c.dataset.c === "next" ? 1 : -1)))); }
+    const card = e.target.closest(".mc"); if (!card) return;
+    if (e.target.closest(".flip")) { const f = card.querySelector(".face"), b = card.querySelector(".back"), toBack = !f.hidden; card.classList.add("turn"); setTimeout(() => { f.hidden = toBack; b.hidden = !toBack; card.classList.remove("turn"); }, reduced ? 0 : 180); return; }
+    const o = e.target.closest("[data-o]"); if (o) { state[card.dataset.m] = +o.dataset.o; card.querySelectorAll("[data-o]").forEach(b => b.setAttribute("aria-pressed", String(b === o))); idle(card); return; }
+    const l = e.target.closest("[data-l]"); if (l) { lang(card, +l.dataset.l); return; }
+    if (e.target.closest(".lever")) run(card);
   });
-  el.addEventListener("keydown", e => { if (e.key === "Escape") { e.stopPropagation(); close(); } });
+  el.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches(".pw input")) run(e.target.closest(".mc")); });
+
   let onClose = null;
-  function open(id, cb) { onClose = cb || null; const i = Math.max(0, FLOWS.findIndex(f => f.id === id)); el.hidden = false; requestAnimationFrame(() => el.classList.add("on")); draw(i); setPlaying(!reduced); el.querySelector(".en-close").focus({ preventScroll: true }); }
-  function close() { setPlaying(false); cancelAnimationFrame(raf); el.classList.remove("on"); setTimeout(() => { el.hidden = true; }, 400); if (onClose) onClose(); }
+  function open(id, cb) {
+    onClose = cb || null; el.querySelectorAll(".mc").forEach(c => { c.querySelector(".face").hidden = false; c.querySelector(".back").hidden = true; idle(c); });
+    el.hidden = false; requestAnimationFrame(() => el.classList.add("on")); el.querySelector(".en-close").focus({ preventScroll: true });
+    if (id) { const c = el.querySelector(`.mc[data-m="${id}"]`); if (c) { c.classList.add("spot"); setTimeout(() => c.classList.remove("spot"), 1800); } }
+  }
+  function close() { el.classList.remove("on"); setTimeout(() => { el.hidden = true; }, 400); if (onClose) onClose(); }
   return { open, close, get isOpen() { return !el.hidden; } };
 }

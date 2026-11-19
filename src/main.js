@@ -1140,7 +1140,7 @@ const descentEl = document.getElementById("descent");
 function dig(dir) { return new Promise(res => { if (REDUCED) { res(); return; } descentEl.classList.remove("down", "up"); void descentEl.offsetWidth; descentEl.classList.add("on", dir); setTimeout(res, dir === "down" ? 1500 : 1300); }); }
 async function openEngine(id) {
   if (ENGINE.isOpen || S.engineBusy) return; S.engineBusy = true;
-  const side = document.querySelector('#side [data-engine]'); side.classList.add("on");
+  const side = document.querySelector('#side [data-under]'); side.classList.add("on");
   const fromHub = S.phase === "hub", back = fromHub ? { p: camera.position.clone(), l: camLook.clone() } : null;
   if (fromHub) { S.phase = "engine"; hubHint.hidden = true; if (!REDUCED) await moveCamera(new V3(0, 1.6, 1.2), new V3(0, -1, -.1), .9, "i"); }
   await dig("down");
@@ -1154,7 +1154,7 @@ async function openEngine(id) {
   setTimeout(() => { descentEl.classList.remove("on"); }, 450);
   S.engineBusy = false;
 }
-document.addEventListener("click", e => { const b = e.target.closest("[data-engine]"); if (!b) return; e.preventDefault(); e.stopPropagation(); openEngine(b.dataset.engine); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-under]"); if (!b) return; e.preventDefault(); e.stopPropagation(); openEngine(b.dataset.under); });
 document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); go(b.dataset.go); }));
 const qv = document.getElementById("quickview");
 function openQuick(e) { if (e) { e.preventDefault(); e.stopPropagation(); } qv.hidden = false; document.body.classList.add("qv"); qv.querySelector(".qv-close").focus(); }
